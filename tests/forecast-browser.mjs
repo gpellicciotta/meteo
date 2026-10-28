@@ -32,6 +32,8 @@ function forecastBody() {
       precipitation_probability: RAIN.map((v) => (v > 0 ? 70 : 5)),
       wind_speed_10m: [40, ...Array(11).fill(20), 99],
       wind_gusts_10m: [99, ...Array(11).fill(35), 70],
+      weather_code: [61, ...Array(12).fill(0)],
+      is_day: RAIN.map(() => 1),
     },
   };
 }
@@ -296,6 +298,77 @@ function measureStartLayout(page) {
       }
     }
     check(problems.length === 0, `no wind scenario console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 6: current-hour icons, language changes, missing data, and inline phone layout.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    const urls = await mockOpenMeteo(context);
+    let body = forecastBody();
+    await context.route("https://api.open-meteo.com/**", (route) => {
+      urls.push(route.request().url());
+      return route.fulfill({ json: body });
+    });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "condition scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    const summary = page.locator("#forecast-summary");
+    const text = (await summary.textContent()).trim();
+    const height = (await summary.boundingBox()).height;
+    check(await summary.getByRole("img", { name: "Rain", exact: true }).count() === 1, "rain icon has an accessible English name");
+    check(await summary.locator(":scope > svg:first-child.icon-weather-rain").count() === 1,
+      "current-hour rain icon precedes the summary text");
+    check(urls.some((u) => new URL(u).searchParams.get("hourly")?.includes("weather_code,is_day")),
+      "the request includes weather code and daylight");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    check(await summary.getByRole("img", { name: "Regen", exact: true }).count() === 1, "rain icon follows the Dutch language switch");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "en");
+
+    for (const [code, day, icon, label] of [
+      [0, 0, "clear-night", "Clear"], [0, 1, "clear-day", "Clear"],
+      [2, 0, "partly-night", "Partly cloudy"], [2, 1, "partly-day", "Partly cloudy"],
+      [3, 1, "cloudy", "Cloudy"], [45, 1, "fog", "Fog"],
+      [71, 1, "snow", "Snow"], [95, 1, "thunder", "Thunderstorm"],
+      [null, 1, null, null], [999, 1, null, null], [0, null, null, null],
+    ]) {
+      body = forecastBody();
+      body.hourly.weather_code[0] = code;
+      body.hourly.is_day[0] = day;
+      if (code === null) {
+        delete body.hourly.weather_code;
+      }
+      await Promise.all([
+        page.waitForResponse((response) => response.url().startsWith("https://api.open-meteo.com/")),
+        page.click("#btn-search"),
+      ]);
+      await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
+      const actualText = (await summary.textContent()).trim();
+      check(actualText === text, `condition ${code}/${day} preserves the summary text${actualText === text ? "" : `: ${actualText}`}`);
+      if (icon) {
+        check(await summary.getByRole("img", { name: label, exact: true }).count() === 1
+          && await summary.locator(`svg.icon-weather-${icon}`).count() === 1, `condition ${code}/${day} renders ${icon}`);
+        check(await summary.locator("svg").count() === 1, "refresh replaces the previous condition icon");
+      }
+      else {
+        check(await summary.locator("svg").count() === 0, `condition ${code}/${day} omits the icon`);
+        check(Math.abs((await summary.boundingBox()).height - height) < 1, "icon adds no summary line at 390px");
+      }
+      if (icon === "clear-night") {
+        await captureViews(page, "condition-night");
+      }
+    }
+    check(problems.length === 0, `no condition scenario console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

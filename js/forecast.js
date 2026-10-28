@@ -39,17 +39,47 @@ function valueAt(series, index) {
 }
 
 /**
+ * Map documented Open-Meteo WMO codes to a condition name and line icon.
+ *
+ * @param {number|null} code - Instantaneous weather code.
+ * @param {number|null} isDay - 1 for daylight, 0 for night; missing values stay unknown.
+ * @returns {{name: string, icon: string}|null} Condition, or null for unsupported data.
+ */
+export function weatherCondition(code, isDay) {
+  if (code === 0 || code === 1 || code === 2) {
+    if (isDay !== 0 && isDay !== 1) {
+      return null;
+    }
+    const name = code === 2 ? "partly" : "clear";
+    return { name, icon: `weather-${name}-${isDay === 1 ? "day" : "night"}` };
+  }
+  const groups = [
+    ["cloudy", [3]], ["fog", [45, 48]],
+    ["rain", [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]],
+    ["snow", [71, 73, 75, 77, 85, 86]], ["thunder", [95, 96, 97, 99]],
+  ];
+  for (const [name, codes] of groups) {
+    if (codes.includes(code)) {
+      return { name, icon: `weather-${name}` };
+    }
+  }
+  return null;
+}
+
+/**
  * Turn an Open-Meteo hourly forecast into the 12 hours shown in the chart.
  *
  * Open-Meteo reports precipitation and its probability for the hour before each time
  * step, so the response holds 13 steps: hour k runs from step k to step k + 1, taking
  * its label and temperature from step k and its rain and probability from step k + 1.
  * Wind speed is instantaneous at step k; gusts are the preceding-hour maximum at step k + 1.
+ * Weather code and daylight are instantaneous at step k.
  *
  * @param {object} json - Forecast API response body.
  * @returns {{timezone: string, hours: Array<{time: string, label: string, temperature: number|null,
  *          precipitation: number|null, probability: number|null,
- *          windSpeed: number|null, windGusts: number|null}>}} Parsed forecast.
+ *          windSpeed: number|null, windGusts: number|null,
+ *          condition: {name: string, icon: string}|null}>}} Parsed forecast.
  * @throws {ForecastError} With code "bad_response" when fewer than 13 steps are present.
  */
 export function parseForecast(json) {
@@ -68,6 +98,7 @@ export function parseForecast(json) {
       probability: valueAt(hourly.precipitation_probability, k + 1),
       windSpeed: valueAt(hourly.wind_speed_10m, k),
       windGusts: valueAt(hourly.wind_gusts_10m, k + 1),
+      condition: weatherCondition(valueAt(hourly.weather_code, k), valueAt(hourly.is_day, k)),
     });
   }
   return { timezone: json.timezone || "", hours };

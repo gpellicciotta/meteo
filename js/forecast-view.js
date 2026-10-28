@@ -4,6 +4,7 @@ import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
 import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, summarizeRain, summarizeWind } from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
+import { createIcon } from "./icons.js";
 
 const view = {
   // The place shown: {kind: "place", id, name, label} or {kind: "coords"}, plus latitude and longitude.
@@ -226,6 +227,15 @@ function renderForecast() {
     time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });
   el.forecastSummary.textContent = sentences.join(" ");
+  const condition = hours[0].condition;
+  if (condition) {
+    const icon = createIcon(condition.icon, {
+      className: "forecast-condition",
+      title: t(`forecast.condition_${condition.name}`),
+    });
+    icon.removeAttribute("aria-hidden");
+    el.forecastSummary.prepend(icon);
+  }
   el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
 
   const scaleMax = barScaleMax(hours);

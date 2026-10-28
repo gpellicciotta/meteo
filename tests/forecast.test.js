@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barScaleMax, formatPlace, parseForecast, summarizeRain, summarizeWind } from "../js/forecast.js";
+import { barScaleMax, formatPlace, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -47,7 +47,7 @@ describe("parseForecast", () => {
     const forecast = parseForecast(forecastResponse(RAIN));
     expect(forecast.timezone).toBe("Europe/Brussels");
     expect(forecast.hours).toHaveLength(12);
-    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null });
+    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null, condition: null });
     expect(forecast.hours[4]).toMatchObject({ label: "14:00", temperature: 14, precipitation: 1.2, probability: 25 });
     expect(forecast.hours[11]).toMatchObject({ label: "21:00", precipitation: 0, probability: 60 });
   });
@@ -80,6 +80,49 @@ describe("parseForecast", () => {
     expect(hours[1]).toMatchObject({ windSpeed: 0, windGusts: 0 });
     expect(hours[2]).toMatchObject({ windSpeed: null, windGusts: null });
     expect(parseForecast(forecastResponse(RAIN)).hours.every((h) => h.windSpeed === null && h.windGusts === null)).toBe(true);
+  });
+});
+
+describe("weatherCondition", () => {
+  it("maps every documented WMO code to its condition and icon", () => {
+    const groups = [
+      ["cloudy", [3]], ["fog", [45, 48]],
+      ["rain", [51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82]],
+      ["snow", [71, 73, 75, 77, 85, 86]], ["thunder", [95, 96, 97, 99]],
+    ];
+    for (const [name, codes] of groups) {
+      for (const code of codes) {
+        for (const isDay of [0, 1, null]) {
+          expect(weatherCondition(code, isDay)).toEqual({ name, icon: `weather-${name}` });
+        }
+      }
+    }
+    for (const code of [0, 1, 2]) {
+      const name = code === 2 ? "partly" : "clear";
+      expect(weatherCondition(code, 1)).toEqual({ name, icon: `weather-${name}-day` });
+      expect(weatherCondition(code, 0)).toEqual({ name, icon: `weather-${name}-night` });
+      for (const missing of [null, undefined, 2, "0"]) {
+        expect(weatherCondition(code, missing)).toBeNull();
+      }
+    }
+  });
+
+  it("omits unknown, missing, and nonnumeric codes", () => {
+    for (const code of [null, undefined, -1, 4, 52, 60, 72, 98, 100, "61", NaN, 61.5]) {
+      expect(weatherCondition(code, 1)).toBeNull();
+    }
+  });
+
+  it("uses instantaneous weather and daylight at step k, including the final displayed hour", () => {
+    const { hours } = parseForecast(forecastResponse(RAIN, {
+      weather_code: [0, 61, ...Array(9).fill(null), 2, 95],
+      is_day: [0, 1, ...Array(9).fill(1), 0, 1],
+    }));
+    expect(hours[0].condition).toEqual({ name: "clear", icon: "weather-clear-night" });
+    expect(hours[1].condition).toEqual({ name: "rain", icon: "weather-rain" });
+    expect(hours[2].condition).toBeNull();
+    expect(hours[11].condition).toEqual({ name: "partly", icon: "weather-partly-night" });
+    expect(parseForecast(forecastResponse(RAIN)).hours.every((h) => h.condition === null)).toBe(true);
   });
 });
 
@@ -135,7 +178,7 @@ describe("weather API client", () => {
     );
     expect(buildForecastUrl(50.85, 4.35)).toBe(
       "https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35"
-      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m&forecast_hours=13&timezone=auto",
+      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m%2Cweather_code%2Cis_day&forecast_hours=13&timezone=auto",
     );
   });
 

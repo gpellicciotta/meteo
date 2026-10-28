@@ -1,4 +1,35 @@
 const ICON_DEFS = {
+  // Current-hour weather, using the same stroke and theme color as interface icons.
+  "weather-clear-day": `
+    <circle cx="12" cy="12" r="4"></circle>
+    <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path>
+  `,
+  "weather-clear-night": `
+    <path d="M20.5 14A9 9 0 0 1 10 3a9 9 0 1 0 10.5 11Z"></path>
+  `,
+  "weather-partly-day": `
+    <path d="M6 13a4 4 0 1 1 7-4M8 2v2M2 8h2M3 3l1.5 1.5M13 3l-1.5 1.5"></path>
+    <path d="M8 21a4 4 0 0 1 0-8h1a5 5 0 0 1 9.5 0 4 4 0 0 1 .5 8Z"></path>
+  `,
+  "weather-partly-night": `
+    <path d="M6 14A7 7 0 0 1 9 2a6 6 0 0 0 5 8"></path>
+    <path d="M8 21a4 4 0 0 1 0-8h1a5 5 0 0 1 9.5 0 4 4 0 0 1 .5 8Z"></path>
+  `,
+  "weather-cloudy": `
+    <path d="M6 19a5 5 0 0 1 0-10h1a6 6 0 0 1 11.5 1A4.5 4.5 0 0 1 18 19Z"></path>
+  `,
+  "weather-fog": `
+    <path d="M5 12a4 4 0 0 1 0-8 6 6 0 0 1 11.5 2A3 3 0 0 1 19 12M3 16h18M5 20h14"></path>
+  `,
+  "weather-rain": `
+    <path d="M5 14a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 14M8 17l-1 3m6-3-1 5m6-5-1 3"></path>
+  `,
+  "weather-snow": `
+    <path d="M5 13a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 13M7 17v4m-2-2h4m8-2v4m-2-2h4"></path>
+  `,
+  "weather-thunder": `
+    <path d="M5 14a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 14M13 11l-4 7h5l-3 5"></path>
+  `,
   // Checkmark for correct answers and completed states.
   check: `
     <polyline points="20 6 9 17 4 12"></polyline>

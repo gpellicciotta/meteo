@@ -14,11 +14,13 @@ It keeps the same minimal look, the About and Settings views, theming and langua
 - When several places match, pick the one you mean from the list.
 - The forecast shows a bar per hour with the rain in mm, the chance of rain and the temperature.
 - A summary line tells when rain starts and how heavy it gets, or that it stays dry.
+- A theme-colored icon starts the summary, showing the current hour's weather with day and night variants.
+- Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.
 - The summary includes maximum wind speed and gusts from 50 km/h over the next 12 hours, when available.
 - The last place is remembered and reloaded on your next visit.
 
 The browser fetches all data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
-- [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind speed and gusts.
+- [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind, weather codes and daylight.
 - [Geocoding API](https://open-meteo.com/en/docs/geocoding-api) for place and postal code search.
 
 Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed under CC BY 4.0.
