@@ -10,6 +10,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+review_status: rejected
+review_round: 1
+reviewed_by: "@claude-2"
 ---
 # T0005: Use a compact start layout with the forecast details below the chart when vertical space is short
 
@@ -49,4 +52,15 @@ Specifications: [technical-spec.md](T0005-use-a-compact-start-layout-with-the-fo
   24 unit tests and both browser scripts passed; outputs in validation-proof.md.
   - [Before 1280x800](T0005-use-a-compact-start-layout-with-the-forecast/screenshots/before-1280x800-light.png).
   - [After 1280x800](T0005-use-a-compact-start-layout-with-the-forecast/screenshots/after-1280x800-light.png).
+
+- [2026-10-28] **[Review]**
+  Round 1 requested (mode: agent).
+
+- [2026-10-28] **[Review]**
+  Round 1 rejected by @claude-2: Doubled forecast card padding in the roomy phone layout.
+
+- [2026-10-28] **[Implement]**
+  Scoped the phone card padding to compact mode after the round 1 rejection, with a failing check first.
+  - Roomy chart widths match the pre-change values.
+  - Restored the 10px gap on narrow phones.
 

@@ -242,6 +242,8 @@ function measureStartLayout(page) {
     layout = await measureStartLayout(page);
     check(layout.locate.top >= layout.input.bottom, "with enough height the current-location button stays below the field");
     check(layout.place.bottom <= layout.chart.top, "with enough height the place name stays above the chart");
+    const cardPadding = await page.$eval(".forecast-card", (card) => getComputedStyle(card).paddingLeft);
+    check(cardPadding === "0px", `with enough height the inner card adds no padding (${cardPadding})`);
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {

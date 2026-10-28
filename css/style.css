@@ -1123,6 +1123,12 @@ body.suppress-tooltips [data-tooltip]::before {
     border-radius: var(--radius);
   }
 
+  @media (max-width: 479px) {
+    .start-content .forecast-card {
+      padding: 12px 8px;
+    }
+  }
+
   .start-content .forecast-summary {
     margin-top: 0;
   }
@@ -1157,10 +1163,6 @@ body.suppress-tooltips [data-tooltip]::before {
 
   .forecast-bar-track {
     height: 100px;
-  }
-
-  .start-content .forecast-card {
-    padding: 12px 8px;
   }
 
   .forecast-amount,
@@ -1689,7 +1691,7 @@ body.suppress-tooltips [data-tooltip]::before {
       "input"
       "submit"
       "locate";
-    gap: 8px;
+    gap: 10px;
   }
 
   .btn-start-arrow {
