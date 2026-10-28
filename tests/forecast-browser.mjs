@@ -937,5 +937,48 @@ function measureStartLayout(page) {
   }
 }
 
+// Scenario 13: the rain bars, amounts and wet summary follow the accent color.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
+    const rgb = (hex) => `rgb(${[1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(", ")})`;
+    // The tallest bar, at 2.6 mm, with its amount label.
+    const column = "#forecast-chart > li:nth-child(6)";
+
+    for (const accent of ["red", "yellow"]) {
+      check((await page.goto(`${server.url}?lang=en&location=Brussel&theme-color=${accent}`, { waitUntil: "networkidle" })).status() === 200,
+        `${accent} accent scenario receives HTTP 200`);
+      await page.waitForSelector("#forecast:not(.hidden)");
+      await captureViews(page, `accent-${accent}`);
+    }
+
+    for (const [theme, accent, bar, text] of [
+      ["light", "blue", "#3b82f6", "#1d4ed8"], ["light", "yellow", "#ca8a04", "#854d0e"], ["light", "red", "#ef4444", "#b91c1c"],
+      ["dark", "blue", "#60a5fa", "#93c5fd"], ["dark", "yellow", "#fbbf24", "#fde68a"], ["dark", "red", "#f87171", "#fca5a5"],
+    ]) {
+      await page.goto(`${server.url}?lang=en&location=Brussel&theme=${theme}&theme-color=${accent}`, { waitUntil: "networkidle" });
+      await page.waitForSelector("#forecast:not(.hidden)");
+      const colors = await page.evaluate((selector) => ({
+        bar: getComputedStyle(document.querySelector(`${selector} .forecast-bar`)).backgroundColor,
+        amount: getComputedStyle(document.querySelector(`${selector} .forecast-amount`)).color,
+        summary: getComputedStyle(document.getElementById("forecast-summary")).color,
+      }), column);
+      check(colors.bar === rgb(bar), `${theme} ${accent} rain bars use ${bar} (${colors.bar})`);
+      check(colors.amount === rgb(text) && colors.summary === rgb(text),
+        `${theme} ${accent} amounts and wet summary use ${text} (${colors.amount}, ${colors.summary})`);
+    }
+    check(problems.length === 0, `no accent console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

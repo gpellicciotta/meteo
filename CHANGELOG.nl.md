@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.0.0 [released: 2026-10-28]
+- FrontEnd: De regenstaven, hoeveelheden en natte weersamenvatting volgen nu de gekozen accentkleur.
 - FrontEnd: De zoekbalk verdwijnt zodra een voorspelling verschijnt; een zoekknop onderaan toont ze opnieuw.
 - FrontEnd: De titel en beschrijving van het startscherm staan nu gecentreerd, in plaats van 24 pixels naar links.
 - FrontEnd: Elke zin van de weersamenvatting staat op een eigen regel, in een kleiner lettertype.

@@ -30,7 +30,7 @@
   --color-warning-border: #fcd34d;
   --color-warning-text: #92400e;
 
-  /* Rain Chart Colors (fixed blue, independent of the accent color) */
+  /* Rain Chart Colors, following the accent color */
   --color-rain: #3b82f6;
   --color-rain-text: #1d4ed8;
 
@@ -98,6 +98,8 @@
   --color-primary-shadow: rgba(202, 138, 4, 0.28);
   --color-primary-shadow-hover: rgba(202, 138, 4, 0.38);
   --color-primary-focus: rgba(202, 138, 4, 0.2);
+  --color-rain: #ca8a04;
+  --color-rain-text: #854d0e;
 }
 
 /* Theme Color Variant: Red */
@@ -111,6 +113,8 @@
   --color-primary-shadow: rgba(220, 38, 38, 0.28);
   --color-primary-shadow-hover: rgba(220, 38, 38, 0.38);
   --color-primary-focus: rgba(220, 38, 38, 0.2);
+  --color-rain: #ef4444;
+  --color-rain-text: #b91c1c;
 }
 
 /* Dark Theme Surface & Feedback Tokens */
@@ -182,6 +186,8 @@
   --color-primary-shadow: rgba(217, 119, 6, 0.3);
   --color-primary-shadow-hover: rgba(217, 119, 6, 0.45);
   --color-primary-focus: rgba(217, 119, 6, 0.3);
+  --color-rain: #fbbf24;
+  --color-rain-text: #fde68a;
 }
 
 /* Dark Theme + Red */
@@ -195,6 +201,8 @@
   --color-primary-shadow: rgba(220, 38, 38, 0.3);
   --color-primary-shadow-hover: rgba(220, 38, 38, 0.45);
   --color-primary-focus: rgba(220, 38, 38, 0.3);
+  --color-rain: #f87171;
+  --color-rain-text: #fca5a5;
 }
 
 /* ==========================================================================

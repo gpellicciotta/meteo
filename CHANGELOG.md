@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.0.0 [released: 2026-10-28]
+- FrontEnd: Colored the rain bars, amounts and wet forecast summary with the chosen accent color.
 - FrontEnd: Hid the search row once a forecast is shown, with a footer search button to show it again.
 - FrontEnd: Centered the start view title and description, which sat 24 pixels left of center.
 - FrontEnd: Put each forecast summary sentence on its own line in a smaller font.
