@@ -19,10 +19,10 @@ Serve the site from the `main` branch root through GitHub Pages.
 Confirm the live site loads and shows a real forecast.
 
 ## Task Execution Steps
-- [ ] **[Implement]** Create the GitHub repository and push the main branch.
-- [ ] **[Implement]** Enable GitHub Pages from the main branch root.
-- [ ] **[Verify]**    Confirm the live URL returns HTTP 200 and renders a forecast.
-- [ ] **[Doc]**       Link the live site in README.md and mark the release in both changelogs.
+- [x] **[Implement]** Create the GitHub repository and push the main branch.
+- [x] **[Implement]** Enable GitHub Pages from the main branch root.
+- [x] **[Verify]**    Confirm the live URL returns HTTP 200 and renders a forecast.
+- [x] **[Doc]**       Link the live site in README.md and mark the release in both changelogs.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
@@ -31,4 +31,11 @@ Confirm the live site loads and shows a real forecast.
 
 - [2026-10-28] **[Doc]**
   Marked v0.1.0 released in both changelogs and linked the live site in README.md before publishing.
+
+- [2026-10-28] **[Implement]**
+  Created the public repository, pushed main and enabled GitHub Pages; the site resolves at the account's custom domain.
+
+- [2026-10-28] **[Verify]**
+  Pages built; the live site returned HTTP 200 and showed 12 bars for Brussel without errors.
+  - [After live mobile](T0003-publish-the-meteo-repository-on-github-and-serve/screenshots/live-site-mobile.png).
 

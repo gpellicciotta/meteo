@@ -4,7 +4,7 @@ A minimal web app showing the temperature and hourly rain forecast for the next 
 It is a static HTML/CSS/JS site without a server, hosted on GitHub Pages and installable as a PWA.
 The interface is available in English and Dutch.
 
-Use it at [gpellicciotta.github.io/meteo](https://gpellicciotta.github.io/meteo/).
+Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 
 Meteo started from the application shell of [Verkeersregels Quiz](https://github.com/gpellicciotta/verkeersregels-quiz).
 It keeps the same minimal look, the About and Settings views, theming and language switching.
