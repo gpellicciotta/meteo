@@ -11,6 +11,9 @@ try {
   check((await page.textContent("#start-title")) === "Meteo", "start view shows the Meteo title");
   check((await page.getAttribute("html", "lang")) === "nl", "Dutch is active with ?lang=nl");
   await captureViews(page, "start");
+  for (const asset of ["manifest.webmanifest", "assets/favicon.svg", "favicon.ico", "assets/icons/icon-192.png"]) {
+    check((await page.request.get(`${server.url}${asset}`)).status() === 200, `${asset} loads with HTTP 200`);
+  }
 
   await page.click("#btn-config");
   check(await page.isVisible("#screen-config"), "Settings view opens");

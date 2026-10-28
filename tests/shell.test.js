@@ -111,3 +111,21 @@ describe("changelogs", () => {
     expect(heading("CHANGELOG.nl.md")).toBe(heading("CHANGELOG.md"));
   });
 });
+
+describe("app icon and manifest", () => {
+  it("names the app Meteo and points at existing icon files", () => {
+    const manifest = JSON.parse(read("manifest.webmanifest"));
+    expect(manifest.name).toBe("Meteo");
+    expect(manifest.short_name).toBe("Meteo");
+    expect(manifest.categories).toContain("weather");
+    expect(manifest.icons.length).toBeGreaterThan(3);
+    expect(manifest.icons.filter((icon) => !existsSync(join(ROOT, icon.src))).map((icon) => icon.src)).toEqual([]);
+  });
+
+  it("uses a weather favicon instead of the copied traffic sign", () => {
+    const svg = read("assets/favicon.svg");
+    expect(svg).toMatch(/^<svg\s[^>]*xmlns="http:\/\/www\.w3\.org\/2000\/svg"/);
+    expect(svg).not.toMatch(/Calque_1|Illustrator|#0071B3/i);
+    expect(svg).toMatch(/<title>Meteo<\/title>/);
+  });
+});

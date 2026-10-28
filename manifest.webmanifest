@@ -1,18 +1,18 @@
 {
   "id": "./index.html",
-  "name": "Verkeersregels Quiz",
-  "short_name": "Verkeersquiz",
-  "description": "Oefen de officiële verkeersregels en verkeersborden.",
+  "name": "Meteo",
+  "short_name": "Meteo",
+  "description": "Temperature and hourly rain forecast for the next 12 hours.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f5f7fa",
   "theme_color": "#1a56db",
   "orientation": "any",
-  "lang": "nl-BE",
+  "lang": "en",
   "categories": [
-    "education",
-    "reference"
+    "weather",
+    "utilities"
   ],
   "icons": [
     {
@@ -47,4 +47,3 @@
     }
   ]
 }
-

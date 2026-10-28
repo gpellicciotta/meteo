@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate PWA icons and transparent favicon.ico from D5 traffic sign SVG.
+"""Generate PWA icons and transparent favicon.ico from the assets/favicon.svg app icon.
 
 Cross-platform (Windows/Linux/macOS).
 
@@ -34,7 +34,7 @@ from _cli_common import (
 )
 
 PROG = "generate-pwa-icons"
-DESCRIPTION = "Renders multi-resolution PWA icons and transparent favicon.ico from D5 traffic sign SVG."
+DESCRIPTION = "Renders multi-resolution PWA icons and transparent favicon.ico from assets/favicon.svg."
 ACTIONS = ["generate", "version", "help"]
 DEFAULT_ACTION = "generate"
 EXIT_CODES = [
@@ -45,7 +45,6 @@ EXIT_CODES = [
 
 ASSETS_DIR = REPO_ROOT / "assets"
 ICONS_DIR = ASSETS_DIR / "icons"
-D5_SVG = ASSETS_DIR / "signs" / "D5.svg"
 FAVICON_SVG = ASSETS_DIR / "favicon.svg"
 FAVICON_ICO = REPO_ROOT / "favicon.ico"
 
@@ -74,16 +73,11 @@ def find_chrome_binary() -> str | None:
 
 def generate_icons(force: bool, logger: TeeLogger) -> int:
     """Renders SVG to PNG icons and generates multi-resolution favicon.ico."""
-    if not D5_SVG.exists():
-        logger.log(f"Source SVG not found: {D5_SVG}", level="ERROR")
+    if not FAVICON_SVG.exists():
+        logger.log(f"Source SVG not found: {FAVICON_SVG}", level="ERROR")
         return 1
 
     ICONS_DIR.mkdir(parents=True, exist_ok=True)
-
-    # 1. Update assets/favicon.svg from D5.svg
-    d5_content = D5_SVG.read_text(encoding="utf-8")
-    FAVICON_SVG.write_text(d5_content, encoding="utf-8")
-    logger.log(f"Updated {FAVICON_SVG}", level="DEBUG")
 
     chrome_path = find_chrome_binary()
     if not chrome_path:
@@ -115,16 +109,16 @@ def generate_icons(force: bool, logger: TeeLogger) -> int:
 </body>
 </html>
 """
-    d5_uri = FAVICON_SVG.resolve().as_uri()
+    svg_uri = FAVICON_SVG.resolve().as_uri()
     configs = [
         ("icon-512.png", 512, 512, "transparent", 94),
-        ("icon-maskable-512.png", 512, 512, "#0071B3", 75),
+        ("icon-maskable-512.png", 512, 512, "#1a56db", 80),
     ]
 
     temp_html = ICONS_DIR / "_temp_icon.html"
     try:
         for filename, w, h, bg, scale in configs:
-            content = html_template.format(bg=bg, scale=scale, svg_path=d5_uri)
+            content = html_template.format(bg=bg, scale=scale, svg_path=svg_uri)
             temp_html.write_text(content, encoding="utf-8")
 
             out_png = ICONS_DIR / filename
