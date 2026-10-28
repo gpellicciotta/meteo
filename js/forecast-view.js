@@ -1,7 +1,7 @@
 import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
-import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isStale, summarizeRain, summarizeWind } from "./forecast.js";
+import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale, summarizeRain, summarizeWind } from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 import { createIcon } from "./icons.js";
@@ -148,29 +148,32 @@ function showPlaceChoices(matches, query = "") {
  *
  * @param {{label: string, temperature: number|null, precipitation: number|null, probability: number|null}} hour - Forecast hour.
  * @param {number} scaleMax - Rain amount drawn as a full-height bar.
+ * @param {boolean} isNow - True when the column is the current hour, labeled "Now" instead of its time.
  * @returns {HTMLLIElement} Chart column.
  */
-function buildHourColumn(hour, scaleMax) {
+function buildHourColumn(hour, scaleMax, isNow) {
   const rain = hour.precipitation || 0;
   const isWet = rain >= RAIN_THRESHOLD_MM;
   const amount = hour.precipitation === null ? "–" : formatNumber(rain, 1);
   const chance = hour.probability === null ? t("forecast.chance_unknown") : `${hour.probability}%`;
   const temperature = hour.temperature === null ? "–" : formatNumber(hour.temperature, 0);
+  const label = isNow ? t("forecast.now") : hour.label;
 
   const item = document.createElement("li");
   item.className = "forecast-hour";
   item.classList.toggle("is-wet", isWet);
+  item.classList.toggle("is-now", isNow);
 
   const description = document.createElement("span");
   description.className = "sr-only";
-  description.textContent = t("forecast.hour_aria", { time: hour.label, amount, chance, temp: temperature });
+  description.textContent = t("forecast.hour_aria", { time: label, amount, chance, temp: temperature });
   item.append(description);
 
   const parts = [
     ["forecast-amount", isWet ? amount : ""],
     ["forecast-bar-track", ""],
     ["forecast-chance", hour.probability === null ? "" : chance],
-    ["forecast-time", hour.label],
+    ["forecast-time", label],
     ["forecast-temp", hour.temperature === null ? "–" : `${temperature}°`],
   ];
   for (const [className, text] of parts) {
@@ -199,11 +202,14 @@ function renderForecast() {
   }
   const { hours } = view.forecast;
   const rain = summarizeRain(hours);
+  const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
+  const rainingNow = startsNow && (hours[0].precipitation || 0) >= RAIN_THRESHOLD_MM;
   const temperatures = hours.map((h) => h.temperature).filter((v) => v !== null);
   const sentences = [
-    rain.firstRainLabel
-      ? t("forecast.summary_rain", { time: rain.firstRainLabel, max: formatNumber(rain.maxPrecipitation, 1) })
-      : t("forecast.summary_dry"),
+    rainingNow ? t("forecast.summary_rain_now", { max: formatNumber(rain.maxPrecipitation, 1) })
+      : rain.firstRainLabel
+        ? t("forecast.summary_rain", { time: rain.firstRainLabel, max: formatNumber(rain.maxPrecipitation, 1) })
+        : t("forecast.summary_dry"),
   ];
   if (temperatures.length) {
     sentences.push(t("forecast.summary_temp", {
@@ -241,7 +247,7 @@ function renderForecast() {
   el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
 
   const scaleMax = barScaleMax(hours);
-  el.forecastChart.replaceChildren(...hours.map((hour) => buildHourColumn(hour, scaleMax)));
+  el.forecastChart.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0)));
   el.forecast.classList.remove("hidden");
 }
 

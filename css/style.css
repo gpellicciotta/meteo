@@ -1061,6 +1061,10 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-muted);
 }
 
+.forecast-hour.is-now .forecast-time {
+  font-weight: 700;
+}
+
 .forecast-temp {
   margin-top: 4px;
   font-size: var(--font-size-sm);

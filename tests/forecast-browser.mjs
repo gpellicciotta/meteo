@@ -521,5 +521,83 @@ function measureStartLayout(page) {
   }
 }
 
+// Scenario 8: the first column reads "Now" in bold only while it is the current hour of the forecast timezone.
+{
+  // A device timezone far from the forecast's proves the forecast timezone decides the current hour.
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 320, height: 568 }, timezoneId: "Asia/Tokyo" });
+  try {
+    await mockOpenMeteo(context);
+    const body = forecastBody();
+    body.hourly.precipitation = [0, 0.6, ...RAIN.slice(2)];
+    await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: body }));
+    // 10:20 in Brussels, so the first forecast hour (10:00) is the current one.
+    await page.clock.install({ time: new Date("2026-10-28T09:20:00Z") });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "now-label scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    await page.evaluate(() => document.fonts.ready);
+    await captureViews(page, "now-en");
+    const readChart = () => page.evaluate(() => {
+      const hours = [...document.querySelectorAll("#forecast-chart > li")];
+      const bounds = hours.map((hour) => hour.querySelector(".forecast-time"))
+        .filter((label) => getComputedStyle(label).visibility !== "hidden")
+        .map((label) => {
+          const range = document.createRange();
+          range.selectNodeContents(label);
+          return range.getBoundingClientRect();
+        });
+      return {
+        labels: hours.map((hour) => hour.querySelector(".forecast-time").textContent),
+        weights: hours.map((hour) => getComputedStyle(hour.querySelector(".forecast-time")).fontWeight),
+        nowClass: hours.map((hour) => hour.classList.contains("is-now")),
+        description: hours[0].querySelector(".sr-only").textContent,
+        gap: Math.min(...bounds.slice(1).map((rect, i) => rect.left - bounds[i].right)),
+        summary: document.getElementById("forecast-summary").textContent.trim(),
+      };
+    });
+    const clockLabels = (chart) => chart.labels.slice(1).every((label, i) => label === `${11 + i}:00`);
+    let chart = await readChart();
+    check(chart.labels[0] === "Now" && chart.weights[0] === "700", `the current hour is labeled "Now" in bold (${chart.labels[0]}, ${chart.weights[0]})`);
+    check(clockLabels(chart) && chart.weights.slice(1).every((w) => w !== "700") && chart.nowClass.filter(Boolean).length === 1,
+      "the other hours keep their clock times in regular weight");
+    check(chart.description.startsWith("Now: 0.6 mm rain"), `the screen reader description says "Now" (${chart.description})`);
+    check(chart.gap >= 2, `the "Now" label keeps a 2px gap at 320px (${chart.gap.toFixed(2)}px)`);
+    check(chart.summary.startsWith("Rain expected now (up to 2.6 mm per hour)."), `the summary says rain is expected now (${chart.summary})`);
+
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    await captureViews(page, "now-nl");
+    chart = await readChart();
+    check(chart.labels[0] === "Nu" && chart.weights[0] === "700" && clockLabels(chart), `the Dutch current hour is labeled "Nu" (${chart.labels[0]})`);
+    check(chart.description.startsWith("Nu: 0,6 mm regen"), `the Dutch screen reader description says "Nu" (${chart.description})`);
+    check(chart.summary.startsWith("Nu regen verwacht (tot 2,6 mm per uur)."), `the Dutch summary says rain is expected now (${chart.summary})`);
+
+    // 11:05 in Brussels: the shown forecast still starts at 10:00, which is no longer the current hour.
+    await page.clock.setSystemTime(new Date("2026-10-28T10:05:00Z"));
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "en");
+    chart = await readChart();
+    check(chart.labels[0] === "10:00" && chart.weights[0] !== "700" && !chart.nowClass.some(Boolean),
+      `a first hour that is no longer current keeps its clock time (${chart.labels[0]})`);
+    check(chart.summary.startsWith("Rain expected from 10:00"), `the summary names a past first hour by its time (${chart.summary})`);
+
+    // A dry current hour keeps the time of the first rain in the summary.
+    await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: forecastBody() }));
+    await page.clock.setSystemTime(new Date("2026-10-28T09:20:00Z"));
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    chart = await readChart();
+    check(chart.labels[0] === "Now" && chart.summary.startsWith("Rain expected from 13:00"), `a dry current hour keeps the first rain time (${chart.summary})`);
+    check(problems.length === 0, `no now-label console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

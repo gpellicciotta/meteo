@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { STALE_AFTER_MS, barScaleMax, formatPlace, isStale, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -174,6 +174,34 @@ describe("isStale", () => {
 
   it("is never stale without a forecast", () => {
     expect(isStale(null, Date.now())).toBe(false);
+  });
+});
+
+describe("isCurrentHour", () => {
+  it("is true for the hour containing now in the forecast timezone", () => {
+    // Brussels is at UTC+1 after the switch to winter time on 2026-10-25.
+    expect(isCurrentHour("2026-10-28T10:00", "Europe/Brussels", new Date("2026-10-28T09:00:00Z"))).toBe(true);
+    expect(isCurrentHour("2026-10-28T10:00", "Europe/Brussels", new Date("2026-10-28T09:59:59Z"))).toBe(true);
+    expect(isCurrentHour("2026-10-29T00:00", "Europe/Brussels", new Date("2026-10-28T23:15:00Z"))).toBe(true);
+  });
+
+  it("is false one hour later or earlier", () => {
+    expect(isCurrentHour("2026-10-28T10:00", "Europe/Brussels", new Date("2026-10-28T10:00:00Z"))).toBe(false);
+    expect(isCurrentHour("2026-10-28T10:00", "Europe/Brussels", new Date("2026-10-28T08:59:59Z"))).toBe(false);
+    expect(isCurrentHour("2026-10-28T10:00", "Europe/Brussels", new Date("2026-10-29T09:30:00Z"))).toBe(false);
+  });
+
+  it("uses the forecast timezone rather than the device timezone", () => {
+    const now = new Date("2026-10-28T09:30:00Z");
+    expect(isCurrentHour("2026-10-28T05:00", "America/New_York", now)).toBe(true);
+    expect(isCurrentHour("2026-10-28T18:00", "Asia/Tokyo", now)).toBe(true);
+    expect(isCurrentHour("2026-10-28T10:00", "Asia/Tokyo", now)).toBe(false);
+  });
+
+  it("is false without a usable timezone", () => {
+    const now = new Date("2026-10-28T09:30:00Z");
+    expect(isCurrentHour("2026-10-28T10:00", "", now)).toBe(false);
+    expect(isCurrentHour("2026-10-28T10:00", "Not/AZone", now)).toBe(false);
   });
 });
 

@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Labeled the current forecast hour "Now" in bold, saying "now" in the summary when rain is already falling.
 - FrontEnd: Refreshed a forecast older than 15 minutes in the background when the app becomes visible again.
 - FrontEnd: Spaced forecast time labels every two hours on phones, preserving all hourly bars and accessible descriptions.
 - FrontEnd: Limited place searches and forecasts, including response bodies, to 10 seconds, showing the existing network error on timeout.

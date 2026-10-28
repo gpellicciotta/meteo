@@ -160,6 +160,31 @@ export function isStale(updatedAt, now) {
 }
 
 /**
+ * Tell whether a forecast time step falls in the current hour of the forecast timezone.
+ *
+ * @param {string} time - Local time step such as "2026-10-28T10:00", as Open-Meteo returns it.
+ * @param {string} timezone - IANA timezone of the forecast.
+ * @param {Date|number} now - Current time.
+ * @returns {boolean} True when the step's date and hour match now in that timezone; false without a valid timezone.
+ */
+export function isCurrentHour(time, timezone, now) {
+  if (!timezone) {
+    return false;
+  }
+  let parts;
+  try {
+    parts = new Intl.DateTimeFormat("en-US", {
+      timeZone: timezone, year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23",
+    }).formatToParts(now);
+  }
+  catch {
+    return false;
+  }
+  const part = (type) => parts.find((p) => p.type === type).value;
+  return String(time).slice(0, 13) === `${part("year")}-${part("month")}-${part("day")}T${part("hour")}`;
+}
+
+/**
  * Build a readable place name from a geocoding result.
  *
  * @param {{name?: string, admin1?: string, country?: string}} place - Geocoding match.
