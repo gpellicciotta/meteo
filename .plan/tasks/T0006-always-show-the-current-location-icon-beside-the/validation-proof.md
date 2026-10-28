@@ -84,7 +84,7 @@ ok - no console, page or network errors
 
 ## Visual Verification
 The local test server answered HTTP 200; no console, page or network errors were recorded.
-Before screenshots are the T0005 ones in `../T0005-use-a-compact-start-layout-with-the-forecast/screenshots/`.
+- Before, pre-T0006 layout from commit c63d0d7: [1280×900](screenshots/before-1280x900-light.png), [390×844](screenshots/before-390x844-light.png).
 
 - 1280×900: [light](screenshots/after-1280x900-light.png), [dark](screenshots/after-1280x900-dark.png).
 - 1280×800: [light](screenshots/after-1280x800-light.png), [dark](screenshots/after-1280x800-dark.png).

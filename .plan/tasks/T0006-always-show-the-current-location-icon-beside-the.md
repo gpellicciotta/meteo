@@ -74,3 +74,8 @@ Specifications: [technical-spec.md](T0006-always-show-the-current-location-icon-
   - Lines touched: 246.
   - Reopenings: 0.
 
+- [2026-10-28] **[Visual]**
+  Captured baseline screenshots of the pre-T0006 layout from commit c63d0d7.
+  - [Before 1280x900](T0006-always-show-the-current-location-icon-beside-the/screenshots/before-1280x900-light.png).
+  - [Before 390x844](T0006-always-show-the-current-location-icon-beside-the/screenshots/before-390x844-light.png).
+
