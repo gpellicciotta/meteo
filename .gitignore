@@ -1,0 +1,17 @@
+.DS_Store
+Thumbs.db
+node_modules/
+
+# Task worktrees
+work/
+.plan/work/
+.plan/sessions/
+
+# Python caches
+__pycache__/
+*.py[cod]
+
+# Logs and runtime metadata
+logs/
+*.log
+*.lock
