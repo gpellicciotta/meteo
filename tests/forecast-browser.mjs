@@ -5,6 +5,9 @@ import { mkdirSync } from "node:fs";
 import { join } from "node:path";
 
 const RAIN = [0, 0, 0, 0.05, 0.4, 1.2, 2.6, 0.3, 0, 0, 0, 0.1, 0];
+
+// 10:20 in Brussels, inside the first hour of the mocked forecasts, so the chart shows every mocked hour.
+const MOCK_NOW = new Date("2026-10-28T09:20:00Z");
 /**
  * Build the geocoding matches for "Gent" in the requested language.
  *
@@ -38,6 +41,20 @@ function forecastBody() {
       is_day: RAIN.map(() => 1),
     },
   };
+}
+
+/**
+ * Build a mocked forecast response of 25 hourly steps from 10:00 to 10:00 the next day.
+ *
+ * @returns {object} Forecast API body, repeating the last step of forecastBody() after 22:00.
+ */
+function dayForecastBody() {
+  const body = forecastBody();
+  for (const [key, values] of Object.entries(body.hourly)) {
+    body.hourly[key] = Array.from({ length: 25 }, (_, i) => values[Math.min(i, values.length - 1)]);
+  }
+  body.hourly.time = body.hourly.time.map((_, i) => new Date(Date.UTC(2026, 9, 28, 10 + i)).toISOString().slice(0, 16));
+  return body;
 }
 
 /**
@@ -81,6 +98,7 @@ let failed = false;
   const { browser, context, page, problems } = await launchBrowser();
   try {
     await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
     const failures = [];
     for (const lang of ["en", "nl"]) {
       check((await page.goto(`${server.url}?lang=${lang}&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
@@ -123,7 +141,7 @@ let failed = false;
             failures.push(`${size}: label count or horizontal containment is incorrect`);
           }
           if (layout.bars !== 12 || layout.descriptions.length !== 12
-            || !layout.descriptions.every((text, i) => text.startsWith(`${10 + i}:00:`))
+            || !layout.descriptions.every((text, i) => text.startsWith(i === 0 ? `${lang === "nl" ? "Nu" : "Now"}:` : `${10 + i}:00:`))
             || Math.max(...layout.temperatureRows) - Math.min(...layout.temperatureRows) > 1) {
             failures.push(`${size}: hourly data or temperature alignment changed`);
           }
@@ -147,6 +165,7 @@ let failed = false;
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
   try {
     const urls = await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
     check((await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" })).status() === 200, "the local server returns HTTP 200");
     await page.fill("#location-input", "Gent");
     await page.click("#btn-search");
@@ -166,7 +185,7 @@ let failed = false;
     check(/\b\d{2}:\d{2}\b/.test(updated) && !/AM|PM/.test(updated), `the update time uses the 24-hour clock (${updated})`);
     const amounts = await page.$$eval("#forecast-chart .forecast-amount", (spans) => spans.map((s) => s.textContent));
     check(amounts[2] === "", "amounts below the 0.1 mm rain threshold get no label");
-    check(urls.some((u) => u.includes("latitude=51.05") && u.includes("forecast_hours=13")), "the forecast request uses the picked place");
+    check(urls.some((u) => u.includes("latitude=51.05") && u.includes("forecast_hours=25")), "the forecast request uses the picked place");
     const attributionInView = await page.$eval("#forecast a[href='https://open-meteo.com/']", (a) => {
       const box = a.getBoundingClientRect();
       return box.height > 0 && box.bottom <= window.innerHeight;
@@ -234,6 +253,7 @@ let failed = false;
   });
   try {
     const urls = await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
     await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
     await page.click("#btn-current-location");
     await page.waitForSelector("#forecast:not(.hidden)");
@@ -300,6 +320,7 @@ function measureStartLayout(page) {
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
   try {
     await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
     await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
     await page.waitForSelector("#forecast:not(.hidden)");
 
@@ -338,6 +359,7 @@ function measureStartLayout(page) {
   const { browser, context, page, problems } = await launchBrowser();
   try {
     await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
     const cases = [
       [20, 35, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
       [20.4, 49.9, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
@@ -386,6 +408,7 @@ function measureStartLayout(page) {
       urls.push(route.request().url());
       return route.fulfill({ json: body });
     });
+    await page.clock.install({ time: MOCK_NOW });
     check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
       "condition scenario receives HTTP 200");
     await page.waitForSelector("#forecast:not(.hidden)");
@@ -449,7 +472,7 @@ function measureStartLayout(page) {
 
 // Scenario 7: a stale forecast refreshes quietly when the app becomes visible again.
 {
-  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 }, timezoneId: "Europe/Brussels" });
   try {
     await mockOpenMeteo(context);
     const forecastUrls = [];
@@ -572,14 +595,14 @@ function measureStartLayout(page) {
     check(chart.description.startsWith("Nu: 0,6 mm regen"), `the Dutch screen reader description says "Nu" (${chart.description})`);
     check(chart.summary.startsWith("Nu regen verwacht (tot 2,6 mm per uur)."), `the Dutch summary says rain is expected now (${chart.summary})`);
 
-    // 11:05 in Brussels: the shown forecast still starts at 10:00, which is no longer the current hour.
+    // 11:05 in Brussels: a re-render drops the past 10:00 hour and starts at the new current hour.
     await page.clock.setSystemTime(new Date("2026-10-28T10:05:00Z"));
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "en");
     chart = await readChart();
-    check(chart.labels[0] === "10:00" && chart.weights[0] !== "700" && !chart.nowClass.some(Boolean),
-      `a first hour that is no longer current keeps its clock time (${chart.labels[0]})`);
-    check(chart.summary.startsWith("Rain expected from 10:00"), `the summary names a past first hour by its time (${chart.summary})`);
+    check(chart.labels.length === 11 && chart.labels[0] === "Now" && chart.labels[1] === "12:00" && chart.nowClass.filter(Boolean).length === 1,
+      `a re-rendered chart starts at the new current hour (${chart.labels.slice(0, 2).join(", ")})`);
+    check(chart.summary.startsWith("Rain expected from 13:00"), `the summary leaves out the past hour (${chart.summary})`);
 
     // A dry current hour keeps the time of the first rain in the summary.
     await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: forecastBody() }));
@@ -589,6 +612,169 @@ function measureStartLayout(page) {
     chart = await readChart();
     check(chart.labels[0] === "Now" && chart.summary.startsWith("Rain expected from 13:00"), `a dry current hour keeps the first rain time (${chart.summary})`);
     check(problems.length === 0, `no now-label console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 9: an offline start shows the last saved forecast while at least 6 of its hours lie ahead.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 }, timezoneId: "Europe/Brussels" });
+  try {
+    await mockOpenMeteo(context);
+    const forecastUrls = [];
+    let online = true;
+    await context.route("https://api.open-meteo.com/**", (route) => {
+      forecastUrls.push(route.request().url());
+      return online ? route.fulfill({ json: dayForecastBody() }) : route.abort("internetdisconnected");
+    });
+    await page.clock.install({ time: MOCK_NOW });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "offline-start scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+
+    const start = async (minutesLater) => {
+      await page.clock.setSystemTime(new Date(MOCK_NOW.getTime() + minutesLater * 60 * 1000));
+      await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+      await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
+      return page.evaluate(() => ({
+        shown: !document.getElementById("forecast").classList.contains("hidden"),
+        error: document.getElementById("start-error").classList.contains("hidden") ? "" : document.getElementById("start-error").textContent,
+        labels: [...document.querySelectorAll("#forecast-chart .forecast-time")].map((label) => label.textContent),
+        description: document.querySelector("#forecast-chart .sr-only")?.textContent || "",
+        place: document.getElementById("forecast-place").textContent,
+        updated: document.getElementById("forecast-updated").textContent,
+      }));
+    };
+    online = false;
+    let view = await start(30);
+    await captureViews(page, "offline-start");
+    check(new URL(forecastUrls[0]).searchParams.get("forecast_hours") === "25", "the forecast request asks for 25 hourly steps");
+    check(forecastUrls.length === 2, "an offline start still tries to fetch the forecast");
+    check(view.shown && !view.error && view.place.includes("Gent") && view.labels.length === 12
+      && view.labels[0] === "Now" && view.labels[1] === "11:00",
+      `an offline start shows the saved chart without an error (${view.error || view.labels.slice(0, 2).join(", ")})`);
+    check(view.updated === "Updated at 10:20", `the saved chart keeps its original update time (${view.updated})`);
+
+    view = await start(3 * 60);
+    check(view.shown && !view.error && view.labels.length === 12 && view.labels[0] === "Now" && view.labels[1] === "14:00"
+      && view.labels[11] === "00:00" && view.description.startsWith("Now: 0.4 mm rain"),
+      `3 hours later the saved chart starts at 13:00 (${view.labels.slice(0, 2).join(", ")}, ${view.description})`);
+    check(view.updated === "Updated at 10:20", `3 hours later the update time still reads 10:20 (${view.updated})`);
+
+    view = await start(20 * 60);
+    check(!view.shown && view.error.startsWith("The forecast service could not be reached"),
+      `20 hours later the network error replaces the 4 remaining saved hours (${view.error})`);
+
+    online = true;
+    view = await start(3 * 60);
+    check(view.shown && !view.error && view.updated === "Updated at 13:20", `a successful start replaces the saved forecast (${view.updated})`);
+
+    // 06:20 the next day: a failed background refresh leaves 4 shown hours, too few to keep.
+    const refresh = async (minutesLater) => {
+      await page.clock.setSystemTime(new Date(MOCK_NOW.getTime() + minutesLater * 60 * 1000));
+      await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+      await page.waitForTimeout(300);
+      await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
+      return page.evaluate(() => ({
+        shown: !document.getElementById("forecast").classList.contains("hidden"),
+        error: !document.getElementById("start-error").classList.contains("hidden"),
+      }));
+    };
+    online = false;
+    let refreshed = await refresh(20 * 60);
+    check(!refreshed.shown && refreshed.error, "a failed refresh with under 6 hours left hides the chart and shows the error");
+    online = true;
+    refreshed = await refresh(20 * 60 + 20);
+    check(refreshed.shown && !refreshed.error, "the next refresh brings the chart back and clears the error");
+    // The aborted forecast requests above are intentional; drop their network and console entries from the error gate.
+    problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("api.open-meteo.com") && !p.includes("ERR_INTERNET_DISCONNECTED")));
+    check(problems.length === 0, `no offline-start console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 10: resuming the app drops past hours, whether its refresh fails or is skipped offline.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 }, timezoneId: "Europe/Brussels" });
+  try {
+    await mockOpenMeteo(context);
+    const forecastUrls = [];
+    let online = true;
+    await context.route("https://api.open-meteo.com/**", (route) => {
+      forecastUrls.push(route.request().url());
+      return online ? route.fulfill({ json: dayForecastBody() }) : route.abort("internetdisconnected");
+    });
+    await page.clock.install({ time: MOCK_NOW });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "resume scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+
+    const resume = async (minutesLater, event) => {
+      await page.clock.setSystemTime(new Date(MOCK_NOW.getTime() + minutesLater * 60 * 1000));
+      await page.evaluate((name) => {
+        if (name === "pageshow") {
+          window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true }));
+        }
+        else {
+          document.dispatchEvent(new Event("visibilitychange"));
+        }
+      }, event);
+      await page.waitForTimeout(300);
+      await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
+      return page.evaluate(() => ({
+        shown: !document.getElementById("forecast").classList.contains("hidden"),
+        error: document.getElementById("start-error").classList.contains("hidden") ? "" : document.getElementById("start-error").textContent,
+        labels: [...document.querySelectorAll("#forecast-chart .forecast-time")].map((label) => label.textContent),
+        summary: document.getElementById("forecast-summary").textContent.trim(),
+      }));
+    };
+    const failures = [];
+    const expect = (condition, message) => {
+      if (!condition) {
+        failures.push(message);
+      }
+    };
+
+    // 14:05: the refresh of the 10:20 forecast fails with 20 hours left.
+    online = false;
+    let view = await resume(225, "visibilitychange");
+    expect(forecastUrls.length === 2, `a stale forecast tries to refresh (${forecastUrls.length} requests)`);
+    expect(view.shown && !view.error && view.labels.length === 12 && view.labels[0] === "Now" && view.labels[1] === "15:00",
+      `a failed refresh starts the chart at 14:00 (${view.error || view.labels.slice(0, 2).join(", ")})`);
+    expect(view.summary.startsWith("Rain expected now"), `a failed refresh summarizes only the coming hours (${view.summary})`);
+
+    // 16:05 offline: no refresh runs, but the chart still moves on.
+    await context.setOffline(true);
+    view = await resume(345, "pageshow");
+    expect(forecastUrls.length === 2, `an offline resume skips the refresh (${forecastUrls.length} requests)`);
+    expect(view.shown && !view.error && view.labels[0] === "Now" && view.labels[1] === "17:00",
+      `an offline resume starts the chart at 16:00 (${view.error || view.labels.slice(0, 2).join(", ")})`);
+
+    // 06:20 the next day, still offline: 4 hours are left, too few to keep.
+    view = await resume(20 * 60, "visibilitychange");
+    expect(!view.shown && view.error.startsWith("The forecast service could not be reached"),
+      `an offline resume with under 6 hours left shows the network error (${view.shown ? view.labels.slice(0, 2).join(", ") : view.error})`);
+
+    await context.setOffline(false);
+    online = true;
+    view = await resume(20 * 60 + 5, "visibilitychange");
+    expect(view.shown && !view.error && forecastUrls.length === 3, `the first online resume fetches the forecast again (${view.error})`);
+    check(failures.length === 0, `resuming drops past hours after a failed or skipped refresh${failures.length ? `:\n${failures.join("\n")}` : ""}`);
+    // The aborted forecast requests above are intentional; drop their network and console entries from the error gate.
+    problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("api.open-meteo.com") && !p.includes("ERR_INTERNET_DISCONNECTED")));
+    check(problems.length === 0, `no resume console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

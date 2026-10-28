@@ -19,6 +19,10 @@ It keeps the same minimal look, the About and Settings views, theming and langua
 - Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.
 - The summary includes maximum wind speed and gusts from 50 km/h over the next 12 hours, when available.
 - The last place is remembered and reloaded on your next visit.
+- Its last forecast is saved too and shown when the app starts offline or a refresh fails.
+- The chart always starts at the current hour, also when the app resumes offline.
+- A saved forecast keeps its original update time.
+- With fewer than 6 hours left, the saved forecast gives way to the network error.
 
 The browser fetches all data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
 - [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind, weather codes and daylight.

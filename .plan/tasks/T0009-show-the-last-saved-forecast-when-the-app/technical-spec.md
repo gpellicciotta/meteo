@@ -13,6 +13,16 @@
 - **[Decided]** Below 6 remaining hours, hide the forecast and show the existing network error.
 - The update line keeps showing the original fetch time, so old data is never presented as new.
 - Ignore a saved forecast that fails to parse or has the wrong shape.
+- **[Decided]** Startup shows a saved forecast only while at least 6 visible hours remain.
+  - This avoids flashing a chart that a failed fetch would hide again.
+- **[Decided]** The keep-or-hide rule applies to every failed load of the shown place.
+  - A failed background refresh with under 6 hours left hides the chart and shows the error.
+  - The next refresh of a hidden chart loads visibly, so the error clears on success.
+- **[Decided]** Resuming the app (`visibilitychange`, persisted `pageshow`) re-renders with `visibleHours` first.
+  - This drops past hours even when the refresh fails or is skipped offline.
+  - Offline, a chart below 6 remaining hours gives way to the network error.
+- **[Decided]** Browser scenarios pin the page clock to 10:20 in Brussels.
+  - The mocked forecasts start at 10:00; without a pinned clock, `visibleHours` would drop hours.
 
 ### Declared Files
 - `js/forecast.js`
@@ -22,6 +32,7 @@
 - `tests/forecast-browser.mjs`
 - `CHANGELOG.md`
 - `CHANGELOG.nl.md`
+- `README.md`
 
 Mechanical command: python scripts/generate-sw.py generate
 

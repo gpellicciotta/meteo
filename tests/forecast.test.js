@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -11,7 +11,8 @@ import { getCurrentCoordinates } from "../js/geolocation.js";
  * @returns {object} Response body as returned by the forecast API.
  */
 function forecastResponse(rain, overrides = {}) {
-  const time = rain.map((_, i) => `2026-10-28T${String(10 + i).padStart(2, "0")}:00`);
+  // Local times as Open-Meteo returns them, starting at 10:00 and running past midnight.
+  const time = rain.map((_, i) => new Date(Date.UTC(2026, 9, 28, 10 + i)).toISOString().slice(0, 16));
   return {
     timezone: "Europe/Brussels",
     hourly: {
@@ -42,6 +43,9 @@ function fakeFetch(status, body) {
 
 const RAIN = [9, 0, 0, 0.05, 0.4, 1.2, 0.3, 0, 0, 0, 0, 0, 0];
 
+// 25 hourly steps from 10:00 to 10:00 the next day, as requested from Open-Meteo.
+const DAY_RAIN = [...RAIN, ...Array(12).fill(0)];
+
 describe("parseForecast", () => {
   it("turns 13 hourly steps into 12 hours with the rain of the following hour", () => {
     const forecast = parseForecast(forecastResponse(RAIN));
@@ -50,6 +54,12 @@ describe("parseForecast", () => {
     expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null, condition: null });
     expect(forecast.hours[4]).toMatchObject({ label: "14:00", temperature: 14, precipitation: 1.2, probability: 25 });
     expect(forecast.hours[11]).toMatchObject({ label: "21:00", precipitation: 0, probability: 60 });
+  });
+
+  it("keeps every hour of a longer response", () => {
+    const { hours } = parseForecast(forecastResponse(DAY_RAIN));
+    expect(hours).toHaveLength(24);
+    expect(hours[23]).toMatchObject({ time: "2026-10-29T09:00", label: "09:00", temperature: 33, precipitation: 0 });
   });
 
   it("rejects a response with fewer than 13 hourly steps", () => {
@@ -205,6 +215,81 @@ describe("isCurrentHour", () => {
   });
 });
 
+describe("visibleHours", () => {
+  const forecast = parseForecast(forecastResponse(DAY_RAIN));
+  const labels = (hours) => hours.map((h) => h.label);
+
+  it("starts at the current hour and returns 12 hours", () => {
+    // Brussels is at UTC+1, so 09:20 UTC is 10:20 there.
+    const fresh = visibleHours(forecast, new Date("2026-10-28T09:20:00Z"));
+    expect(fresh).toHaveLength(12);
+    expect(fresh[0]).toBe(forecast.hours[0]);
+    const later = visibleHours(forecast, new Date("2026-10-28T12:05:00Z"));
+    expect(later).toHaveLength(12);
+    expect(labels(later)).toEqual(["13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00", "00:00"]);
+  });
+
+  it("returns fewer hours when the saved data runs out", () => {
+    expect(labels(visibleHours(forecast, new Date("2026-10-29T05:20:00Z")))).toEqual(["06:00", "07:00", "08:00", "09:00"]);
+    expect(visibleHours(forecast, new Date("2026-10-30T09:20:00Z"))).toEqual([]);
+  });
+
+  it("starts at the first hour when it has not begun yet or the timezone is unusable", () => {
+    expect(labels(visibleHours(forecast, new Date("2026-10-28T07:00:00Z")))[0]).toBe("10:00");
+    for (const timezone of ["", "Not/AZone"]) {
+      expect(visibleHours({ ...forecast, timezone }, new Date("2026-10-29T05:20:00Z"))).toHaveLength(12);
+    }
+  });
+});
+
+describe("placeKey", () => {
+  it("uses the place id, or the rounded coordinates for the current location", () => {
+    expect(placeKey({ kind: "place", id: 2797656, latitude: 51.05, longitude: 3.71667 })).toBe("2797656");
+    expect(placeKey({ kind: "coords", latitude: 50.8503, longitude: 4.3517 })).toBe("50.85,4.35");
+  });
+});
+
+describe("restoreForecast", () => {
+  const forecast = parseForecast(forecastResponse(DAY_RAIN, { weather_code: [61], is_day: [1] }));
+  const saved = { placeKey: "2797656", fetchedAt: "2026-10-28T09:20:00.000Z", forecast };
+
+  it("restores a saved forecast of the same place after a storage round trip", () => {
+    const restored = restoreForecast(JSON.parse(JSON.stringify(saved)), "2797656");
+    expect(restored.forecast).toEqual(forecast);
+    expect(restored.fetchedAt).toEqual(new Date("2026-10-28T09:20:00Z"));
+  });
+
+  it("ignores the saved forecast of another place", () => {
+    expect(restoreForecast(saved, "50.85,4.35")).toBeNull();
+  });
+
+  it("ignores a malformed saved forecast without throwing", () => {
+    const hour = forecast.hours[0];
+    const malformed = [
+      undefined, null, "forecast", 42, [], {},
+      { ...saved, placeKey: 2797656 },
+      { ...saved, fetchedAt: undefined },
+      { ...saved, fetchedAt: "yesterday" },
+      { ...saved, forecast: null },
+      { ...saved, forecast: { ...forecast, timezone: 1 } },
+      { ...saved, forecast: { ...forecast, hours: "none" } },
+      { ...saved, forecast: { ...forecast, hours: [] } },
+      { ...saved, forecast: { ...forecast, hours: [null] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, time: 10 }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, time: "10:00" }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, label: null }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, temperature: "12" }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, windGusts: undefined }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, condition: "rain" }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, condition: { name: "rain", icon: "weather-hail" } }] } },
+    ];
+    for (const value of malformed) {
+      expect(() => restoreForecast(value, "2797656")).not.toThrow();
+      expect(restoreForecast(value, "2797656")).toBeNull();
+    }
+  });
+});
+
 describe("formatPlace", () => {
   it("joins name, region and country without missing or duplicate parts", () => {
     expect(formatPlace({ name: "Gent", admin1: "Flanders", country: "Belgium" })).toBe("Gent, Flanders, Belgium");
@@ -271,7 +356,7 @@ describe("weather API client", () => {
     );
     expect(buildForecastUrl(50.85, 4.35)).toBe(
       "https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35"
-      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m%2Cweather_code%2Cis_day&forecast_hours=13&timezone=auto",
+      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m%2Cweather_code%2Cis_day&forecast_hours=25&timezone=auto",
     );
   });
 
@@ -286,8 +371,8 @@ describe("weather API client", () => {
   });
 
   it("parses a forecast response", async () => {
-    const forecast = await fetchForecast(50.85, 4.35, fakeFetch(200, forecastResponse(RAIN)));
-    expect(forecast.hours).toHaveLength(12);
+    const forecast = await fetchForecast(50.85, 4.35, fakeFetch(200, forecastResponse(DAY_RAIN)));
+    expect(forecast.hours).toHaveLength(24);
   });
 
   it("maps HTTP and network failures to error codes", async () => {

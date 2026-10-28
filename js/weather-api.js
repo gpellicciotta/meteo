@@ -1,4 +1,4 @@
-import { FORECAST_HOURS, ForecastError, parseForecast } from "./forecast.js";
+import { FETCH_HOURS, ForecastError, parseForecast } from "./forecast.js";
 
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
@@ -30,7 +30,7 @@ export function buildForecastUrl(latitude, longitude) {
     latitude: String(latitude),
     longitude: String(longitude),
     hourly: "temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,is_day",
-    forecast_hours: String(FORECAST_HOURS + 1),
+    forecast_hours: String(FETCH_HOURS + 1),
     timezone: "auto",
   });
   return `${FORECAST_URL}?${params}`;
@@ -86,7 +86,7 @@ export async function searchPlaces(query, lang, fetchImpl = fetch, timeoutMs = 1
 }
 
 /**
- * Load the 12-hour forecast for a position.
+ * Load the 24-hour forecast for a position.
  *
  * @param {number} latitude - Latitude in degrees.
  * @param {number} longitude - Longitude in degrees.

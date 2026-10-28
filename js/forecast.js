@@ -1,5 +1,13 @@
 export const FORECAST_HOURS = 12;
 
+// Hours fetched, so a saved forecast still covers the next hours later in the day.
+export const FETCH_HOURS = 24;
+
+// Fewest upcoming hours for which a saved forecast is still shown.
+export const MIN_SAVED_HOURS = 6;
+
+const CONDITION_NAMES = ["clear", "partly", "cloudy", "fog", "rain", "snow", "thunder"];
+
 // Open-Meteo counts an hour as wet from 0.1 mm, the same threshold as its probability.
 export const RAIN_THRESHOLD_MM = 0.1;
 
@@ -70,10 +78,10 @@ export function weatherCondition(code, isDay) {
 }
 
 /**
- * Turn an Open-Meteo hourly forecast into the 12 hours shown in the chart.
+ * Turn an Open-Meteo hourly forecast into forecast hours, one fewer than the time steps.
  *
  * Open-Meteo reports precipitation and its probability for the hour before each time
- * step, so the response holds 13 steps: hour k runs from step k to step k + 1, taking
+ * step, so the response holds one extra step: hour k runs from step k to step k + 1, taking
  * its label and temperature from step k and its rain and probability from step k + 1.
  * Wind speed is instantaneous at step k; gusts are the preceding-hour maximum at step k + 1.
  * Weather code and daylight are instantaneous at step k.
@@ -92,7 +100,7 @@ export function parseForecast(json) {
     throw new ForecastError("bad_response", `Expected ${FORECAST_HOURS + 1} hourly steps, got ${times.length}`);
   }
   const hours = [];
-  for (let k = 0; k < FORECAST_HOURS; k++) {
+  for (let k = 0; k < times.length - 1; k++) {
     hours.push({
       time: times[k],
       label: String(times[k]).slice(11, 16),
@@ -160,16 +168,15 @@ export function isStale(updatedAt, now) {
 }
 
 /**
- * Tell whether a forecast time step falls in the current hour of the forecast timezone.
+ * Return the current hour in a timezone, formatted like the start of an Open-Meteo time step.
  *
- * @param {string} time - Local time step such as "2026-10-28T10:00", as Open-Meteo returns it.
  * @param {string} timezone - IANA timezone of the forecast.
  * @param {Date|number} now - Current time.
- * @returns {boolean} True when the step's date and hour match now in that timezone; false without a valid timezone.
+ * @returns {string|null} Date and hour such as "2026-10-28T10", or null without a valid timezone.
  */
-export function isCurrentHour(time, timezone, now) {
+function currentHourKey(timezone, now) {
   if (!timezone) {
-    return false;
+    return null;
   }
   let parts;
   try {
@@ -178,10 +185,93 @@ export function isCurrentHour(time, timezone, now) {
     }).formatToParts(now);
   }
   catch {
-    return false;
+    return null;
   }
   const part = (type) => parts.find((p) => p.type === type).value;
-  return String(time).slice(0, 13) === `${part("year")}-${part("month")}-${part("day")}T${part("hour")}`;
+  return `${part("year")}-${part("month")}-${part("day")}T${part("hour")}`;
+}
+
+/**
+ * Tell whether a forecast time step falls in the current hour of the forecast timezone.
+ *
+ * @param {string} time - Local time step such as "2026-10-28T10:00", as Open-Meteo returns it.
+ * @param {string} timezone - IANA timezone of the forecast.
+ * @param {Date|number} now - Current time.
+ * @returns {boolean} True when the step's date and hour match now in that timezone; false without a valid timezone.
+ */
+export function isCurrentHour(time, timezone, now) {
+  const key = currentHourKey(timezone, now);
+  return key !== null && String(time).slice(0, 13) === key;
+}
+
+/**
+ * Return the forecast hours to show: up to 12 from the current hour on.
+ *
+ * Hours that already passed are dropped, so an older forecast never shows the past.
+ *
+ * @param {{timezone: string, hours: Array<{time: string}>}} forecast - Parsed forecast.
+ * @param {Date|number} now - Current time.
+ * @returns {Array<object>} Visible hours; fewer than 12 when the data runs out, and the first 12
+ *          when the timezone is unusable.
+ */
+export function visibleHours(forecast, now) {
+  const key = currentHourKey(forecast.timezone, now);
+  const upcoming = key === null ? forecast.hours : forecast.hours.filter((h) => String(h.time).slice(0, 13) >= key);
+  return upcoming.slice(0, FORECAST_HOURS);
+}
+
+/**
+ * Return the key matching a saved forecast to its place.
+ *
+ * @param {{kind: string, id?: number, latitude: number, longitude: number}} place - Shown place.
+ * @returns {string} The place id, or the coordinates rounded to two decimals for the current location.
+ */
+export function placeKey(place) {
+  if (place.kind === "place" && place.id) {
+    return String(place.id);
+  }
+  return `${place.latitude.toFixed(2)},${place.longitude.toFixed(2)}`;
+}
+
+/**
+ * Tell whether a value restored from storage has the shape of a parsed forecast hour.
+ *
+ * @param {*} hour - Stored value.
+ * @returns {boolean} True for an hour that renderForecast can show.
+ */
+function isForecastHour(hour) {
+  if (!hour || typeof hour !== "object" || typeof hour.label !== "string"
+    || typeof hour.time !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(hour.time)) {
+    return false;
+  }
+  const numeric = ["temperature", "precipitation", "probability", "windSpeed", "windGusts"];
+  if (!numeric.every((key) => hour[key] === null || Number.isFinite(hour[key]))) {
+    return false;
+  }
+  const { condition } = hour;
+  return condition === null || Boolean(condition && CONDITION_NAMES.includes(condition.name)
+    && new RegExp(`^weather-${condition.name}(-day|-night)?$`).test(condition.icon));
+}
+
+/**
+ * Restore the last saved forecast when it belongs to the given place and is well formed.
+ *
+ * @param {*} saved - Stored `{placeKey, fetchedAt, forecast}` value, as read from storage.
+ * @param {string} key - Place key of the place to show, from placeKey().
+ * @returns {{forecast: ReturnType<typeof parseForecast>, fetchedAt: Date}|null} The forecast and
+ *          its fetch time, or null for another place or malformed data.
+ */
+export function restoreForecast(saved, key) {
+  if (!saved || typeof saved !== "object" || saved.placeKey !== key || typeof saved.fetchedAt !== "string") {
+    return null;
+  }
+  const fetchedAt = new Date(saved.fetchedAt);
+  const { forecast } = saved;
+  if (Number.isNaN(fetchedAt.getTime()) || !forecast || typeof forecast !== "object" || typeof forecast.timezone !== "string"
+    || !Array.isArray(forecast.hours) || forecast.hours.length === 0 || !forecast.hours.every(isForecastHour)) {
+    return null;
+  }
+  return { forecast, fetchedAt };
 }
 
 /**

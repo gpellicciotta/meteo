@@ -8,7 +8,7 @@ An overview of all tasks and their planning.
 - [x] T0007 Keep the hourly time labels of the forecast chart from running together on 320px wide screens.
 - [x] T0008 Refresh the forecast when the app becomes visible again and the shown data is older than 15 minutes.
 - [x] T0011 Label the first forecast hour as now instead of its clock time.
-- [ ] T0009 Show the last saved forecast when the app starts offline or a refresh fails.
+- [x] T0009 Show the last saved forecast when the app starts offline or a refresh fails.
 - [ ] T0014 Show the town and province of the current location instead of its coordinates.
 
 ## Backlog

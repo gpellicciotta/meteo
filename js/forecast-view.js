@@ -1,7 +1,10 @@
 import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
-import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale, summarizeRain, summarizeWind } from "./forecast.js";
+import {
+  MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale,
+  placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours,
+} from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 import { createIcon } from "./icons.js";
@@ -191,16 +194,16 @@ function buildHourColumn(hour, scaleMax, isNow) {
 }
 
 /**
- * Render the forecast of the current place: heading, summary and chart.
+ * Render the forecast of the current place from the current hour on: heading, summary and chart.
  *
  * @returns {void}
  */
 function renderForecast() {
-  if (!view.place || !view.forecast) {
+  const hours = view.place && view.forecast ? visibleHours(view.forecast, Date.now()) : [];
+  if (hours.length === 0) {
     el.forecast.classList.add("hidden");
     return;
   }
-  const { hours } = view.forecast;
   const rain = summarizeRain(hours);
   const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
   const rainingNow = startsNow && (hours[0].precipitation || 0) >= RAIN_THRESHOLD_MM;
@@ -254,8 +257,9 @@ function renderForecast() {
 /**
  * Fetch and show the forecast for a place, remembering it for the next visit.
  *
- * A quiet load refreshes the shown place in the background: it shows no status line
- * and keeps the current chart and update time when it fails.
+ * A quiet load refreshes the shown place in the background and shows no status line.
+ * When loading the shown place fails, its chart and update time stay while at least
+ * 6 hours of it lie ahead; otherwise the chart is hidden and the error shown.
  *
  * @param {object} place - Place to show, as built by placeFromMatch() or a coordinates place.
  * @param {{quiet?: boolean}} [options] - Set quiet for a background refresh.
@@ -274,13 +278,21 @@ async function loadForecast(place, { quiet = false } = {}) {
     }
     // A refresh keeps the shown place, which a language switch may have renamed meanwhile.
     Object.assign(view, { place: quiet ? view.place : place, forecast, updatedAt: new Date() });
-    setStoredPreferences({ lastPlace: view.place });
+    setStoredPreferences({
+      lastPlace: view.place,
+      lastForecast: { placeKey: placeKey(view.place), fetchedAt: view.updatedAt.toISOString(), forecast },
+    });
     renderForecast();
   }
   catch (err) {
-    if (requestId === view.requestId && !quiet) {
-      setError(errorKey(err));
+    if (requestId !== view.requestId) {
+      return;
     }
+    const shown = Boolean(view.forecast) && placeKey(view.place) === placeKey(place);
+    if (shown && showRemainingHours()) {
+      return;
+    }
+    setError(errorKey(err));
   }
   finally {
     if (requestId === view.requestId && !quiet) {
@@ -290,9 +302,39 @@ async function loadForecast(place, { quiet = false } = {}) {
 }
 
 /**
+ * Re-render the shown forecast from the current hour on, hiding it below 6 remaining hours.
+ *
+ * @returns {boolean} True when a forecast is still shown.
+ */
+function showRemainingHours() {
+  if (view.forecast && visibleHours(view.forecast, Date.now()).length < MIN_SAVED_HOURS) {
+    view.forecast = null;
+  }
+  renderForecast();
+  return Boolean(view.forecast);
+}
+
+/**
+ * Bring the shown forecast up to date when the app is shown again.
+ *
+ * Past hours are dropped even when no refresh runs, such as offline or within 15 minutes.
+ * An offline device that drops its last hours shows the network error instead.
+ *
+ * @returns {void}
+ */
+function handleResume() {
+  const hadForecast = Boolean(view.forecast);
+  if (!showRemainingHours() && hadForecast && navigator.onLine === false) {
+    setError("forecast.error_network");
+  }
+  refreshIfStale();
+}
+
+/**
  * Fetch the shown forecast again in the background when it has become stale.
  *
  * Skipped without a shown place, while offline, or while a request is in flight.
+ * A forecast hidden after a failed refresh is loaded visibly, so its error is replaced.
  *
  * @returns {Promise<void>} Resolves once the refresh is shown, dropped or skipped.
  */
@@ -303,7 +345,7 @@ async function refreshIfStale() {
   }
   view.refreshing = true;
   try {
-    await loadForecast(view.place, { quiet: true });
+    await loadForecast(view.place, { quiet: Boolean(view.forecast) });
   }
   finally {
     view.refreshing = false;
@@ -418,9 +460,26 @@ function handleLanguageChange() {
 }
 
 /**
+ * Show the last saved forecast of a place at once, while at least 6 of its hours lie ahead.
+ *
+ * The update line keeps the original fetch time, so the saved data is never presented as new.
+ *
+ * @param {object} place - Last place, as stored by loadForecast().
+ * @returns {void}
+ */
+function showSavedForecast(place) {
+  const saved = restoreForecast(getStoredPreferences().lastForecast, placeKey(place));
+  if (saved && visibleHours(saved.forecast, Date.now()).length >= MIN_SAVED_HOURS) {
+    Object.assign(view, { place, forecast: saved.forecast, updatedAt: saved.fetchedAt });
+    renderForecast();
+  }
+}
+
+/**
  * Wire the search form and the current-location button, and show the first forecast.
  *
- * A `?location=` query parameter is searched first; otherwise the last place is reloaded.
+ * A `?location=` query parameter is searched first; otherwise the last place is reloaded,
+ * showing its saved forecast until the new one arrives.
  *
  * @returns {void}
  */
@@ -434,12 +493,12 @@ export function initForecastView() {
   // An installed app resumes from memory, and the back-forward cache restores the page, without reloading.
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {
-      refreshIfStale();
+      handleResume();
     }
   });
   window.addEventListener("pageshow", (e) => {
     if (e.persisted) {
-      refreshIfStale();
+      handleResume();
     }
   });
 
@@ -450,6 +509,7 @@ export function initForecastView() {
     searchAndShow(query);
   }
   else if (lastPlace && typeof lastPlace.latitude === "number" && typeof lastPlace.longitude === "number") {
+    showSavedForecast(lastPlace);
     loadForecast(lastPlace);
   }
 }
