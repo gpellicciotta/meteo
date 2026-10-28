@@ -447,5 +447,79 @@ function measureStartLayout(page) {
   }
 }
 
+// Scenario 7: a stale forecast refreshes quietly when the app becomes visible again.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    await mockOpenMeteo(context);
+    const forecastUrls = [];
+    let answer = (route) => route.fulfill({ json: forecastBody() });
+    await context.route("https://api.open-meteo.com/**", (route) => {
+      forecastUrls.push(route.request().url());
+      return answer(route);
+    });
+    await page.clock.install({ time: new Date(2026, 9, 28, 10, 0) });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "refresh scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    const updated = () => page.textContent("#forecast-updated");
+    const becomeVisible = () => page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
+    const settle = () => page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"))
+      .then(() => page.waitForTimeout(300));
+    check(forecastUrls.length === 1 && (await updated()).includes("10:00"), "the first forecast is fetched at 10:00");
+
+    await page.clock.fastForward("05:00");
+    await becomeVisible();
+    await settle();
+    check(forecastUrls.length === 1, "a 5-minute-old forecast is not refreshed");
+
+    answer = (route) => new Promise((resolve) => setTimeout(resolve, 500)).then(() => route.fulfill({ json: forecastBody() }));
+    await page.clock.fastForward("11:00");
+    await becomeVisible();
+    await page.waitForTimeout(200);
+    const whileLoading = await page.evaluate(() => ({
+      status: document.getElementById("forecast-status").classList.contains("hidden"),
+      bars: document.querySelectorAll("#forecast-chart > li").length,
+    }));
+    check(whileLoading.status && whileLoading.bars === 12, "a background refresh keeps the chart and shows no loading line");
+    await page.waitForFunction(() => document.getElementById("forecast-updated").textContent.includes("10:16"));
+    check(forecastUrls.length === 2, "a 16-minute-old forecast is refreshed once on visibilitychange");
+
+    answer = (route) => route.fulfill({ status: 500, json: { error: true } });
+    await page.clock.fastForward("16:00");
+    await becomeVisible();
+    await settle();
+    check(forecastUrls.length === 3, "a stale forecast requests a refresh again");
+    const kept = await page.evaluate(() => ({
+      error: document.getElementById("start-error").classList.contains("hidden"),
+      bars: document.querySelectorAll("#forecast-chart > li").length,
+      updated: document.getElementById("forecast-updated").textContent,
+    }));
+    check(kept.error && kept.bars === 12 && kept.updated.includes("10:16"), "a failed refresh keeps the chart and update time without an error");
+    // The mocked HTTP 500 above is intentional; drop its response and console entries from the error gate.
+    problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("api.open-meteo.com") && !p.includes("status of 500")));
+
+    answer = (route) => route.fulfill({ json: forecastBody() });
+    await page.evaluate(() => window.dispatchEvent(new PageTransitionEvent("pageshow", { persisted: true })));
+    await page.waitForFunction(() => document.getElementById("forecast-updated").textContent.includes("10:32"));
+    check(forecastUrls.length === 4, "a page restored from the back-forward cache refreshes a stale forecast");
+
+    await page.clock.fastForward("16:00");
+    await context.setOffline(true);
+    await becomeVisible();
+    await settle();
+    await context.setOffline(false);
+    check(forecastUrls.length === 4 && (await updated()).includes("10:32"), "an offline device skips the refresh");
+    check(problems.length === 0, `no refresh scenario console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

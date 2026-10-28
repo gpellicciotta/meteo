@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Een weersvoorspelling ouder dan 15 minuten wordt op de achtergrond vernieuwd wanneer de app weer zichtbaar wordt.
 - FrontEnd: Op telefoons staan de tijdslabels van de voorspelling om de twee uur, met behoud van alle uurstaven en toegankelijke beschrijvingen.
 - FrontEnd: Plaatszoekopdrachten en weersverzoeken, inclusief antwoordgegevens, beperkt tot 10 seconden, met de bestaande netwerkfout bij een time-out.
 - FrontEnd: Een themagekleurd weericoon met dag/nachtvarianten en vertaalde toegankelijke namen toegevoegd aan het begin van de weersamenvatting.

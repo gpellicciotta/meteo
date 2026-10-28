@@ -9,6 +9,9 @@ export const STRONG_GUST_THRESHOLD_KMH = 50;
 // Lowest top of the bar scale, so drizzle never fills the chart like a downpour.
 export const MIN_SCALE_MM = 2;
 
+// Age at which a shown forecast is fetched again when the app becomes visible.
+export const STALE_AFTER_MS = 15 * 60 * 1000;
+
 /**
  * Error raised for forecast data and API failures, identified by a short code.
  */
@@ -140,6 +143,20 @@ export function summarizeWind(hours) {
  */
 export function barScaleMax(hours) {
   return Math.max(MIN_SCALE_MM, ...hours.map((h) => h.precipitation || 0));
+}
+
+/**
+ * Tell whether a forecast fetched at a given time should be fetched again.
+ *
+ * @param {Date|number|null} updatedAt - Time the forecast was fetched, or null when none is shown.
+ * @param {Date|number} now - Current time.
+ * @returns {boolean} True once the forecast is at least STALE_AFTER_MS old.
+ */
+export function isStale(updatedAt, now) {
+  if (updatedAt === null || updatedAt === undefined) {
+    return false;
+  }
+  return now - updatedAt >= STALE_AFTER_MS;
 }
 
 /**

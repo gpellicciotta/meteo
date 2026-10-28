@@ -1,7 +1,7 @@
 import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
-import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, summarizeRain, summarizeWind } from "./forecast.js";
+import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isStale, summarizeRain, summarizeWind } from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 import { createIcon } from "./icons.js";
@@ -19,6 +19,8 @@ const view = {
   error: null,
   // Incremented per user action so late answers of an older request are ignored.
   requestId: 0,
+  // True while a background refresh runs; user requests in flight show a status instead.
+  refreshing: false,
   // Incremented per language switch so only the latest place translation is applied.
   localizeId: 0,
 };
@@ -246,31 +248,59 @@ function renderForecast() {
 /**
  * Fetch and show the forecast for a place, remembering it for the next visit.
  *
+ * A quiet load refreshes the shown place in the background: it shows no status line
+ * and keeps the current chart and update time when it fails.
+ *
  * @param {object} place - Place to show, as built by placeFromMatch() or a coordinates place.
+ * @param {{quiet?: boolean}} [options] - Set quiet for a background refresh.
  * @returns {Promise<void>} Resolves once the forecast or an error is shown.
  */
-async function loadForecast(place) {
+async function loadForecast(place, { quiet = false } = {}) {
   const requestId = ++view.requestId;
-  setError(null);
-  setStatus("forecast.status_loading");
+  if (!quiet) {
+    setError(null);
+    setStatus("forecast.status_loading");
+  }
   try {
     const forecast = await fetchForecast(place.latitude, place.longitude);
     if (requestId !== view.requestId) {
       return;
     }
-    Object.assign(view, { place, forecast, updatedAt: new Date() });
-    setStoredPreferences({ lastPlace: place });
+    // A refresh keeps the shown place, which a language switch may have renamed meanwhile.
+    Object.assign(view, { place: quiet ? view.place : place, forecast, updatedAt: new Date() });
+    setStoredPreferences({ lastPlace: view.place });
     renderForecast();
   }
   catch (err) {
-    if (requestId === view.requestId) {
+    if (requestId === view.requestId && !quiet) {
       setError(errorKey(err));
     }
   }
   finally {
-    if (requestId === view.requestId) {
+    if (requestId === view.requestId && !quiet) {
       setStatus(null);
     }
+  }
+}
+
+/**
+ * Fetch the shown forecast again in the background when it has become stale.
+ *
+ * Skipped without a shown place, while offline, or while a request is in flight.
+ *
+ * @returns {Promise<void>} Resolves once the refresh is shown, dropped or skipped.
+ */
+async function refreshIfStale() {
+  if (!view.place || !isStale(view.updatedAt, Date.now()) || navigator.onLine === false
+    || view.status || view.refreshing) {
+    return;
+  }
+  view.refreshing = true;
+  try {
+    await loadForecast(view.place, { quiet: true });
+  }
+  finally {
+    view.refreshing = false;
   }
 }
 
@@ -395,6 +425,17 @@ export function initForecastView() {
   });
   el.btnCurrentLocation.addEventListener("click", showCurrentLocation);
   document.addEventListener("languagechange", handleLanguageChange);
+  // An installed app resumes from memory, and the back-forward cache restores the page, without reloading.
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      refreshIfStale();
+    }
+  });
+  window.addEventListener("pageshow", (e) => {
+    if (e.persisted) {
+      refreshIfStale();
+    }
+  });
 
   const query = new URLSearchParams(window.location.search).get("location");
   const lastPlace = getStoredPreferences().lastPlace;

@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { barScaleMax, formatPlace, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, formatPlace, isStale, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -160,6 +160,20 @@ describe("barScaleMax", () => {
   it("uses 2 mm for light rain and the highest amount for heavy rain", () => {
     expect(barScaleMax(parseForecast(forecastResponse(RAIN)).hours)).toBe(2);
     expect(barScaleMax(parseForecast(forecastResponse(RAIN.map((v) => v * 5))).hours)).toBe(6);
+  });
+});
+
+describe("isStale", () => {
+  const updatedAt = new Date("2026-10-28T10:00:00Z");
+
+  it("turns stale after exactly 15 minutes", () => {
+    expect(STALE_AFTER_MS).toBe(15 * 60 * 1000);
+    expect(isStale(updatedAt, updatedAt.getTime() + (14 * 60 + 59) * 1000)).toBe(false);
+    expect(isStale(updatedAt, updatedAt.getTime() + 15 * 60 * 1000)).toBe(true);
+  });
+
+  it("is never stale without a forecast", () => {
+    expect(isStale(null, Date.now())).toBe(false);
   });
 });
 
