@@ -1,3 +1,7 @@
 {
-  "plan_version": "3.0.191-pre"
+  "plan_version": "3.0.191-pre",
+  "agents": [
+    "codex",
+    "claude-code"
+  ]
 }
