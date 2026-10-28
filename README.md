@@ -6,9 +6,6 @@ The interface is available in English and Dutch.
 
 Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 
-Meteo started from the application shell of [Verkeersregels Quiz](https://github.com/gpellicciotta/verkeersregels-quiz).
-It keeps the same minimal look, the About and Settings views, theming and language switching.
-
 ## How It Works
 - Type a city, town or postal code and press "Show", or use "Use current location".
 - When several places match, pick the one you mean from the list.
