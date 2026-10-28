@@ -57,7 +57,45 @@ catch (err) {
 }
 finally {
   await browser.close();
-  await server.close();
 }
 
+/**
+ * Return the horizontal center of an element in CSS pixels.
+ *
+ * @param {object} page - Playwright page.
+ * @param {string} selector - Element selector.
+ * @returns {Promise<number>} Center x coordinate.
+ */
+function centerOf(page, selector) {
+  return page.$eval(selector, (e) => {
+    const r = e.getBoundingClientRect();
+    return r.left + r.width / 2;
+  });
+}
+
+// Header titles are centered on phones and desktops.
+for (const width of [390, 1280]) {
+  const { browser: sized, page: sizedPage, problems: sizedProblems } = await launchBrowser({ viewport: { width, height: 844 } });
+  try {
+    await sizedPage.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+    const contentCenter = await centerOf(sizedPage, "#start-content");
+    for (const selector of ["#start-title", "#start-desc"]) {
+      const offset = Math.abs((await centerOf(sizedPage, selector)) - contentCenter);
+      check(offset <= 1, `${selector} is centered at ${width}px (off by ${offset.toFixed(1)}px)`);
+    }
+    await sizedPage.click("#btn-about");
+    const aboutOffset = Math.abs((await centerOf(sizedPage, ".about-title")) - (await centerOf(sizedPage, "#screen-about")));
+    check(aboutOffset <= 1, `the About title is centered at ${width}px (off by ${aboutOffset.toFixed(1)}px)`);
+    check(sizedProblems.length === 0, `no console, page or network errors at ${width}px${sizedProblems.length ? `:\n${sizedProblems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await sized.close();
+  }
+}
+
+await server.close();
 process.exit(failed ? 1 : 0);

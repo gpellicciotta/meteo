@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.0.0 [released: 2026-10-28]
+- FrontEnd: De titel en beschrijving van het startscherm staan nu gecentreerd, in plaats van 24 pixels naar links.
 - FrontEnd: Elke zin van de weersamenvatting staat op een eigen regel, in een kleiner lettertype.
 - FrontEnd: De huidige locatie toont gemeente, provincie en land via OpenStreetMap, met de coördinaten als het opzoeken mislukt.
 - FrontEnd: De laatst bewaarde voorspelling verschijnt vanaf het huidige uur bij een offline start, een offline hervatting of een mislukte vernieuwing.

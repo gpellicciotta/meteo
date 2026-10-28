@@ -251,7 +251,6 @@ body {
   top: 0;
   z-index: 20;
   background: var(--color-bg);
-  padding-right: 48px; /* Prevent overlap with absolutely positioned close-button */
 }
 
 .view-content {
