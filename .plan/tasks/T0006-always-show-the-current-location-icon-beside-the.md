@@ -10,8 +10,8 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
-review_status: rejected
-review_round: 1
+review_status: approved
+review_round: 2
 reviewed_by: "@claude-2"
 ---
 # T0006: Always show the current-location icon beside the search field and the place and update lines below the forecast card
@@ -30,7 +30,7 @@ Specifications: [technical-spec.md](T0006-always-show-the-current-location-icon-
 - [x] **[Verify]**    Run unit tests and both browser scripts until they pass.
 - [x] **[Visual]**    Capture after screenshots in light and dark on desktop and phone sizes.
 - [x] **[Doc]**       Update CHANGELOG.md and CHANGELOG.nl.md.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-10-28] **[Doc]**
@@ -58,4 +58,13 @@ Specifications: [technical-spec.md](T0006-always-show-the-current-location-icon-
 - [2026-10-28] **[Implement]**
   Named the location button with aria-label after the round 1 rejection, with an exact focused-name check failing first.
   - Dutch name follows the language switch.
+
+- [2026-10-28] **[Review]**
+  Round 2 requested (mode: agent).
+
+- [2026-10-28] **[Review]**
+  Round 2 approved by @claude-2.
+
+- [2026-10-28] **[Implement]**
+  Moved the location button first in the markup so keyboard order matches the visual order, with a failing Shift+Tab check first.
 

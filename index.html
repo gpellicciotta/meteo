@@ -59,11 +59,7 @@
     <div id="start-content" class="start-content view-content">
       <form id="location-form" class="location-form" role="search">
         <div class="start-action-row">
-          <input type="search" id="location-input" class="location-input" autocomplete="off" enterkeyhint="search"
-                 placeholder="City, town or postal code" aria-label="Place name or postal code"
-                 data-i18n-placeholder="forecast.search_placeholder" data-i18n-aria="forecast.search_aria">
-          <button type="submit" id="btn-search" class="btn-primary btn-start-arrow" data-i18n="forecast.btn_search">Show</button>
-          <!-- Icon button placed left of the field by the grid areas in style.css. -->
+          <!-- First in the markup so the keyboard order matches the visual order. -->
           <button type="button" id="btn-current-location" class="btn-current-location"
                   aria-label="Use current location"
                   data-tooltip="Use current location"
@@ -71,6 +67,10 @@
                   data-i18n-tooltip="forecast.btn_current_location">
             <span class="btn-current-location-icon" data-icon="locate" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
           </button>
+          <input type="search" id="location-input" class="location-input" autocomplete="off" enterkeyhint="search"
+                 placeholder="City, town or postal code" aria-label="Place name or postal code"
+                 data-i18n-placeholder="forecast.search_placeholder" data-i18n-aria="forecast.search_aria">
+          <button type="submit" id="btn-search" class="btn-primary btn-start-arrow" data-i18n="forecast.btn_search">Show</button>
         </div>
       </form>
 

@@ -241,8 +241,9 @@ function measureStartLayout(page) {
       }
     }
     // A shown tooltip must not add its text to the name, so check while the button has keyboard focus.
-    await page.focus("#btn-search");
-    await page.keyboard.press("Tab");
+    // Keyboard order follows the visual order: location button, search field, submit button.
+    await page.focus("#location-input");
+    await page.keyboard.press("Shift+Tab");
     const focusedId = await page.evaluate(() => document.activeElement.id);
     const named = await page.getByRole("button", { name: "Use current location", exact: true }).count();
     check(focusedId === "btn-current-location" && named === 1, `the focused icon button is named exactly once (${focusedId}, ${named} match)`);

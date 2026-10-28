@@ -31,6 +31,16 @@ Check failed: the focused icon button is named exactly once (btn-current-locatio
 
 With `aria-label`, the focused button is named once; in Dutch its aria snapshot reads `button "Gebruik huidige locatie"`.
 
+## Focus Order Rework
+After the round 2 approval, the location button moved first in the markup, matching the visual order.
+The check now presses Shift+Tab from the search field; it failed first, exit code 1:
+
+```text
+Check failed: the focused icon button is named exactly once (, 1 match)
+```
+
+Enter in the search field still submits the search, since the location button has `type="button"`.
+
 ## Red Phase
 `node tests/forecast-browser.mjs` after changing the checks, before the CSS change, exit code 1:
 
