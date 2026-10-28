@@ -214,12 +214,13 @@ function measureStartLayout(page) {
       locate: box("#btn-current-location"),
       input: box("#location-input"),
       place: box("#forecast-place"),
+      updated: box(".forecast-updated"),
       chart: box("#forecast-chart"),
     };
   });
 }
 
-// Scenario 4: a short window uses the compact layout and needs no scrollbar.
+// Scenario 4: one layout at every size, with the location button beside the field and the details below the chart.
 {
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
   try {
@@ -227,23 +228,19 @@ function measureStartLayout(page) {
     await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
     await page.waitForSelector("#forecast:not(.hidden)");
 
-    let layout = await measureStartLayout(page);
-    check(layout.overflow <= 0, `the forecast fits without scrolling at 1280x800 (overflow ${layout.overflow}px)`);
-    const sameRow = Math.abs((layout.locate.top + layout.locate.bottom) - (layout.input.top + layout.input.bottom)) <= 2;
-    check(sameRow && layout.locate.right <= layout.input.left, "the current-location button sits left of the search field");
-    check(layout.place.top >= layout.chart.bottom, "the place name moves below the chart");
+    for (const [width, height] of [[1280, 900], [1280, 800], [390, 844], [390, 667], [320, 568]]) {
+      await page.setViewportSize({ width, height });
+      const layout = await measureStartLayout(page);
+      const size = `${width}x${height}`;
+      const sameRow = Math.abs((layout.locate.top + layout.locate.bottom) - (layout.input.top + layout.input.bottom)) <= 2;
+      check(sameRow && layout.locate.right <= layout.input.left, `the current-location button sits left of the search field at ${size}`);
+      check(layout.place.top >= layout.chart.bottom, `the place name sits below the chart at ${size}`);
+      check(layout.updated.top >= layout.place.bottom, `the update time has its own line below the place name at ${size}`);
+      if (size === "1280x800" || size === "390x667") {
+        check(layout.overflow <= 0, `the forecast fits without scrolling at ${size} (overflow ${layout.overflow}px)`);
+      }
+    }
     check(await page.getByRole("button", { name: "Use current location" }).isVisible(), "the icon button keeps its accessible name");
-
-    await page.setViewportSize({ width: 390, height: 667 });
-    layout = await measureStartLayout(page);
-    check(layout.overflow <= 0, `the forecast fits without scrolling at 390x667 (overflow ${layout.overflow}px)`);
-
-    await page.setViewportSize({ width: 390, height: 844 });
-    layout = await measureStartLayout(page);
-    check(layout.locate.top >= layout.input.bottom, "with enough height the current-location button stays below the field");
-    check(layout.place.bottom <= layout.chart.top, "with enough height the place name stays above the chart");
-    const cardPadding = await page.$eval(".forecast-card", (card) => getComputedStyle(card).paddingLeft);
-    check(cardPadding === "0px", `with enough height the inner card adds no padding (${cardPadding})`);
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {

@@ -13,7 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.1-pre
-- FrontEnd: In lage vensters staat de locatieknop naast het zoekveld en de plaatsinfo onder de grafiek, zonder schuifbalk.
+- FrontEnd: De locatieknop staat naast het zoekveld en de plaats en updatetijd staan onder de weerkaart.
 
 ## v0.1.0 [released: 2026-10-28]
 - FrontEnd: Het gekopieerde verkeersbordicoon vervangen door een Meteo-icoon met regenwolk en een eigen manifestnaam.

@@ -14,7 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v0.1.1-pre
-- FrontEnd: Moved the location button beside the search field and place details below the chart in short windows, avoiding a scrollbar.
+- FrontEnd: Moved the location button beside the search field and the place and update lines below the forecast card.
 
 ## v0.1.0 [released: 2026-10-28]
 - FrontEnd: Replaced the copied traffic-sign icon with a Meteo rain-cloud app icon and manifest name.

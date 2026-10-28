@@ -23,6 +23,7 @@ An overview of all tasks and their planning.
 >    For `Tnnnn`-style tasks, more details will be available in the corresponding task file in `.plan/tasks/Tnnnn-slug.md`
 
 ## Next Milestone
+- [~] T0006 [owner: @claude-code] Always show the current-location icon beside the search field and the place and update lines below the forecast card.
 - [x] T0005 Use a compact start layout with the forecast details below the chart when vertical space is short.
 - [x] T0004 Replace the traffic-sign app icon and manifest branding with a weather icon.
 - [x] T0003 Publish the meteo repository on GitHub and serve it through GitHub Pages.
@@ -30,4 +31,4 @@ An overview of all tasks and their planning.
 - [x] T0001 Bootstrap the meteo app shell from verkeersregels-quiz without the quiz-only features.
 
 ## Backlog
-*(Currently no tasks)*
+- [ ] T0007 Keep the hourly time labels of the forecast chart from running together on 320px wide screens.

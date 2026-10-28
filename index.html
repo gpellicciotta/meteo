@@ -63,11 +63,11 @@
                  placeholder="City, town or postal code" aria-label="Place name or postal code"
                  data-i18n-placeholder="forecast.search_placeholder" data-i18n-aria="forecast.search_aria">
           <button type="submit" id="btn-search" class="btn-primary btn-start-arrow" data-i18n="forecast.btn_search">Show</button>
-          <!-- Below the field when there is room; an icon button left of it when height is short. -->
+          <!-- Icon button placed left of the field by the grid areas in style.css. -->
           <button type="button" id="btn-current-location" class="btn-current-location"
                   data-tooltip="Use current location" data-i18n-tooltip="forecast.btn_current_location">
             <span class="btn-current-location-icon" data-icon="locate" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
-            <span class="btn-current-location-label" data-i18n="forecast.btn_current_location">Use current location</span>
+            <span class="sr-only" data-i18n="forecast.btn_current_location">Use current location</span>
           </button>
         </div>
       </form>
@@ -81,7 +81,7 @@
       </div>
 
       <section id="forecast" class="forecast hidden" aria-labelledby="forecast-place">
-        <!-- Above the chart when there is room; below it when height is short. -->
+        <!-- Shown below the card through the flex order in style.css. -->
         <div class="forecast-meta">
           <h2 id="forecast-place" class="forecast-place"></h2>
           <p class="forecast-updated">

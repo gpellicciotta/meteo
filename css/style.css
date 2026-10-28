@@ -667,20 +667,15 @@ body.suppress-tooltips [data-tooltip]::before {
   justify-content: safe center;
   align-items: center;
   width: 100%;
-  /* Size container, so the forecast can switch to a compact layout when height is short.
-     A zero flex basis gives it a definite height; with "auto" Chrome queries a height of 0. */
-  flex: 1 1 0;
-  container: start-content / size;
+  flex: 1 1 auto;
 }
 
 .start-action-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas:
-    "input submit"
-    "locate locate";
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "locate input submit";
   align-items: center;
-  gap: 12px 10px;
+  gap: 10px;
   width: 100%;
   max-width: 420px;
   margin: 0 auto;
@@ -861,30 +856,46 @@ body.suppress-tooltips [data-tooltip]::before {
 
 .btn-current-location {
   grid-area: locate;
-  justify-self: center;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius);
+  background: var(--color-card);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
 .btn-current-location:hover,
 .btn-current-location:focus-visible {
+  border-color: var(--color-primary);
   background: var(--color-primary-tint);
   outline: none;
 }
 
-/* The visible label already says what the button does; the tooltip is for the compact icon button. */
-.btn-current-location[data-tooltip]::after,
+/* Show the tooltip below and left-aligned, so the scrolling content area does not clip it. */
+.btn-current-location[data-tooltip]::after {
+  top: calc(100% + 8px);
+  bottom: auto;
+  left: 0;
+  transform: translateY(-4px);
+}
+
 .btn-current-location[data-tooltip]::before {
-  content: none;
+  top: calc(100% + 2px);
+  bottom: auto;
+  left: 16px;
+  transform: none;
+  border-top-color: transparent;
+  border-bottom-color: var(--color-tooltip-bg);
+}
+
+.btn-current-location[data-tooltip]:hover::after,
+.btn-current-location[data-tooltip]:focus-visible::after {
+  transform: translateY(0);
 }
 
 .forecast-status {
@@ -936,19 +947,30 @@ body.suppress-tooltips [data-tooltip]::before {
   outline: none;
 }
 
+/* The place and update time sit below the card, where scrolling them off matters least. */
 .forecast {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 640px;
-  margin: 20px auto 0;
-  padding: 16px;
+  margin: 16px auto 0;
+}
+
+.forecast-card {
+  padding: 12px 16px;
   background: var(--color-card-subtle);
   border: 1px solid var(--color-card-border);
   border-radius: var(--radius);
 }
 
+.forecast-meta {
+  order: 1;
+  margin-top: 8px;
+}
+
 .forecast-place {
   margin: 0;
-  font-size: var(--font-size-md);
+  font-size: var(--font-size-sm);
   font-weight: 700;
   color: var(--color-text-strong);
   text-align: center;
@@ -962,7 +984,7 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .forecast-summary {
-  margin: 12px 0 16px;
+  margin: 0 0 16px;
   font-size: var(--font-size-sm);
   color: var(--color-text);
   text-align: center;
@@ -1050,110 +1072,8 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-primary);
 }
 
-/* Compact layout when the content area is short: the current-location button becomes an icon
-   left of the search field, and the place and update time move below the chart.
-   Narrow phones wrap more text, so they switch at a larger height. */
-@container start-content (max-height: 520px) or ((max-width: 352px) and (max-height: 580px)) {
-  .start-content .start-action-row {
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "locate input submit";
-  }
-
-  .start-content .btn-current-location {
-    justify-content: center;
-    width: 42px;
-    height: 42px;
-    padding: 0;
-    border: 1.5px solid var(--color-border);
-    background: var(--color-card);
-  }
-
-  .start-content .btn-current-location:hover,
-  .start-content .btn-current-location:focus-visible {
-    border-color: var(--color-primary);
-  }
-
-  .start-content .btn-current-location-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    margin: -1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-    white-space: nowrap;
-  }
-
-  /* Show the tooltip below and left-aligned, so the scrolling content area does not clip it. */
-  .start-content .btn-current-location[data-tooltip]::after {
-    content: attr(data-tooltip);
-    top: calc(100% + 8px);
-    bottom: auto;
-    left: 0;
-    transform: translateY(-4px);
-  }
-
-  .start-content .btn-current-location[data-tooltip]::before {
-    content: "";
-    top: calc(100% + 2px);
-    bottom: auto;
-    left: 16px;
-    transform: none;
-    border-top-color: transparent;
-    border-bottom-color: var(--color-tooltip-bg);
-  }
-
-  .start-content .btn-current-location[data-tooltip]:hover::after,
-  .start-content .btn-current-location[data-tooltip]:focus-visible::after {
-    transform: translateY(0);
-  }
-
-  .start-content .forecast {
-    display: flex;
-    flex-direction: column;
-    margin-top: 16px;
-    padding: 0;
-    background: none;
-    border: none;
-  }
-
-  .start-content .forecast-card {
-    padding: 12px 16px;
-    background: var(--color-card-subtle);
-    border: 1px solid var(--color-card-border);
-    border-radius: var(--radius);
-  }
-
-  @media (max-width: 479px) {
-    .start-content .forecast-card {
-      padding: 12px 8px;
-    }
-  }
-
-  .start-content .forecast-summary {
-    margin-top: 0;
-  }
-
-  .start-content .forecast-meta {
-    order: 1;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: baseline;
-    column-gap: 8px;
-    margin-top: 8px;
-  }
-
-  .start-content .forecast-place {
-    font-size: var(--font-size-xs);
-  }
-
-  .start-content .forecast-updated {
-    margin: 0;
-  }
-}
-
 @media (max-width: 479px) {
-  .forecast {
+  .forecast-card {
     padding: 12px 8px;
   }
 
@@ -1685,19 +1605,6 @@ body.suppress-tooltips [data-tooltip]::before {
 
 /* Narrow Phone Breakpoint (< 380px) */
 @media (max-width: 380px) {
-  .start-action-row {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "input"
-      "submit"
-      "locate";
-    gap: 10px;
-  }
-
-  .btn-start-arrow {
-    width: 100%;
-  }
-
   .start-meta-bar {
     flex-direction: column;
     gap: 10px;
