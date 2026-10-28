@@ -1098,6 +1098,11 @@ body.suppress-tooltips [data-tooltip]::before {
   .forecast-time {
     font-size: 0.625rem;
   }
+
+  /* Keep hourly columns aligned while giving full time labels room on phones. */
+  .forecast-hour:nth-child(even) .forecast-time {
+    visibility: hidden;
+  }
 }
 
 /* ==========================================================================

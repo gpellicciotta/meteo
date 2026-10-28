@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Spaced forecast time labels every two hours on phones, preserving all hourly bars and accessible descriptions.
 - FrontEnd: Limited place searches and forecasts, including response bodies, to 10 seconds, showing the existing network error on timeout.
 - FrontEnd: Added a theme-colored current-weather icon with day/night variants and localized accessible labels before the forecast summary.
 - FrontEnd: Added maximum wind speed and gusts from 50 km/h to the forecast summary in English and Dutch.

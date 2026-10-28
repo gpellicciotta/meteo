@@ -13,6 +13,7 @@ It keeps the same minimal look, the About and Settings views, theming and langua
 - Type a city, town or postal code and press "Show", or use "Use current location".
 - When several places match, pick the one you mean from the list.
 - The forecast shows a bar per hour with the rain in mm, the chance of rain and the temperature.
+- Below 480px, time labels appear every two hours; all twelve hourly bars and screen-reader descriptions remain available.
 - A summary line tells when rain starts and how heavy it gets, or that it stays dry.
 - A theme-colored icon starts the summary, showing the current hour's weather with day and night variants.
 - Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.

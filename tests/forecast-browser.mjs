@@ -1,6 +1,8 @@
 // Browser check of the forecast view against mocked Open-Meteo responses.
 // Usage: node tests/forecast-browser.mjs   (set SCREENSHOT_DIR to save screenshots)
 import { captureViews, check, launchBrowser, startStaticServer } from "./browser-harness.mjs";
+import { mkdirSync } from "node:fs";
+import { join } from "node:path";
 
 const RAIN = [0, 0, 0, 0.05, 0.4, 1.2, 2.6, 0.3, 0, 0, 0, 0.1, 0];
 /**
@@ -73,6 +75,72 @@ async function mockOpenMeteo(context) {
 
 const server = await startStaticServer();
 let failed = false;
+
+// Hourly labels stay separated as the chart resizes, retaining every accessible hour.
+{
+  const { browser, context, page, problems } = await launchBrowser();
+  try {
+    await mockOpenMeteo(context);
+    const failures = [];
+    for (const lang of ["en", "nl"]) {
+      check((await page.goto(`${server.url}?lang=${lang}&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+        `${lang} hourly-label scenario receives HTTP 200`);
+      await page.waitForSelector("#forecast:not(.hidden)");
+      await page.evaluate(() => document.fonts.ready);
+      for (const width of [320, 390, 479, 480, 1280]) {
+        await page.setViewportSize({ width, height: width < 480 ? 844 : 800 });
+        for (const scheme of ["light", "dark"]) {
+          await page.emulateMedia({ colorScheme: scheme, reducedMotion: "reduce" });
+          const layout = await page.evaluate(() => {
+            const hours = [...document.querySelectorAll("#forecast-chart > li")];
+            const labels = hours.map((hour) => hour.querySelector(".forecast-time"))
+              .filter((label) => getComputedStyle(label).visibility !== "hidden" && label.getClientRects().length);
+            const bounds = labels.map((label) => {
+              const range = document.createRange();
+              range.selectNodeContents(label);
+              const rect = range.getBoundingClientRect();
+              return { left: rect.left, right: rect.right };
+            });
+            return {
+              count: labels.length,
+              gap: Math.min(...bounds.slice(1).map((rect, i) => rect.left - bounds[i].right)),
+              contained: bounds.every((rect) => rect.left >= 0 && rect.right <= innerWidth),
+              overflow: document.documentElement.scrollWidth > innerWidth,
+              descriptions: hours.map((hour) => hour.querySelector(".sr-only").textContent),
+              bars: document.querySelectorAll("#forecast-chart .forecast-bar").length,
+              temperatureRows: hours.map((hour) => hour.querySelector(".forecast-temp").getBoundingClientRect().top),
+            };
+          });
+          if (process.env.SCREENSHOT_DIR && width === 320) {
+            mkdirSync(process.env.SCREENSHOT_DIR, { recursive: true });
+            await page.screenshot({ path: join(process.env.SCREENSHOT_DIR, `hourly-${lang}-320-${scheme}.png`), fullPage: true });
+          }
+          const size = `${lang}/${scheme}/${width}px`;
+          if (layout.gap < 2) {
+            failures.push(`${size}: time labels need a 2px gap (actual ${layout.gap.toFixed(2)}px)`);
+          }
+          if (layout.count !== (width < 480 ? 6 : 12) || !layout.contained || layout.overflow) {
+            failures.push(`${size}: label count or horizontal containment is incorrect`);
+          }
+          if (layout.bars !== 12 || layout.descriptions.length !== 12
+            || !layout.descriptions.every((text, i) => text.startsWith(`${10 + i}:00:`))
+            || Math.max(...layout.temperatureRows) - Math.min(...layout.temperatureRows) > 1) {
+            failures.push(`${size}: hourly data or temperature alignment changed`);
+          }
+        }
+      }
+    }
+    check(problems.length === 0, `no hourly-label console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+    check(failures.length === 0, `hourly labels remain separated across 20 language/theme/viewport combinations${failures.length ? `:\n${failures.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
 
 // Scenario 1: search, pick a place, see the chart; then a single match and an unknown place.
 {
