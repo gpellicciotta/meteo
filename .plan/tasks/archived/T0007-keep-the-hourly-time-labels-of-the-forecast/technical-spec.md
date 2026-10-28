@@ -9,11 +9,11 @@ Completion check: `npm test` and `npm run test:browser`.
 Size estimate: 5 files, 180 lines
 
 ### Declared Files
-- [style.css](../../../css/style.css)
-- [forecast-browser.mjs](../../../tests/forecast-browser.mjs)
-- [README.md](../../../README.md)
-- [CHANGELOG.md](../../../CHANGELOG.md)
-- [sw.js](../../../sw.js), generated using `python scripts/generate-sw.py generate`.
+- [style.css](../../../../css/style.css)
+- [forecast-browser.mjs](../../../../tests/forecast-browser.mjs)
+- [README.md](../../../../README.md)
+- [CHANGELOG.md](../../../../CHANGELOG.md)
+- [sw.js](../../../../sw.js), generated using `python scripts/generate-sw.py generate`.
 
 ### Tests
 - Unit: Existing forecast parsing tests must preserve twelve hourly labels and their associated measurements.

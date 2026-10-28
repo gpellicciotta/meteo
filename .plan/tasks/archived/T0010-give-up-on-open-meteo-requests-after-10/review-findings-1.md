@@ -41,7 +41,7 @@ All 1 task file passed validation.
 ```
 
 ## Defects
-- P2: Body timeouts escape the conversion in `getJson` ([weather-api.js](../../../js/weather-api.js), lines 49-59).
+- P2: Body timeouts escape the conversion in `getJson` ([weather-api.js](../../../../js/weather-api.js), lines 49-59).
   Fetch resolves when headers arrive, but `res.json()` executes outside the catch block.
   A body that stalls past the deadline therefore rejects with a native exception instead of `ForecastError("network")`.
   Both public functions violate the timeout-error contract in [technical-spec.md](technical-spec.md).
