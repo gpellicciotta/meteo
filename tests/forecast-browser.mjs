@@ -441,7 +441,7 @@ function measureStartLayout(page) {
           await page.waitForFunction(() => document.documentElement.lang === "nl");
         }
         const summary = await page.textContent("#forecast-summary");
-        check(summary.split("°C.")[1] === (expected ? ` ${expected}` : ""), `${lang} summary handles speed ${speed}, gusts ${gusts}`);
+        check(summary.split("°C.")[1] === (expected ? `\n${expected}` : ""), `${lang} summary handles speed ${speed}, gusts ${gusts}`);
       }
     }
     check(problems.length === 0, `no wind scenario console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
