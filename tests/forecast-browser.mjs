@@ -108,6 +108,19 @@ function reverseBody(nl) {
 
 const OSM_LINK = "#forecast a[href='https://www.openstreetmap.org/copyright']";
 
+/**
+ * Show the search row through the footer button when a shown forecast has hidden it.
+ *
+ * @param {object} page - Playwright page.
+ * @returns {Promise<void>} Resolves once the search field is visible.
+ */
+async function openSearch(page) {
+  if (await page.isHidden("#location-form")) {
+    await page.click("#btn-change-place");
+    await page.waitForSelector("#location-form:not(.hidden)");
+  }
+}
+
 const server = await startStaticServer();
 let failed = false;
 
@@ -219,6 +232,7 @@ let failed = false;
     check(true, "the place name follows the language switch");
     await captureViews(page, "forecast-nl");
 
+    await openSearch(page);
     await page.fill("#location-input", "Xyzzy");
     await page.click("#btn-search");
     await page.waitForSelector("#start-error:not(.hidden)");
@@ -283,6 +297,7 @@ let failed = false;
     await page.click("#btn-current-location");
     await page.waitForSelector("#forecast:not(.hidden)");
     check(urls.some((u) => u.includes("latitude=50.85") && u.includes("longitude=4.35")), "the forecast uses the device position");
+    check(await page.isHidden("#location-form"), "the current location forecast hides the search row");
     await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Sint-Niklaas"));
     check((await page.textContent("#forecast-place")) === "Sint-Niklaas, East Flanders, Belgium (current location)",
       "the current location shows its town, province and country");
@@ -301,6 +316,7 @@ let failed = false;
     await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("East Flanders"));
 
     reverseFails = true;
+    await openSearch(page);
     await Promise.all([
       page.waitForResponse((response) => response.url().startsWith("https://nominatim.openstreetmap.org/")),
       page.click("#btn-current-location"),
@@ -310,6 +326,7 @@ let failed = false;
     check(await page.isHidden("#start-error"), "a failed lookup shows no error");
     check(await page.isHidden(OSM_LINK), "the OpenStreetMap attribution is hidden with the coordinates");
 
+    await openSearch(page);
     await page.fill("#location-input", "Brussel");
     await page.click("#btn-search");
     await page.waitForFunction(() => document.getElementById("forecast-place").textContent === "Gent, Flanders, Belgium");
@@ -380,6 +397,7 @@ function measureStartLayout(page) {
     await page.clock.install({ time: MOCK_NOW });
     await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
     await page.waitForSelector("#forecast:not(.hidden)");
+    await openSearch(page);
 
     for (const [width, height] of [[1280, 900], [1280, 800], [390, 844], [390, 667], [320, 568]]) {
       await page.setViewportSize({ width, height });
@@ -496,6 +514,7 @@ function measureStartLayout(page) {
       if (code === null) {
         delete body.hourly.weather_code;
       }
+      await openSearch(page);
       await Promise.all([
         page.waitForResponse((response) => response.url().startsWith("https://api.open-meteo.com/")),
         page.click("#btn-search"),
@@ -832,6 +851,82 @@ function measureStartLayout(page) {
     // The aborted forecast requests above are intentional; drop their network and console entries from the error gate.
     problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("api.open-meteo.com") && !p.includes("ERR_INTERNET_DISCONNECTED")));
     check(problems.length === 0, `no resume console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 11: a shown forecast hides the search row, and the footer button shows it again.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
+    check((await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" })).status() === 200, "search row scenario receives HTTP 200");
+    check(await page.isVisible("#location-form") && await page.isHidden("#btn-change-place"),
+      "a start without a saved place shows the search row and no change place button");
+
+    await page.fill("#location-input", "Gent");
+    await page.click("#btn-search");
+    await page.click("#place-choices li:first-child button");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check(await page.isHidden("#location-form"), "choosing a place hides the search row");
+    check(await page.isVisible("#btn-change-place") && (await page.getAttribute("#btn-change-place", "aria-expanded")) === "false",
+      "the change place button is shown, collapsed");
+    check((await page.getAttribute("#btn-change-place", "aria-label")) === "Search another place", "the change place button has an English name");
+    await captureViews(page, "search-row-hidden");
+
+    await page.click("#btn-change-place");
+    check(await page.isVisible("#location-form"), "the change place button shows the search row");
+    check(await page.evaluate(() => document.activeElement.id) === "location-input", "showing the search row focuses the search field");
+    check((await page.getAttribute("#btn-change-place", "aria-expanded")) === "true", "the change place button is expanded");
+    await captureViews(page, "search-row-shown");
+    await page.click("#btn-change-place");
+    check(await page.isHidden("#location-form"), "the change place button hides the search row again");
+
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    check((await page.getAttribute("#btn-change-place", "aria-label")) === "Zoek een andere plaats", "the change place button has a Dutch name");
+    check(await page.isHidden("#location-form"), "a language switch keeps the search row hidden");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "en");
+
+    await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check(await page.isHidden("#location-form"), "a start with a saved place hides the search row");
+
+    await page.click("#btn-about");
+    check((await page.textContent("[data-i18n='about.icon_search_title']")) === "Search", "About lists the search icon");
+    await page.click("#btn-about-back");
+    check(problems.length === 0, `no search row console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 12: a failed first forecast keeps the search row visible with the error.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    await mockOpenMeteo(context);
+    await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ status: 500, json: { error: true } }));
+    await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
+    await page.waitForSelector("#start-error:not(.hidden)");
+    check(await page.isVisible("#location-form") && await page.isHidden("#btn-change-place"),
+      "a failed first forecast keeps the search row and hides the change place button");
+    // The mocked HTTP 500 forecast is intentional; drop its response and console entries from the error gate.
+    problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("api.open-meteo.com") && !p.includes("status of 500")));
+    check(problems.length === 0, `no failed forecast console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

@@ -221,6 +221,27 @@ export function visibleHours(forecast, now) {
 }
 
 /**
+ * Decide whether the search row is open after a view event.
+ *
+ * Without a forecast the row is always open, so a place can be searched.
+ *
+ * @param {boolean} open - Whether the row is open now.
+ * @param {"chosen"|"toggled"|"rendered"} event - A forecast shown for a newly chosen place,
+ *        the footer button, or any other render such as a refresh or language switch.
+ * @param {boolean} forecastShown - Whether a forecast is shown after the event.
+ * @returns {boolean} Whether the row is open afterwards.
+ */
+export function searchRowOpen(open, event, forecastShown) {
+  if (!forecastShown) {
+    return true;
+  }
+  if (event === "chosen") {
+    return false;
+  }
+  return event === "toggled" ? !open : open;
+}
+
+/**
  * Return the key matching a saved forecast to its place.
  *
  * @param {{kind: string, id?: number, latitude: number, longitude: number}} place - Shown place.

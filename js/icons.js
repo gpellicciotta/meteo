@@ -48,6 +48,11 @@ const ICON_DEFS = {
     <line x1="2" y1="12" x2="5" y2="12"></line>
     <line x1="19" y1="12" x2="22" y2="12"></line>
   `,
+  // Magnifying glass for searching another place.
+  search: `
+    <circle cx="11" cy="11" r="7"></circle>
+    <line x1="16" y1="16" x2="21" y2="21"></line>
+  `,
   // Outward arrow from a box for external links.
   externalLink: `
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

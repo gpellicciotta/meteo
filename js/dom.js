@@ -15,6 +15,7 @@ export const el = {
   forecastAttributionOsm: document.getElementById("forecast-attribution-osm"),
   forecastSummary: document.getElementById("forecast-summary"),
   forecastChart: document.getElementById("forecast-chart"),
+  btnChangePlace: document.getElementById("btn-change-place"),
   btnConfig: document.getElementById("btn-config"),
   screenConfig: document.getElementById("screen-config"),
   btnConfigClose: document.getElementById("btn-config-close"),

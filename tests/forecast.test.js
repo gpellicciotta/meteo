@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildReverseUrl, buildSearchUrl, fetchForecast, reversePlace, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -295,6 +295,28 @@ describe("formatPlace", () => {
     expect(formatPlace({ name: "Gent", admin1: "Flanders", country: "Belgium" })).toBe("Gent, Flanders, Belgium");
     expect(formatPlace({ name: "Brussels", admin1: "Brussels", country: "Belgium" })).toBe("Brussels, Belgium");
     expect(formatPlace({ name: "Monaco", country: "Monaco" })).toBe("Monaco");
+  });
+});
+
+describe("searchRowOpen", () => {
+  it.each(["chosen", "toggled", "rendered"])("opens the row on %s when no forecast is shown", (event) => {
+    expect(searchRowOpen(false, event, false)).toBe(true);
+    expect(searchRowOpen(true, event, false)).toBe(true);
+  });
+
+  it("closes the row once a forecast for a chosen place is shown", () => {
+    expect(searchRowOpen(true, "chosen", true)).toBe(false);
+    expect(searchRowOpen(false, "chosen", true)).toBe(false);
+  });
+
+  it("flips the row with the footer button while a forecast is shown", () => {
+    expect(searchRowOpen(false, "toggled", true)).toBe(true);
+    expect(searchRowOpen(true, "toggled", true)).toBe(false);
+  });
+
+  it("keeps the row as it is on refreshes and language switches", () => {
+    expect(searchRowOpen(true, "rendered", true)).toBe(true);
+    expect(searchRowOpen(false, "rendered", true)).toBe(false);
   });
 });
 

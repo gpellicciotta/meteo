@@ -111,6 +111,15 @@
 
         <div class="start-meta-bar" role="region" aria-label="Settings and information" data-i18n-aria="start.meta_bar_aria">
           <div class="start-meta-group start-meta-actions">
+            <button type="button" id="btn-change-place" class="start-meta-item start-meta-btn start-meta-btn-action hidden"
+                    aria-controls="location-form" aria-expanded="true"
+                    aria-label="Search another place"
+                    data-tooltip="Search another place"
+                    data-i18n-aria="start.btn_change_place_aria"
+                    data-i18n-tooltip="start.btn_change_place_tooltip">
+              <span class="start-meta-svg" data-icon="search" aria-hidden="true"></span>
+            </button>
+
             <button type="button" id="btn-config" class="start-meta-item start-meta-btn start-meta-btn-action"
                     aria-label="Open settings"
                     data-tooltip="Settings"
@@ -168,6 +177,15 @@
             <div class="about-icon-info">
               <strong class="about-icon-name" data-i18n="about.icon_location_title">Current Location</strong>
               <p class="about-icon-detail" data-i18n="about.icon_location_desc">Show the forecast for where you are; only the coordinates are sent to Open-Meteo and OpenStreetMap.</p>
+            </div>
+          </li>
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
+              <span class="about-icon-svg" data-icon="search" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_search_title">Search</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_search_desc">Show the search field again to pick another place.</p>
             </div>
           </li>
           <li class="about-icon-item">

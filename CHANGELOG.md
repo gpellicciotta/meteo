@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.0.0 [released: 2026-10-28]
+- FrontEnd: Hid the search row once a forecast is shown, with a footer search button to show it again.
 - FrontEnd: Centered the start view title and description, which sat 24 pixels left of center.
 - FrontEnd: Put each forecast summary sentence on its own line in a smaller font.
 - FrontEnd: Named the current location by town, province and country from OpenStreetMap, keeping the coordinates when the lookup fails.

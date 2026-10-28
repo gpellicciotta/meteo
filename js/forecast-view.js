@@ -3,7 +3,7 @@ import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
 import {
   MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale,
-  placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours,
+  placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours,
 } from "./forecast.js";
 import { fetchForecast, reversePlace, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
@@ -26,6 +26,8 @@ const view = {
   refreshing: false,
   // Incremented per language switch so only the latest place translation is applied.
   localizeId: 0,
+  // False once a forecast for a chosen place is shown, until the footer button shows the search row again.
+  searchOpen: true,
 };
 
 /**
@@ -197,14 +199,30 @@ function buildHourColumn(hour, scaleMax, isNow) {
 }
 
 /**
- * Render the forecast of the current place from the current hour on: heading, summary and chart.
+ * Show or hide the search row after a view event, with the footer button to show it again.
  *
+ * @param {"chosen"|"toggled"|"rendered"} event - Event passed on to searchRowOpen().
  * @returns {void}
  */
-function renderForecast() {
+function updateSearchRow(event) {
+  const forecastShown = !el.forecast.classList.contains("hidden");
+  view.searchOpen = searchRowOpen(view.searchOpen, event, forecastShown);
+  el.locationForm.classList.toggle("hidden", !view.searchOpen);
+  el.btnChangePlace.classList.toggle("hidden", !forecastShown);
+  el.btnChangePlace.setAttribute("aria-expanded", String(view.searchOpen));
+}
+
+/**
+ * Render the forecast of the current place from the current hour on: heading, summary and chart.
+ *
+ * @param {"chosen"|"rendered"} [event] - "chosen" when the forecast belongs to a newly chosen place.
+ * @returns {void}
+ */
+function renderForecast(event = "rendered") {
   const hours = view.place && view.forecast ? visibleHours(view.forecast, Date.now()) : [];
   if (hours.length === 0) {
     el.forecast.classList.add("hidden");
+    updateSearchRow(event);
     return;
   }
   const rain = summarizeRain(hours);
@@ -256,6 +274,7 @@ function renderForecast() {
   const scaleMax = barScaleMax(hours);
   el.forecastChart.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0)));
   el.forecast.classList.remove("hidden");
+  updateSearchRow(event);
 }
 
 /**
@@ -286,7 +305,7 @@ async function loadForecast(place, { quiet = false } = {}) {
       lastPlace: view.place,
       lastForecast: { placeKey: placeKey(view.place), fetchedAt: view.updatedAt.toISOString(), forecast },
     });
-    renderForecast();
+    renderForecast(quiet ? "rendered" : "chosen");
   }
   catch (err) {
     if (requestId !== view.requestId) {
@@ -512,7 +531,7 @@ function showSavedForecast(place) {
   const saved = restoreForecast(getStoredPreferences().lastForecast, placeKey(place));
   if (saved && visibleHours(saved.forecast, Date.now()).length >= MIN_SAVED_HOURS) {
     Object.assign(view, { place, forecast: saved.forecast, updatedAt: saved.fetchedAt });
-    renderForecast();
+    renderForecast("chosen");
   }
 }
 
@@ -530,6 +549,12 @@ export function initForecastView() {
     searchAndShow(el.locationInput.value);
   });
   el.btnCurrentLocation.addEventListener("click", showCurrentLocation);
+  el.btnChangePlace.addEventListener("click", () => {
+    updateSearchRow("toggled");
+    if (view.searchOpen) {
+      el.locationInput.focus();
+    }
+  });
   document.addEventListener("languagechange", handleLanguageChange);
   // An installed app resumes from memory, and the back-forward cache restores the page, without reloading.
   document.addEventListener("visibilitychange", () => {
