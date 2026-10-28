@@ -68,3 +68,9 @@ Specifications: [technical-spec.md](T0006-always-show-the-current-location-icon-
 - [2026-10-28] **[Implement]**
   Moved the location button first in the markup so keyboard order matches the visual order, with a failing Shift+Tab check first.
 
+- [2026-10-28] **[Verify]**
+  Recorded task outcomes.
+  - Files touched: 5.
+  - Lines touched: 246.
+  - Reopenings: 0.
+
