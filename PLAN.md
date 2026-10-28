@@ -9,6 +9,7 @@ An overview of all tasks and their planning.
 - [ ] T0008 Refresh the forecast when the app becomes visible again and the shown data is older than 15 minutes.
 - [ ] T0011 [needs: T0008] Label the first forecast hour as now instead of its clock time.
 - [ ] T0009 [needs: T0008] Show the last saved forecast when the app starts offline or a refresh fails.
+- [ ] T0014 Show the town and province of the current location instead of its coordinates.
 
 ## Backlog
 *(Currently no tasks)*
