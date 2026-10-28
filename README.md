@@ -7,7 +7,22 @@ The interface is available in English and Dutch.
 Meteo started from the application shell of [Verkeersregels Quiz](https://github.com/gpellicciotta/verkeersregels-quiz).
 It keeps the same minimal look, the About and Settings views, theming and language switching.
 
+## How It Works
+- Type a city, town or postal code and press "Show", or use "Use current location".
+- When several places match, pick the one you mean from the list.
+- The forecast shows a bar per hour with the rain in mm, the chance of rain and the temperature.
+- A summary line tells when rain starts and how heavy it gets, or that it stays dry.
+- The last place is remembered and reloaded on your next visit.
+
+The browser fetches all data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
+- [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation and its probability.
+- [Geocoding API](https://open-meteo.com/en/docs/geocoding-api) for place and postal code search.
+
+Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed under CC BY 4.0.
+Open-Meteo's free tier is for non-commercial use only, which matches this ad-free project.
+
 ## URL Parameters
+- `?location=Gent`: searches a place at startup and shows its forecast.
 - `?lang=en|nl`: sets the interface language (default: browser language, else English).
 - `?theme=light|dark|system`: sets the color theme (default `system`).
 - `?theme-color=blue|yellow|red`: sets the accent color (default `blue`).
@@ -21,6 +36,7 @@ Requirements: Node.js 22 or higher, Python 3.10 or higher, and Google Chrome for
 npm install
 npm test                       # Vitest unit tests
 node tests/shell-browser.mjs   # Playwright browser check of the app shell
+node tests/forecast-browser.mjs  # Playwright browser check of the forecast, with mocked API answers
 ```
 
 Set `SCREENSHOT_DIR` to save desktop and mobile screenshots in light and dark mode during browser checks.

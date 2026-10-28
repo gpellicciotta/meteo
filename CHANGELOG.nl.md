@@ -13,4 +13,5 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.0-pre
+- FrontEnd: Zoeken op plaats en huidige locatie toegevoegd, met een 12-uursvoorspelling van regen per uur en temperatuur via Open-Meteo.
 - FrontEnd: Meteo gestart vanuit de Verkeersregels Quiz-basis, met start-, Over- en Instellingenscherm in het Engels en Nederlands.

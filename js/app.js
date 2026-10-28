@@ -7,6 +7,7 @@ import { loadChangelog } from "./changelog.js";
 import { registerServiceWorker, updateOnlineStatus, syncInstallButtonState } from "./pwa.js";
 import { setLang, detectLang, getLang, applyAll, t, SUPPORTED_LANGS } from "./i18n.js";
 import { renderDataIcons } from "./icons.js";
+import { initForecastView } from "./forecast-view.js";
 
 /**
  * Replace every [data-icon] placeholder in the document with its SVG icon.
@@ -138,6 +139,7 @@ setLang(detectLang())
     updateOnlineStatus();
     syncInstallButtonState();
     checkAutoStart();
+    initForecastView();
   })
   .catch((err) => {
     console.error(err);

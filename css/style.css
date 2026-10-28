@@ -30,6 +30,10 @@
   --color-warning-border: #fcd34d;
   --color-warning-text: #92400e;
 
+  /* Rain Chart Colors (fixed blue, independent of the accent color) */
+  --color-rain: #3b82f6;
+  --color-rain-text: #1d4ed8;
+
   /* Neutral Surface, Background & Typography Colors */
   --color-bg: #f5f7fa;
   --color-card: #ffffff;
@@ -112,6 +116,8 @@
 /* Dark Theme Surface & Feedback Tokens */
 :root[data-theme="dark"] {
   color-scheme: dark;
+  --color-rain: #60a5fa;
+  --color-rain-text: #93c5fd;
   --color-bg: #0f172a;
   --color-card: #1e293b;
   --color-card-subtle: #141f33;
@@ -657,13 +663,11 @@ body.suppress-tooltips [data-tooltip]::before {
   display: flex;
   flex-direction: column;
   justify-content: center;
+  /* Keep the top reachable when the forecast is taller than the view. */
+  justify-content: safe center;
   align-items: center;
   width: 100%;
   flex: 1 1 auto;
-}
-
-#start-form {
-  width: 100%;
 }
 
 .start-action-row {
@@ -676,7 +680,7 @@ body.suppress-tooltips [data-tooltip]::before {
   margin: 0 auto 8px;
 }
 
-.player-name-input {
+.location-input {
   width: 100%;
   padding: 10px 14px;
   border: 1.5px solid var(--color-border);
@@ -688,7 +692,7 @@ body.suppress-tooltips [data-tooltip]::before {
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.player-name-input:focus {
+.location-input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
   outline: none;
@@ -832,6 +836,228 @@ body.suppress-tooltips [data-tooltip]::before {
   margin-top: 14px;
   margin-bottom: 0;
   letter-spacing: 0.02em;
+}
+
+/* ==========================================================================
+   5.5. Forecast (#start-content)
+   ========================================================================== */
+
+.location-form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.btn-current-location {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+.btn-current-location:hover,
+.btn-current-location:focus-visible {
+  background: var(--color-primary-tint);
+  outline: none;
+}
+
+.forecast-status {
+  margin: 16px 0 0;
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}
+
+.place-choices {
+  width: 100%;
+  max-width: 420px;
+  margin: 16px auto 0;
+}
+
+.place-choices-title {
+  margin: 0 0 8px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  text-align: center;
+}
+
+.place-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.place-choice {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius);
+  background: var(--color-card-subtle);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  text-align: left;
+  cursor: pointer;
+}
+
+.place-choice:hover,
+.place-choice:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px var(--color-primary-focus);
+  outline: none;
+}
+
+.forecast {
+  width: 100%;
+  max-width: 640px;
+  margin: 20px auto 0;
+  padding: 16px;
+  background: var(--color-card-subtle);
+  border: 1px solid var(--color-card-border);
+  border-radius: var(--radius);
+}
+
+.forecast-place {
+  margin: 0;
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--color-text-strong);
+  text-align: center;
+}
+
+.forecast-updated {
+  margin: 2px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  text-align: center;
+}
+
+.forecast-summary {
+  margin: 12px 0 16px;
+  font-size: var(--font-size-sm);
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.45;
+}
+
+.forecast-summary.is-wet {
+  color: var(--color-rain-text);
+  font-weight: 600;
+}
+
+.forecast-chart {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 4px;
+}
+
+.forecast-hour {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.forecast-amount {
+  height: 1.5em;
+  line-height: 1.5em;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-rain-text);
+  white-space: nowrap;
+}
+
+.forecast-bar-track {
+  position: relative;
+  width: 100%;
+  max-width: 32px;
+  height: 120px;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.forecast-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-rain);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+}
+
+.forecast-chance {
+  height: 1.4em;
+  line-height: 1.4em;
+  margin-top: 4px;
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}
+
+.forecast-time {
+  margin-top: 2px;
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}
+
+.forecast-temp {
+  margin-top: 4px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.forecast-legend,
+.forecast-attribution {
+  margin: 12px 0 0;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  text-align: center;
+  line-height: 1.4;
+}
+
+.forecast-attribution {
+  margin-top: 4px;
+}
+
+.forecast-attribution a {
+  color: var(--color-primary);
+}
+
+@media (max-width: 479px) {
+  .forecast {
+    padding: 12px 8px;
+  }
+
+  .forecast-chart {
+    gap: 2px;
+  }
+
+  .forecast-bar-track {
+    height: 100px;
+  }
+
+  .forecast-amount,
+  .forecast-chance,
+  .forecast-time {
+    font-size: 0.625rem;
+  }
 }
 
 /* ==========================================================================
@@ -1275,88 +1501,8 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 /* ==========================================================================
-   11. Modals (Report, Changelog)
+   11. Changelog
    ========================================================================== */
-
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: var(--color-overlay);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  padding: 16px;
-}
-
-.modal-dialog {
-  position: relative;
-  background: var(--color-card);
-  border-radius: var(--radius-lg);
-  max-width: 480px;
-  width: 100%;
-  max-height: calc(100dvh - 32px);
-  box-shadow: var(--shadow-modal);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  animation: modal-pop 0.18s ease-out;
-}
-
-dialog.modal-dialog:not([open]) {
-  display: none;
-}
-
-@keyframes modal-pop {
-  from {
-    opacity: 0;
-    transform: scale(0.96) translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) translateY(0);
-  }
-}
-
-.modal-header {
-  position: sticky;
-  top: 0;
-  z-index: 10;
-  background: var(--color-card);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 44px 16px 20px;
-  border-bottom: 1px solid var(--color-border-subtle);
-  flex-shrink: 0;
-}
-
-.modal-header h3 {
-  margin: 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-size-md);
-  font-weight: 700;
-  color: var(--color-primary);
-}
-
-.modal-title-icon {
-  flex-shrink: 0;
-  display: inline-flex;
-}
-
-.modal-dialog .modal-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-}
-
-.modal-body {
-  padding: 18px 20px 20px;
-  overflow-y: auto;
-  flex: 1 1 auto;
-}
 
 .modal-desc {
   margin: 0 0 12px;
@@ -1364,42 +1510,6 @@ dialog.modal-dialog:not([open]) {
   color: var(--color-muted);
   line-height: 1.4;
   white-space: pre-line;
-}
-
-.modal-body textarea {
-  width: 100%;
-  margin-top: 6px;
-  padding: 10px 12px;
-  font-size: var(--font-size-sm);
-  font-family: inherit;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-card);
-  color: var(--color-text);
-  resize: vertical;
-}
-
-.modal-body textarea:focus {
-  outline: 2px solid var(--color-primary);
-  border-color: transparent;
-}
-
-.modal-actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 10;
-  background: var(--color-card);
-  display: flex;
-  gap: 10px;
-  margin-top: auto;
-  padding-top: 14px;
-}
-
-.modal-actions button {
-  margin-top: 0;
-  flex: 1;
-  padding: 10px 14px;
-  font-size: var(--font-size-sm);
 }
 
 .changelog-loading {

@@ -25,7 +25,7 @@ An overview of all tasks and their planning.
 ## Next Milestone
 - [ ] T0004 Replace the traffic-sign app icon and manifest branding with a weather icon.
 - [ ] T0003 [needs: T0002, T0004] Publish the meteo repository on GitHub and serve it through GitHub Pages.
-- [ ] T0002 Add the twelve-hour temperature and hourly rain forecast view using Open-Meteo.
+- [~] T0002 [owner: @claude-code] Add the twelve-hour temperature and hourly rain forecast view using Open-Meteo.
 - [x] T0001 Bootstrap the meteo app shell from verkeersregels-quiz without the quiz-only features.
 
 ## Backlog

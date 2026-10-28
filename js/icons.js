@@ -8,6 +8,15 @@ const ICON_DEFS = {
     <line x1="18" y1="6" x2="6" y2="18"></line>
     <line x1="6" y1="6" x2="18" y2="18"></line>
   `,
+  // Crosshair around a dot for using the current location.
+  locate: `
+    <circle cx="12" cy="12" r="7"></circle>
+    <circle cx="12" cy="12" r="2.5"></circle>
+    <line x1="12" y1="2" x2="12" y2="5"></line>
+    <line x1="12" y1="19" x2="12" y2="22"></line>
+    <line x1="2" y1="12" x2="5" y2="12"></line>
+    <line x1="19" y1="12" x2="22" y2="12"></line>
+  `,
   // Outward arrow from a box for external links.
   externalLink: `
     <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>

@@ -55,9 +55,39 @@
       <p id="start-desc" class="start-desc" data-i18n="start.description">Temperature and rain for the next 12 hours.</p>
     </header>
 
-    <!-- Main content: filled by the forecast feature -->
+    <!-- Main content: location search and the 12-hour forecast -->
     <div id="start-content" class="start-content view-content">
-      <p id="start-error" class="error hidden" role="alert"></p>
+      <form id="location-form" class="location-form" role="search">
+        <div class="start-action-row">
+          <input type="search" id="location-input" class="location-input" autocomplete="off" enterkeyhint="search"
+                 placeholder="City, town or postal code" aria-label="Place name or postal code"
+                 data-i18n-placeholder="forecast.search_placeholder" data-i18n-aria="forecast.search_aria">
+          <button type="submit" id="btn-search" class="btn-primary btn-start-arrow" data-i18n="forecast.btn_search">Show</button>
+        </div>
+        <button type="button" id="btn-current-location" class="btn-current-location">
+          <span class="btn-current-location-icon" data-icon="locate" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
+          <span data-i18n="forecast.btn_current_location">Use current location</span>
+        </button>
+      </form>
+
+      <p id="forecast-status" class="forecast-status hidden" role="status" aria-live="polite"></p>
+      <p id="start-error" class="error start-error hidden" role="alert"></p>
+
+      <div id="place-choices" class="place-choices hidden">
+        <p class="place-choices-title" data-i18n="forecast.choose_place">Which place do you mean?</p>
+        <ul id="place-list" class="place-list"></ul>
+      </div>
+
+      <section id="forecast" class="forecast hidden" aria-labelledby="forecast-place">
+        <h2 id="forecast-place" class="forecast-place"></h2>
+        <p id="forecast-updated" class="forecast-updated"></p>
+        <p id="forecast-summary" class="forecast-summary"></p>
+        <ol id="forecast-chart" class="forecast-chart" aria-label="Rain and temperature per hour" data-i18n-aria="forecast.chart_aria"></ol>
+        <p class="forecast-legend" data-i18n="forecast.legend">Bars show rain in mm per hour, percentages the chance of rain.</p>
+        <p class="forecast-attribution">
+          <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" data-i18n="forecast.attribution">Weather data by Open-Meteo.com</a>
+        </p>
+      </section>
     </div>
 
     <!-- Footer: meta bar with circle buttons and subtle copyright -->
@@ -83,8 +113,8 @@
             </button>
 
             <button type="button" id="btn-about" class="start-meta-item start-about-btn start-meta-btn-action"
-                    aria-label="About this app (version &amp; release notes)"
-                    data-tooltip="About this app (version &amp; release notes)"
+                    aria-label="About this app (version, release notes &amp; sources)"
+                    data-tooltip="About this app (version, release notes &amp; sources)"
                     data-i18n-aria="start.btn_about_aria"
                     data-i18n-tooltip="start.btn_about_tooltip">
               <span class="start-meta-svg" data-icon="help" aria-hidden="true"></span>
@@ -119,6 +149,15 @@
         <ul class="about-icons-list">
           <li class="about-icon-item">
             <span class="about-icon-badge">
+              <span class="about-icon-svg" data-icon="locate" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_location_title">Current Location</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_location_desc">Show the forecast for where you are; only the coordinates are sent to Open-Meteo.</p>
+            </div>
+          </li>
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
               <span class="about-icon-svg" data-icon="settings" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
             </span>
             <div class="about-icon-info">
@@ -141,7 +180,7 @@
             </span>
             <div class="about-icon-info">
               <strong class="about-icon-name" data-i18n="about.icon_about_title">About &amp; Help</strong>
-              <p class="about-icon-detail" data-i18n="about.icon_about_desc">View release notes, support links, and this guide.</p>
+              <p class="about-icon-detail" data-i18n="about.icon_about_desc">View sources, release notes, support links, and this guide.</p>
             </div>
           </li>
           <li class="about-icon-item">
@@ -152,6 +191,26 @@
               <strong class="about-icon-name" data-i18n="about.icon_install_title">Install App</strong>
               <p class="about-icon-detail" data-i18n="about.icon_install_desc">Install Meteo as an app on your phone or computer.</p>
             </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="about-sources-card">
+        <h2 class="about-section-heading" data-i18n="about.sources_heading">Data sources</h2>
+        <ul class="about-sources-list">
+          <li class="about-source-item">
+            <a href="https://open-meteo.com/en/docs" target="_blank" rel="noopener noreferrer" class="about-source-link">
+              <span class="about-source-title" data-i18n="about.source_forecast_title">Open-Meteo Weather Forecast API</span>
+              <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" data-icon-stroke-width="2" aria-hidden="true"></span>
+            </a>
+            <p class="about-source-desc" data-i18n="about.source_forecast_description">Hourly temperature, rain and chance of rain from national weather services (CC BY 4.0).</p>
+          </li>
+          <li class="about-source-item">
+            <a href="https://open-meteo.com/en/docs/geocoding-api" target="_blank" rel="noopener noreferrer" class="about-source-link">
+              <span class="about-source-title" data-i18n="about.source_geocoding_title">Open-Meteo Geocoding API</span>
+              <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" data-icon-stroke-width="2" aria-hidden="true"></span>
+            </a>
+            <p class="about-source-desc" data-i18n="about.source_geocoding_description">Place and postal code search based on GeoNames (CC BY 4.0).</p>
           </li>
         </ul>
       </div>
