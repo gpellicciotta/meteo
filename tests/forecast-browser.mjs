@@ -196,5 +196,62 @@ let failed = false;
   }
 }
 
+/**
+ * Measure the start view layout: overflow of the content area and the boxes of key elements.
+ *
+ * @param {object} page - Playwright page showing a forecast.
+ * @returns {Promise<object>} Overflow in pixels and bounding boxes keyed by element.
+ */
+function measureStartLayout(page) {
+  return page.evaluate(() => {
+    const box = (selector) => {
+      const r = document.querySelector(selector).getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right };
+    };
+    const content = document.getElementById("start-content");
+    return {
+      overflow: content.scrollHeight - content.clientHeight,
+      locate: box("#btn-current-location"),
+      input: box("#location-input"),
+      place: box("#forecast-place"),
+      chart: box("#forecast-chart"),
+    };
+  });
+}
+
+// Scenario 4: a short window uses the compact layout and needs no scrollbar.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
+  try {
+    await mockOpenMeteo(context);
+    await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+
+    let layout = await measureStartLayout(page);
+    check(layout.overflow <= 0, `the forecast fits without scrolling at 1280x800 (overflow ${layout.overflow}px)`);
+    const sameRow = Math.abs((layout.locate.top + layout.locate.bottom) - (layout.input.top + layout.input.bottom)) <= 2;
+    check(sameRow && layout.locate.right <= layout.input.left, "the current-location button sits left of the search field");
+    check(layout.place.top >= layout.chart.bottom, "the place name moves below the chart");
+    check(await page.getByRole("button", { name: "Use current location" }).isVisible(), "the icon button keeps its accessible name");
+
+    await page.setViewportSize({ width: 390, height: 667 });
+    layout = await measureStartLayout(page);
+    check(layout.overflow <= 0, `the forecast fits without scrolling at 390x667 (overflow ${layout.overflow}px)`);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    layout = await measureStartLayout(page);
+    check(layout.locate.top >= layout.input.bottom, "with enough height the current-location button stays below the field");
+    check(layout.place.bottom <= layout.chart.top, "with enough height the place name stays above the chart");
+    check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

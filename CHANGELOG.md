@@ -13,6 +13,9 @@ A summarized overview of all changes, per version of this project.
 
 ---
 
+## v0.1.1-pre
+- FrontEnd: Moved the location button beside the search field and place details below the chart in short windows, avoiding a scrollbar.
+
 ## v0.1.0 [released: 2026-10-28]
 - FrontEnd: Replaced the copied traffic-sign icon with a Meteo rain-cloud app icon and manifest name.
 - FrontEnd: Added place search and current location with a 12-hour forecast of hourly rain bars and temperatures from Open-Meteo.
