@@ -10,6 +10,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+review_status: rejected
+review_round: 1
+reviewed_by: "@claude-2"
 ---
 # T0001: Bootstrap the meteo app shell from verkeersregels-quiz without the quiz-only features
 
@@ -52,4 +55,14 @@ Offer only Dutch and English, and leave an empty start view ready for the foreca
 
 - [2026-10-28] **[Doc]**
   Size note: the hand diff reached 20 files and 1130 lines, above the large line but under three times the estimate.
+
+- [2026-10-28] **[Review]**
+  Round 1 requested (mode: agent).
+
+- [2026-10-28] **[Review]**
+  Round 1 rejected by @claude-2: Shared language storage key with the quiz on the same origin; minor robustness and test gaps.
+  - Findings: [review-findings-1.md](T0001-bootstrap-the-meteo-app-shell-from-verkeersregels-quiz/review-findings-1.md).
+
+- [2026-10-28] **[Implement]**
+  Reworked review round 1: prefixed language storage key, lazy changelog reload, caught language load failures, test and copy fixes.
 

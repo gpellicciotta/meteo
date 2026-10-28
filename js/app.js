@@ -96,14 +96,16 @@ function updateLangButton() {
 
 el.btnLang.addEventListener("click", () => {
   const index = SUPPORTED_LANGS.indexOf(getLang());
-  setLang(SUPPORTED_LANGS[(index + 1) % SUPPORTED_LANGS.length]);
+  setLang(SUPPORTED_LANGS[(index + 1) % SUPPORTED_LANGS.length]).catch((err) => console.warn(err));
 });
 
 // Re-render all dynamic strings on language change (covers module-local renders)
 document.addEventListener("languagechange", () => {
   applyAll();
   updateLangButton();
-  loadChangelog();
+  if (!el.screenAbout.classList.contains("hidden")) {
+    loadChangelog();
+  }
 });
 
 /**

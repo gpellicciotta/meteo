@@ -94,6 +94,8 @@ export async function captureViews(page, name) {
     return;
   }
   mkdirSync(dir, { recursive: true });
+  // Theme switches animate colors, so captures taken mid-transition would show mixed themes.
+  await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
   const viewport = page.viewportSize();
   for (const [device, size] of [["desktop", { width: 1280, height: 800 }], ["mobile", { width: 390, height: 844 }]]) {
     await page.setViewportSize(size);

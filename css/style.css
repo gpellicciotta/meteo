@@ -834,16 +834,6 @@ body.suppress-tooltips [data-tooltip]::before {
   letter-spacing: 0.02em;
 }
 
-.tag-correct {
-  color: var(--color-correct);
-  font-weight: 600;
-}
-
-.tag-wrong {
-  color: var(--color-wrong);
-  font-weight: 600;
-}
-
 /* ==========================================================================
    9. About Screen (#screen-about)
    ========================================================================== */
@@ -1129,13 +1119,6 @@ body.suppress-tooltips [data-tooltip]::before {
   line-height: 1.4;
 }
 
-.about-legal-hint {
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border-subtle);
-  text-align: left;
-}
-
 .about-footer {
   position: sticky;
   bottom: 0;
@@ -1218,23 +1201,6 @@ body.suppress-tooltips [data-tooltip]::before {
   line-height: 1.4;
 }
 
-.config-input {
-  width: 100%;
-  padding: 9px 12px;
-  font-size: var(--font-size-sm);
-  border: 1.5px solid var(--color-border);
-  border-radius: var(--radius);
-  background: var(--color-card);
-  color: var(--color-text);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-.config-input:focus {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px var(--color-primary-focus);
-  outline: none;
-}
-
 .config-field {
   margin-bottom: 16px;
 }
@@ -1279,24 +1245,6 @@ body.suppress-tooltips [data-tooltip]::before {
   font-size: var(--font-size-xs);
   line-height: 1.4;
   font-weight: 500;
-}
-
-.config-checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--color-text);
-  cursor: pointer;
-}
-
-.config-checkbox-label input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  accent-color: var(--color-primary);
-  cursor: pointer;
 }
 
 .config-actions {

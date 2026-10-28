@@ -4,8 +4,8 @@
   "start.meta_bar_aria": "Settings and information",
   "start.btn_config_aria": "Open settings",
   "start.btn_config_tooltip": "Settings",
-  "start.btn_about_aria": "About this app (version, release notes & sources)",
-  "start.btn_about_tooltip": "About this app (version, release notes & sources)",
+  "start.btn_about_aria": "About this app (version & release notes)",
+  "start.btn_about_tooltip": "About this app (version & release notes)",
   "start.btn_install_aria": "Install as app",
   "start.btn_install_tooltip": "Install app",
   "start.btn_lang_aria": "Switch language",
@@ -51,7 +51,7 @@
   "about.icon_lang_title": "Change Language",
   "about.icon_lang_desc": "Switch the interface language (EN, NL).",
   "about.icon_about_title": "About & Help",
-  "about.icon_about_desc": "View sources, release notes, support links, and this guide.",
+  "about.icon_about_desc": "View release notes, support links, and this guide.",
   "about.icon_install_title": "Install App",
   "about.icon_install_desc": "Install Meteo as an app on your phone or computer."
 }

@@ -65,6 +65,6 @@ export function saveConfig() {
   closeConfigView();
 
   if (languageChanged) {
-    setLang(newLang);
+    setLang(newLang).catch((err) => console.warn(err));
   }
 }

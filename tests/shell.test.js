@@ -81,6 +81,17 @@ describe("modules and markup", () => {
   });
 });
 
+describe("browser storage", () => {
+  it("prefixes every localStorage key with meteo_ to stay apart from sibling apps on the same origin", () => {
+    const sources = [read("index.html"), ...jsModules().map((f) => readFileSync(join(JS_DIR, f), "utf-8"))].join("\n");
+    const literalKeys = [...sources.matchAll(/localStorage\.(?:getItem|setItem|removeItem)\(\s*["']([^"']+)["']/g)].map((m) => m[1]);
+    const constantKeys = [...sources.matchAll(/_STORAGE_KEY\s*=\s*["']([^"']+)["']/g)].map((m) => m[1]);
+    const keys = [...literalKeys, ...constantKeys];
+    expect(keys.length).toBeGreaterThan(1);
+    expect(keys.filter((k) => !k.startsWith("meteo_"))).toEqual([]);
+  });
+});
+
 describe("service worker", () => {
   it("precaches existing files including every module", () => {
     const sw = read("sw.js");

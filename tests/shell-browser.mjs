@@ -32,6 +32,19 @@ try {
   await page.click("#btn-lang");
   await page.waitForFunction(() => document.documentElement.lang === "nl");
   check(true, "language button switches back to Dutch");
+  check(await page.evaluate(() => localStorage.getItem("lang") === null), "the language is not stored under the shared key \"lang\"");
+
+  await page.click("#btn-about");
+  await page.waitForFunction(() => document.getElementById("about-changelog-body").textContent.includes("gestart"));
+  check(true, "About shows the Dutch changelog in Dutch");
+  await page.click("#btn-about-back");
+
+  await page.click("#btn-config");
+  await page.selectOption("#config-theme", "dark");
+  check((await page.getAttribute("html", "data-theme")) === "dark", "choosing the dark theme previews it at once");
+  await page.keyboard.press("Escape");
+  check((await page.getAttribute("html", "data-theme")) === "light", "closing Settings without saving reverts the preview");
+  check(await page.isVisible("#screen-start"), "Escape returns to the start view");
 
   check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
 }

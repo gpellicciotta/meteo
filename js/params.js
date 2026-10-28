@@ -24,10 +24,14 @@ export function getThemeColorParam() {
  * @returns {string|null} "light", "dark" or "system", or null when absent or invalid.
  */
 export function getThemeQueryOverride() {
-  if (typeof window === "undefined" || !window.location) return null;
+  if (typeof window === "undefined" || !window.location) {
+    return null;
+  }
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("theme");
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   const val = raw.trim().toLowerCase();
   return val === "dark" || val === "light" || val === "system" ? val : null;
 }
@@ -41,13 +45,23 @@ export function getThemeQueryOverride() {
  * @returns {string|null} "blue", "yellow" or "red", or null when absent or invalid.
  */
 export function getThemeColorQueryOverride() {
-  if (typeof window === "undefined" || !window.location) return null;
+  if (typeof window === "undefined" || !window.location) {
+    return null;
+  }
   const params = new URLSearchParams(window.location.search);
   const raw = params.get("theme-color") || params.get("themecolor") || params.get("theme_color");
-  if (!raw) return null;
+  if (!raw) {
+    return null;
+  }
   const val = raw.trim().toLowerCase();
-  if (val === "yellow" || val === "geel") return "yellow";
-  if (val === "red" || val === "rood") return "red";
-  if (val === "blue" || val === "blauw") return "blue";
+  if (val === "yellow" || val === "geel") {
+    return "yellow";
+  }
+  if (val === "red" || val === "rood") {
+    return "red";
+  }
+  if (val === "blue" || val === "blauw") {
+    return "blue";
+  }
   return null;
 }

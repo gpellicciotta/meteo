@@ -27,14 +27,25 @@ Call log:
   - waiting for locator('#start-title')
 ```
 
+## Review Round 1 Rework
+- The language now persists under `meteo_lang`; a new unit test requires the `meteo_` prefix for every storage key.
+- The changelog reloads on language change only while About is visible; `setLang` rejections are caught.
+- Screenshots disable transitions first; the browser script now covers theme preview, revert and the Dutch changelog.
+- About strings no longer mention sources; `js/params.js` uses braces; five leftover quiz CSS rules were removed.
+
+Red phase of the new storage-key test, `npx vitest run`, exit code 1:
+
+```text
+     × prefixes every localStorage key with meteo_ to stay apart from sibling apps on the same origin 25ms
+      Tests  1 failed | 7 passed (8)
+```
+
 ## Green Phase
 `npx vitest run`, exit code 0:
 
 ```text
  Test Files  1 passed (1)
-      Tests  7 passed (7)
-   Start at  12:14:03
-   Duration  464ms (tests 43%, import 30%, transform 13%, worker 13%, environment 1%)
+      Tests  8 passed (8)
 ```
 
 `node tests/shell-browser.mjs`, exit code 0:
@@ -49,6 +60,11 @@ ok - language button shows EN
 ok - About view opens
 ok - About view shows the version tag
 ok - language button switches back to Dutch
+ok - the language is not stored under the shared key "lang"
+ok - About shows the Dutch changelog in Dutch
+ok - choosing the dark theme previews it at once
+ok - closing Settings without saving reverts the preview
+ok - Escape returns to the start view
 ok - no console, page or network errors
 ```
 

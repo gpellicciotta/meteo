@@ -10,6 +10,8 @@
  */
 
 export const SUPPORTED_LANGS = ["en", "nl"];
+// Prefixed, because sibling apps on the same GitHub Pages origin share localStorage.
+const LANG_STORAGE_KEY = "meteo_lang";
 let currentLang = "en";
 let dict = {};
 
@@ -56,7 +58,7 @@ export function detectLang() {
   try {
     const param = new URLSearchParams(window.location.search).get("lang");
     if (param && SUPPORTED_LANGS.includes(param.toLowerCase())) return param.toLowerCase();
-    const stored = localStorage.getItem("lang");
+    const stored = localStorage.getItem(LANG_STORAGE_KEY);
     if (stored && SUPPORTED_LANGS.includes(stored.toLowerCase())) return stored.toLowerCase();
   } catch (_) {
     // localStorage may be unavailable
@@ -80,7 +82,7 @@ export async function setLang(lang) {
   dict = await res.json();
   currentLang = lang;
   try {
-    localStorage.setItem("lang", lang);
+    localStorage.setItem(LANG_STORAGE_KEY, lang);
   } catch (_) {}
   document.documentElement.lang = lang;
   applyAll();
