@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: De huidige locatie toont gemeente, provincie en land via OpenStreetMap, met de coördinaten als het opzoeken mislukt.
 - FrontEnd: De laatst bewaarde voorspelling verschijnt vanaf het huidige uur bij een offline start, een offline hervatting of een mislukte vernieuwing.
 - FrontEnd: Het huidige uur van de voorspelling heet nu vetgedrukt "Nu", en de samenvatting zegt "nu" als het al regent.
 - FrontEnd: Een weersvoorspelling ouder dan 15 minuten wordt op de achtergrond vernieuwd wanneer de app weer zichtbaar wordt.

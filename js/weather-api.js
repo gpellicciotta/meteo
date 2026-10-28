@@ -2,7 +2,11 @@ import { FETCH_HOURS, ForecastError, parseForecast } from "./forecast.js";
 
 const GEOCODING_URL = "https://geocoding-api.open-meteo.com/v1/search";
 const FORECAST_URL = "https://api.open-meteo.com/v1/forecast";
+const REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
 const MAX_PLACES = 5;
+// Nominatim address fields vary by country; the first one present wins.
+const TOWN_FIELDS = ["city", "town", "village", "municipality", "hamlet"];
+const PROVINCE_FIELDS = ["province", "state", "county"];
 
 /**
  * Build the Open-Meteo geocoding request for a place name or postal code.
@@ -14,6 +18,27 @@ const MAX_PLACES = 5;
 export function buildSearchUrl(query, lang) {
   const params = new URLSearchParams({ name: query, count: String(MAX_PLACES), language: lang, format: "json" });
   return `${GEOCODING_URL}?${params}`;
+}
+
+/**
+ * Build the OpenStreetMap Nominatim reverse request for one position.
+ *
+ * Coordinates are rounded to 3 decimals, about 100 m, which is enough to name the town.
+ *
+ * @param {number} latitude - Latitude in degrees.
+ * @param {number} longitude - Longitude in degrees.
+ * @param {string} lang - Language for the returned names.
+ * @returns {string} Request URL.
+ */
+export function buildReverseUrl(latitude, longitude, lang) {
+  const params = new URLSearchParams({
+    lat: latitude.toFixed(3),
+    lon: longitude.toFixed(3),
+    format: "jsonv2",
+    zoom: "10",
+    "accept-language": lang,
+  });
+  return `${REVERSE_URL}?${params}`;
 }
 
 /**
@@ -83,6 +108,28 @@ export async function searchPlaces(query, lang, fetchImpl = fetch, timeoutMs = 1
   const body = await getJson(buildSearchUrl(query, lang), fetchImpl, timeoutMs);
   const results = Array.isArray(body.results) ? body.results : [];
   return results.map(({ id, name, admin1, country, latitude, longitude }) => ({ id, name, admin1, country, latitude, longitude }));
+}
+
+/**
+ * Look up the town, province and country of a position.
+ *
+ * @param {number} latitude - Latitude in degrees.
+ * @param {number} longitude - Longitude in degrees.
+ * @param {string} lang - Language for the returned names.
+ * @param {Function} [fetchImpl] - Fetch implementation, replaceable in tests.
+ * @param {number} [timeoutMs=10000] - Request timeout in milliseconds.
+ * @returns {Promise<{name: string, admin1: string, country: string}|null>} Place names, or null
+ *          when no town is found.
+ */
+export async function reversePlace(latitude, longitude, lang, fetchImpl = fetch, timeoutMs = 10000) {
+  const body = await getJson(buildReverseUrl(latitude, longitude, lang), fetchImpl, timeoutMs);
+  const address = (body && body.address) || {};
+  const first = (fields) => address[fields.find((field) => address[field])] || "";
+  const name = first(TOWN_FIELDS) || (body && body.name) || "";
+  if (!name) {
+    return null;
+  }
+  return { name, admin1: first(PROVINCE_FIELDS), country: address.country || "" };
 }
 
 /**

@@ -56,6 +56,8 @@
 - `CHANGELOG.md`
 - `CHANGELOG.nl.md`
 - `README.md`
+- `js/dom.js` (added during execution: attribution element handle)
+- `css/style.css` (added during execution: keeps the attribution link on one line)
 
 Mechanical command: python scripts/generate-sw.py generate
 

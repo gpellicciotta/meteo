@@ -60,6 +60,7 @@
   "forecast.btn_current_location": "Gebruik huidige locatie",
   "forecast.choose_place": "Welke plaats bedoel je?",
   "forecast.current_location": "Huidige locatie ({coords})",
+  "forecast.current_location_named": "{place} (huidige locatie)",
   "forecast.updated": "Bijgewerkt om {time}",
   "forecast.summary_rain": "Regen verwacht vanaf {time} (tot {max} mm per uur).",
   "forecast.summary_rain_now": "Nu regen verwacht (tot {max} mm per uur).",
@@ -81,6 +82,7 @@
   "forecast.chance_unknown": "onbekende",
   "forecast.legend": "Staven tonen de regen in mm per uur, percentages de kans op regen.",
   "forecast.attribution": "Weerdata van Open-Meteo.com",
+  "forecast.attribution_osm": "Plaatsnaam © OpenStreetMap",
   "forecast.status_searching": "Zoeken…",
   "forecast.status_locating": "Je locatie bepalen…",
   "forecast.status_loading": "Voorspelling laden…",
@@ -94,10 +96,12 @@
   "forecast.error_http": "De weerdienst is nu niet beschikbaar. Probeer het later opnieuw.",
   "forecast.error_bad_response": "De weerdienst gaf een onverwacht antwoord. Probeer het later opnieuw.",
   "about.icon_location_title": "Huidige locatie",
-  "about.icon_location_desc": "Toon de voorspelling voor waar je bent; enkel de coördinaten gaan naar Open-Meteo.",
+  "about.icon_location_desc": "Toon de voorspelling voor waar je bent; enkel de coördinaten gaan naar Open-Meteo en OpenStreetMap.",
   "about.sources_heading": "Gegevensbronnen",
   "about.source_forecast_title": "Open-Meteo Weather Forecast API",
   "about.source_forecast_description": "Temperatuur, regen en regenkans per uur van nationale weerdiensten (CC BY 4.0).",
   "about.source_geocoding_title": "Open-Meteo Geocoding API",
-  "about.source_geocoding_description": "Zoeken op plaatsnaam en postcode, gebaseerd op GeoNames (CC BY 4.0)."
+  "about.source_geocoding_description": "Zoeken op plaatsnaam en postcode, gebaseerd op GeoNames (CC BY 4.0).",
+  "about.source_reverse_title": "OpenStreetMap Nominatim",
+  "about.source_reverse_description": "Naam van de huidige locatie uit OpenStreetMap-data (ODbL)."
 }

@@ -5,12 +5,12 @@ import {
   MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale,
   placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours,
 } from "./forecast.js";
-import { fetchForecast, searchPlaces } from "./weather-api.js";
+import { fetchForecast, reversePlace, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 import { createIcon } from "./icons.js";
 
 const view = {
-  // The place shown: {kind: "place", id, name, label} or {kind: "coords"}, plus latitude and longitude.
+  // The place shown: {kind: "place", id, name, label} or {kind: "coords", label?}, plus latitude and longitude.
   place: null,
   forecast: null,
   updatedAt: null,
@@ -105,9 +105,12 @@ function placeFromMatch(match) {
 /**
  * Return the heading of the place currently shown.
  *
- * @returns {string} Place label, or the rounded coordinates for the current location.
+ * @returns {string} Place label, or the rounded coordinates for an unnamed current location.
  */
 function placeLabel() {
+  if (view.place.kind === "coords" && view.place.label) {
+    return t("forecast.current_location_named", { place: view.place.label });
+  }
   if (view.place.kind === "coords") {
     const coords = `${view.place.latitude.toFixed(2)}, ${view.place.longitude.toFixed(2)}`;
     return t("forecast.current_location", { coords });
@@ -234,6 +237,7 @@ function renderForecast() {
   }
 
   el.forecastPlace.textContent = placeLabel();
+  el.forecastAttributionOsm.classList.toggle("hidden", !(view.place.kind === "coords" && view.place.label));
   el.forecastUpdated.textContent = t("forecast.updated", {
     time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });
@@ -406,7 +410,11 @@ async function showCurrentLocation() {
   try {
     const { latitude, longitude } = await getCurrentCoordinates();
     if (requestId === view.requestId) {
-      await loadForecast({ kind: "coords", latitude, longitude });
+      const place = { kind: "coords", latitude, longitude };
+      const loading = loadForecast(place);
+      // The forecast never waits for the name.
+      nameCurrentLocation(place);
+      await loading;
     }
   }
   catch (err) {
@@ -418,25 +426,58 @@ async function showCurrentLocation() {
 }
 
 /**
+ * Look up the town of a current location place and show it once its forecast is shown.
+ *
+ * The name is kept while the place still loads as the latest request, or is shown.
+ * Failures keep the coordinates without an error message.
+ *
+ * @param {object} place - Coordinates place passed to loadForecast().
+ * @returns {Promise<void>} Resolves once the name is set or dropped.
+ */
+async function nameCurrentLocation(place) {
+  const requestId = view.requestId;
+  try {
+    const match = await reversePlace(place.latitude, place.longitude, getLang());
+    if (!match || (requestId !== view.requestId && view.place !== place)) {
+      return;
+    }
+    place.label = formatPlace(match);
+    if (view.place === place) {
+      setStoredPreferences({ lastPlace: place });
+      renderForecast();
+    }
+  }
+  catch {
+    // Keep the coordinates.
+  }
+}
+
+/**
  * Fetch the name of the shown place in the active language and re-render it.
  *
  * Geocoding returns names in the requested language, so the place is looked up again
- * by name and matched on its id. Failures keep the current name.
+ * by name and matched on its id. The current location is looked up again by its position.
+ * Failures keep the current name.
  *
  * @returns {Promise<void>} Resolves once the name is updated or kept.
  */
 async function localizePlace() {
   const place = view.place;
-  if (!place || place.kind !== "place" || !place.id || !place.name) {
+  const isCoords = place && place.kind === "coords";
+  if (!place || (!isCoords && (place.kind !== "place" || !place.id || !place.name))) {
     return;
   }
   const localizeId = ++view.localizeId;
   try {
-    const match = (await searchPlaces(place.name, getLang())).find((m) => m.id === place.id);
+    const match = isCoords
+      ? await reversePlace(place.latitude, place.longitude, getLang())
+      : (await searchPlaces(place.name, getLang())).find((m) => m.id === place.id);
     if (!match || localizeId !== view.localizeId || view.place !== place) {
       return;
     }
-    view.place = { ...placeFromMatch(match), latitude: place.latitude, longitude: place.longitude };
+    view.place = isCoords
+      ? { ...place, label: formatPlace(match) }
+      : { ...placeFromMatch(match), latitude: place.latitude, longitude: place.longitude };
     setStoredPreferences({ lastPlace: view.place });
     renderForecast();
   }

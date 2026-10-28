@@ -12,6 +12,7 @@ It keeps the same minimal look, the About and Settings views, theming and langua
 ## How It Works
 - Type a city, town or postal code and press "Show", or use "Use current location".
 - When several places match, pick the one you mean from the list.
+- The current location shows its town, province and country, or its coordinates when the lookup fails.
 - The forecast shows a bar per hour with the rain in mm, the chance of rain and the temperature.
 - Below 480px, time labels appear every two hours; all twelve hourly bars and screen-reader descriptions remain available.
 - A summary line tells when rain starts and how heavy it gets, or that it stays dry.
@@ -24,9 +25,13 @@ It keeps the same minimal look, the About and Settings views, theming and langua
 - A saved forecast keeps its original update time.
 - With fewer than 6 hours left, the saved forecast gives way to the network error.
 
-The browser fetches all data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
+The browser fetches the weather and place search data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
 - [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind, weather codes and daylight.
 - [Geocoding API](https://open-meteo.com/en/docs/geocoding-api) for place and postal code search.
+
+The name of the current location comes from the [OpenStreetMap Nominatim reverse API](https://nominatim.org/release-docs/latest/api/Reverse/).
+Only the rounded coordinates are sent, once per location request or language switch.
+Place names © [OpenStreetMap](https://www.openstreetmap.org/copyright) contributors, licensed under ODbL.
 
 Weather data by [Open-Meteo.com](https://open-meteo.com/), licensed under CC BY 4.0.
 Open-Meteo's free tier is for non-commercial use only, which matches this ad-free project.

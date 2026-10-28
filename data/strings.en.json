@@ -60,6 +60,7 @@
   "forecast.btn_current_location": "Use current location",
   "forecast.choose_place": "Which place do you mean?",
   "forecast.current_location": "Current location ({coords})",
+  "forecast.current_location_named": "{place} (current location)",
   "forecast.updated": "Updated at {time}",
   "forecast.summary_rain": "Rain expected from {time} (up to {max} mm per hour).",
   "forecast.summary_rain_now": "Rain expected now (up to {max} mm per hour).",
@@ -81,6 +82,7 @@
   "forecast.chance_unknown": "unknown",
   "forecast.legend": "Bars show rain in mm per hour, percentages the chance of rain.",
   "forecast.attribution": "Weather data by Open-Meteo.com",
+  "forecast.attribution_osm": "Place name © OpenStreetMap",
   "forecast.status_searching": "Searching…",
   "forecast.status_locating": "Finding your location…",
   "forecast.status_loading": "Loading the forecast…",
@@ -94,10 +96,12 @@
   "forecast.error_http": "The forecast service is not available right now. Try again later.",
   "forecast.error_bad_response": "The forecast service sent an unexpected answer. Try again later.",
   "about.icon_location_title": "Current Location",
-  "about.icon_location_desc": "Show the forecast for where you are; only the coordinates are sent to Open-Meteo.",
+  "about.icon_location_desc": "Show the forecast for where you are; only the coordinates are sent to Open-Meteo and OpenStreetMap.",
   "about.sources_heading": "Data sources",
   "about.source_forecast_title": "Open-Meteo Weather Forecast API",
   "about.source_forecast_description": "Hourly temperature, rain and chance of rain from national weather services (CC BY 4.0).",
   "about.source_geocoding_title": "Open-Meteo Geocoding API",
-  "about.source_geocoding_description": "Place and postal code search based on GeoNames (CC BY 4.0)."
+  "about.source_geocoding_description": "Place and postal code search based on GeoNames (CC BY 4.0).",
+  "about.source_reverse_title": "OpenStreetMap Nominatim",
+  "about.source_reverse_description": "Name of the current location from OpenStreetMap data (ODbL)."
 }

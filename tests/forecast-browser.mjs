@@ -90,6 +90,24 @@ async function mockOpenMeteo(context) {
   return urls;
 }
 
+/**
+ * Build a mocked Nominatim reverse answer in the shape of the Sint-Niklaas sample.
+ *
+ * @param {boolean} nl - True for the Dutch names.
+ * @returns {object} Reverse API body.
+ */
+function reverseBody(nl) {
+  return {
+    name: "Sint-Niklaas",
+    address: {
+      town: "Sint-Niklaas", municipality: "Sint-Niklaas", county: "Sint-Niklaas",
+      state: nl ? "Oost-Vlaanderen" : "East Flanders", postcode: "9100", country: nl ? "België" : "Belgium", country_code: "be",
+    },
+  };
+}
+
+const OSM_LINK = "#forecast a[href='https://www.openstreetmap.org/copyright']";
+
 const server = await startStaticServer();
 let failed = false;
 
@@ -253,12 +271,51 @@ let failed = false;
   });
   try {
     const urls = await mockOpenMeteo(context);
+    const reverseUrls = [];
+    let reverseFails = false;
+    await context.route("https://nominatim.openstreetmap.org/**", (route) => {
+      reverseUrls.push(route.request().url());
+      const nl = new URL(route.request().url()).searchParams.get("accept-language") === "nl";
+      return reverseFails ? route.fulfill({ status: 500, json: { error: true } }) : route.fulfill({ json: reverseBody(nl) });
+    });
     await page.clock.install({ time: MOCK_NOW });
     await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
     await page.click("#btn-current-location");
     await page.waitForSelector("#forecast:not(.hidden)");
-    check((await page.textContent("#forecast-place")).includes("50.85, 4.35"), "the current location shows rounded coordinates");
     check(urls.some((u) => u.includes("latitude=50.85") && u.includes("longitude=4.35")), "the forecast uses the device position");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Sint-Niklaas"));
+    check((await page.textContent("#forecast-place")) === "Sint-Niklaas, East Flanders, Belgium (current location)",
+      "the current location shows its town, province and country");
+    check(reverseUrls.length === 1 && reverseUrls[0].includes("lat=50.850&lon=4.352") && reverseUrls[0].includes("accept-language=en"),
+      `the name is looked up once with rounded coordinates (${reverseUrls.join(", ")})`);
+    check(await page.isVisible(OSM_LINK), "the OpenStreetMap attribution is shown with the looked-up name");
+    await captureViews(page, "current-location-en");
+
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Oost-Vlaanderen"));
+    check((await page.textContent("#forecast-place")) === "Sint-Niklaas, Oost-Vlaanderen, België (huidige locatie)",
+      "the current location name follows the language switch");
+    check(reverseUrls.length === 2 && reverseUrls[1].includes("accept-language=nl"), "the language switch looks up the Dutch name");
+    await captureViews(page, "current-location-nl");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("East Flanders"));
+
+    reverseFails = true;
+    await Promise.all([
+      page.waitForResponse((response) => response.url().startsWith("https://nominatim.openstreetmap.org/")),
+      page.click("#btn-current-location"),
+    ]);
+    await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
+    check((await page.textContent("#forecast-place")) === "Current location (50.85, 4.35)", "a failed lookup keeps the rounded coordinates");
+    check(await page.isHidden("#start-error"), "a failed lookup shows no error");
+    check(await page.isHidden(OSM_LINK), "the OpenStreetMap attribution is hidden with the coordinates");
+
+    await page.fill("#location-input", "Brussel");
+    await page.click("#btn-search");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent === "Gent, Flanders, Belgium");
+    check(await page.isHidden(OSM_LINK), "the OpenStreetMap attribution is hidden for a searched place");
+    // The mocked HTTP 500 lookup above is intentional; drop its response and console entries from the error gate.
+    problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("nominatim.openstreetmap.org") && !p.includes("status of 500")));
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {

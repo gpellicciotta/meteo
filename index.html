@@ -90,6 +90,10 @@
             <span id="forecast-updated"></span>
             <span aria-hidden="true">·</span>
             <a href="https://open-meteo.com/" target="_blank" rel="noopener noreferrer" data-i18n="forecast.attribution">Weather data by Open-Meteo.com</a>
+            <span id="forecast-attribution-osm" class="forecast-attribution-osm hidden">
+              <span aria-hidden="true">·</span>
+              <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" data-i18n="forecast.attribution_osm">Place name © OpenStreetMap</a>
+            </span>
           </p>
         </div>
         <div class="forecast-card">
@@ -163,7 +167,7 @@
             </span>
             <div class="about-icon-info">
               <strong class="about-icon-name" data-i18n="about.icon_location_title">Current Location</strong>
-              <p class="about-icon-detail" data-i18n="about.icon_location_desc">Show the forecast for where you are; only the coordinates are sent to Open-Meteo.</p>
+              <p class="about-icon-detail" data-i18n="about.icon_location_desc">Show the forecast for where you are; only the coordinates are sent to Open-Meteo and OpenStreetMap.</p>
             </div>
           </li>
           <li class="about-icon-item">
@@ -221,6 +225,13 @@
               <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" data-icon-stroke-width="2" aria-hidden="true"></span>
             </a>
             <p class="about-source-desc" data-i18n="about.source_geocoding_description">Place and postal code search based on GeoNames (CC BY 4.0).</p>
+          </li>
+          <li class="about-source-item">
+            <a href="https://nominatim.org/release-docs/latest/api/Reverse/" target="_blank" rel="noopener noreferrer" class="about-source-link">
+              <span class="about-source-title" data-i18n="about.source_reverse_title">OpenStreetMap Nominatim</span>
+              <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" data-icon-stroke-width="2" aria-hidden="true"></span>
+            </a>
+            <p class="about-source-desc" data-i18n="about.source_reverse_description">Name of the current location from OpenStreetMap data (ODbL).</p>
           </li>
         </ul>
       </div>

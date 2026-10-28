@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
-import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
+import { buildForecastUrl, buildReverseUrl, buildSearchUrl, fetchForecast, reversePlace, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
 /**
@@ -382,6 +382,53 @@ describe("weather API client", () => {
       throw new TypeError("Failed to fetch");
     };
     await expect(fetchForecast(0, 0, offline)).rejects.toMatchObject({ code: "network" });
+  });
+});
+
+describe("reversePlace", () => {
+  // Nominatim reverse answer for 51.1655, 4.1437, checked on 2026-10-28.
+  const SINT_NIKLAAS = {
+    name: "Sint-Niklaas",
+    address: {
+      town: "Sint-Niklaas", municipality: "Sint-Niklaas", county: "Sint-Niklaas",
+      state: "Oost-Vlaanderen", postcode: "9100", country: "België", country_code: "be",
+    },
+  };
+
+  it("builds the documented reverse URL with 3-decimal coordinates and the language", () => {
+    expect(buildReverseUrl(51.16549, 4.14372, "nl")).toBe(
+      "https://nominatim.openstreetmap.org/reverse?lat=51.165&lon=4.144&format=jsonv2&zoom=10&accept-language=nl",
+    );
+  });
+
+  it("maps a town answer to its name, province and country", async () => {
+    const fetchImpl = fakeFetch(200, SINT_NIKLAAS);
+    expect(await reversePlace(51.1655, 4.1437, "nl", fetchImpl)).toEqual({
+      name: "Sint-Niklaas", admin1: "Oost-Vlaanderen", country: "België",
+    });
+    expect(fetchImpl.calls).toEqual([buildReverseUrl(51.1655, 4.1437, "nl")]);
+  });
+
+  it("prefers city, then village, and the province before the state", async () => {
+    const answer = (address) => reversePlace(0, 0, "en", fakeFetch(200, { name: "Top", address }));
+    expect(await answer({ city: "Gent", town: "T", village: "V", province: "East Flanders", state: "Flanders" }))
+      .toEqual({ name: "Gent", admin1: "East Flanders", country: "" });
+    expect(await answer({ village: "Lochristi", hamlet: "H", county: "Gent", country: "Belgium" }))
+      .toEqual({ name: "Lochristi", admin1: "Gent", country: "Belgium" });
+    expect(await answer({ state: "Flanders" })).toEqual({ name: "Top", admin1: "Flanders", country: "" });
+  });
+
+  it("returns null when no place is found", async () => {
+    expect(await reversePlace(0, 0, "en", fakeFetch(200, { error: "Unable to geocode" }))).toBeNull();
+    expect(await reversePlace(0, 0, "en", fakeFetch(200, { address: { country: "Belgium" } }))).toBeNull();
+  });
+
+  it("maps HTTP and network failures to error codes", async () => {
+    await expect(reversePlace(0, 0, "en", fakeFetch(429, {}))).rejects.toMatchObject({ code: "http" });
+    const offline = async () => {
+      throw new TypeError("Failed to fetch");
+    };
+    await expect(reversePlace(0, 0, "en", offline)).rejects.toMatchObject({ code: "network" });
   });
 });
 
