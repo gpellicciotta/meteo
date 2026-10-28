@@ -12,7 +12,8 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 
 ---
 
-## v0.1.1-pre
+## v1.0.0 [released: 2026-10-28]
+- FrontEnd: Elke zin van de weersamenvatting staat op een eigen regel, in een kleiner lettertype.
 - FrontEnd: De huidige locatie toont gemeente, provincie en land via OpenStreetMap, met de coördinaten als het opzoeken mislukt.
 - FrontEnd: De laatst bewaarde voorspelling verschijnt vanaf het huidige uur bij een offline start, een offline hervatting of een mislukte vernieuwing.
 - FrontEnd: Het huidige uur van de voorspelling heet nu vetgedrukt "Nu", en de samenvatting zegt "nu" als het al regent.
