@@ -10,6 +10,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+review_status: rejected
+review_round: 1
+reviewed_by: "@claude-2"
 ---
 # T0002: Add the twelve-hour temperature and hourly rain forecast view using Open-Meteo
 
@@ -50,4 +53,19 @@ Offer the view in Dutch and English and credit Open-Meteo as its CC BY 4.0 licen
 
 - [2026-10-28] **[Doc]**
   Size note: 17 files and 1366 lines, above the large line but under three times the estimate; 123 lines are removed quiz CSS.
+
+- [2026-10-28] **[Review]**
+  Round 1 requested (mode: agent).
+
+- [2026-10-28] **[Review]**
+  Round 1 rejected by @claude-2: Chart accessibility, stale language after switching, and several low-severity UX gaps.
+  - Findings: [review-findings-1.md](T0002-add-the-twelve-hour-temperature-and-hourly-rain/review-findings-1.md).
+
+- [2026-10-28] **[Verify]**
+  Rework red phase: the unanswered-prompt timeout test and the screen reader description check failed.
+  - vitest: 1 failed, 23 passed.
+  - forecast-browser: .sr-only description missing.
+
+- [2026-10-28] **[Implement]**
+  Reworked review round 1: screen reader descriptions, language-aware place and messages, stale-search guard, 24-hour time, rain label threshold, geolocation timeout, visible attribution.
 

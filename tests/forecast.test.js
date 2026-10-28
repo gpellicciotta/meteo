@@ -139,4 +139,9 @@ describe("getCurrentCoordinates", () => {
     await expect(getCurrentCoordinates(timeout)).rejects.toMatchObject({ code: "geo_timeout" });
     await expect(getCurrentCoordinates(null)).rejects.toMatchObject({ code: "geo_unsupported" });
   });
+
+  it("gives up when the permission prompt is never answered", async () => {
+    const silent = { getCurrentPosition: () => {} };
+    await expect(getCurrentCoordinates(silent, 20)).rejects.toMatchObject({ code: "geo_timeout" });
+  });
 });

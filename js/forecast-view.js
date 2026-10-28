@@ -1,18 +1,25 @@
 import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
-import { barScaleMax, formatPlace, summarizeRain } from "./forecast.js";
+import { RAIN_THRESHOLD_MM, barScaleMax, formatPlace, summarizeRain } from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 
 const view = {
-  // The place shown: {kind: "place", label} or {kind: "coords"}, plus latitude and longitude.
+  // The place shown: {kind: "place", id, name, label} or {kind: "coords"}, plus latitude and longitude.
   place: null,
   forecast: null,
   updatedAt: null,
   choices: [],
+  // Query whose matches are listed in the place choices.
+  choicesQuery: "",
+  // Status and error as string keys with variables, so they can be re-rendered in another language.
+  status: null,
+  error: null,
   // Incremented per user action so late answers of an older request are ignored.
   requestId: 0,
+  // Incremented per language switch so only the latest place translation is applied.
+  localizeId: 0,
 };
 
 /**
@@ -27,37 +34,66 @@ function formatNumber(value, digits) {
 }
 
 /**
+ * Render the current status line and error message in the active language.
+ *
+ * @returns {void}
+ */
+function renderMessages() {
+  el.forecastStatus.textContent = view.status ? t(view.status) : "";
+  el.forecastStatus.classList.toggle("hidden", !view.status);
+  el.startError.textContent = view.error ? t(view.error.key, view.error.vars) : "";
+  el.startError.classList.toggle("hidden", !view.error);
+}
+
+/**
  * Show a status line such as "Searching...", or hide it.
  *
  * @param {string|null} key - String key of the status, or null to hide it.
  * @returns {void}
  */
 function setStatus(key) {
-  el.forecastStatus.textContent = key ? t(key) : "";
-  el.forecastStatus.classList.toggle("hidden", !key);
+  view.status = key;
+  renderMessages();
 }
 
 /**
  * Show an error message, or hide it.
  *
- * @param {string|null} message - Translated message, or null to hide it.
+ * @param {string|null} key - String key of the message, or null to hide it.
+ * @param {Record<string, string>} [vars] - Values for the message placeholders.
  * @returns {void}
  */
-function setError(message) {
-  el.startError.textContent = message || "";
-  el.startError.classList.toggle("hidden", !message);
+function setError(key, vars = {}) {
+  view.error = key ? { key, vars } : null;
+  renderMessages();
 }
 
 /**
- * Translate a coded error into a user message.
+ * Pick the message key for a coded error raised by the API or geolocation modules.
  *
- * @param {Error & {code?: string}} err - Error raised by the API or geolocation modules.
- * @returns {string} Translated message.
+ * @param {Error & {code?: string}} err - Raised error.
+ * @returns {string} String key of the message; unknown errors count as network failures.
  */
-function errorMessage(err) {
+function errorKey(err) {
   const key = `forecast.error_${err && err.code}`;
-  const text = t(key);
-  return text === key ? t("forecast.error_network") : text;
+  return t(key) === key ? "forecast.error_network" : key;
+}
+
+/**
+ * Describe a geocoding match as a place to show.
+ *
+ * @param {{id: number, name: string, latitude: number, longitude: number}} match - Geocoding match.
+ * @returns {{kind: string, id: number, name: string, label: string, latitude: number, longitude: number}} Place.
+ */
+function placeFromMatch(match) {
+  return {
+    kind: "place",
+    id: match.id,
+    name: match.name,
+    label: formatPlace(match),
+    latitude: match.latitude,
+    longitude: match.longitude,
+  };
 }
 
 /**
@@ -74,42 +110,38 @@ function placeLabel() {
 }
 
 /**
- * Render the list of matching places to choose from.
+ * Show or clear the place choices.
  *
+ * @param {Array<object>} matches - Geocoding matches, or an empty list to hide the choices.
+ * @param {string} [query] - Search text the matches belong to.
  * @returns {void}
  */
-function renderChoices() {
+function showPlaceChoices(matches, query = "") {
+  view.choices = matches;
+  view.choicesQuery = query;
   el.placeList.replaceChildren();
-  for (const place of view.choices) {
+  for (const match of matches) {
     const item = document.createElement("li");
     const button = document.createElement("button");
     button.type = "button";
     button.className = "place-choice";
-    button.textContent = formatPlace(place);
+    button.textContent = formatPlace(match);
     button.addEventListener("click", () => {
       showPlaceChoices([]);
-      el.locationInput.value = place.name;
-      loadForecast({ kind: "place", label: formatPlace(place), latitude: place.latitude, longitude: place.longitude });
+      el.locationInput.value = match.name;
+      loadForecast(placeFromMatch(match));
     });
     item.append(button);
     el.placeList.append(item);
   }
-}
-
-/**
- * Show or clear the place choices.
- *
- * @param {Array<object>} places - Geocoding matches, or an empty list to hide the choices.
- * @returns {void}
- */
-function showPlaceChoices(places) {
-  view.choices = places;
-  renderChoices();
-  el.placeChoices.classList.toggle("hidden", places.length === 0);
+  el.placeChoices.classList.toggle("hidden", matches.length === 0);
 }
 
 /**
  * Build one column of the rain chart.
+ *
+ * The visible parts are hidden from assistive technology; a visually hidden sentence
+ * describes the whole hour instead.
  *
  * @param {{label: string, temperature: number|null, precipitation: number|null, probability: number|null}} hour - Forecast hour.
  * @param {number} scaleMax - Rain amount drawn as a full-height bar.
@@ -117,17 +149,22 @@ function showPlaceChoices(places) {
  */
 function buildHourColumn(hour, scaleMax) {
   const rain = hour.precipitation || 0;
+  const isWet = rain >= RAIN_THRESHOLD_MM;
   const amount = hour.precipitation === null ? "–" : formatNumber(rain, 1);
   const chance = hour.probability === null ? t("forecast.chance_unknown") : `${hour.probability}%`;
   const temperature = hour.temperature === null ? "–" : formatNumber(hour.temperature, 0);
 
   const item = document.createElement("li");
   item.className = "forecast-hour";
-  item.classList.toggle("is-wet", rain >= 0.1);
-  item.setAttribute("aria-label", t("forecast.hour_aria", { time: hour.label, amount, chance, temp: temperature }));
+  item.classList.toggle("is-wet", isWet);
+
+  const description = document.createElement("span");
+  description.className = "sr-only";
+  description.textContent = t("forecast.hour_aria", { time: hour.label, amount, chance, temp: temperature });
+  item.append(description);
 
   const parts = [
-    ["forecast-amount", rain >= 0.05 ? amount : ""],
+    ["forecast-amount", isWet ? amount : ""],
     ["forecast-bar-track", ""],
     ["forecast-chance", hour.probability === null ? "" : chance],
     ["forecast-time", hour.label],
@@ -174,7 +211,7 @@ function renderForecast() {
 
   el.forecastPlace.textContent = placeLabel();
   el.forecastUpdated.textContent = t("forecast.updated", {
-    time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit" }),
+    time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });
   el.forecastSummary.textContent = sentences.join(" ");
   el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
@@ -187,7 +224,7 @@ function renderForecast() {
 /**
  * Fetch and show the forecast for a place, remembering it for the next visit.
  *
- * @param {{kind: string, label?: string, latitude: number, longitude: number}} place - Place to show.
+ * @param {object} place - Place to show, as built by placeFromMatch() or a coordinates place.
  * @returns {Promise<void>} Resolves once the forecast or an error is shown.
  */
 async function loadForecast(place) {
@@ -205,7 +242,7 @@ async function loadForecast(place) {
   }
   catch (err) {
     if (requestId === view.requestId) {
-      setError(errorMessage(err));
+      setError(errorKey(err));
     }
   }
   finally {
@@ -223,34 +260,35 @@ async function loadForecast(place) {
  */
 async function searchAndShow(query) {
   const trimmed = query.trim();
+  const requestId = ++view.requestId;
   showPlaceChoices([]);
+  setStatus(null);
   if (!trimmed) {
-    setError(t("forecast.error_empty"));
+    setError("forecast.error_empty");
     return;
   }
-  const requestId = ++view.requestId;
   setError(null);
   setStatus("forecast.status_searching");
   try {
-    const places = await searchPlaces(trimmed, getLang());
+    const matches = await searchPlaces(trimmed, getLang());
     if (requestId !== view.requestId) {
       return;
     }
     setStatus(null);
-    if (places.length === 0) {
-      setError(t("forecast.error_not_found", { query: trimmed }));
+    if (matches.length === 0) {
+      setError("forecast.error_not_found", { query: trimmed });
     }
-    else if (places.length === 1) {
-      await loadForecast({ kind: "place", label: formatPlace(places[0]), latitude: places[0].latitude, longitude: places[0].longitude });
+    else if (matches.length === 1) {
+      await loadForecast(placeFromMatch(matches[0]));
     }
     else {
-      showPlaceChoices(places);
+      showPlaceChoices(matches, trimmed);
     }
   }
   catch (err) {
     if (requestId === view.requestId) {
       setStatus(null);
-      setError(errorMessage(err));
+      setError(errorKey(err));
     }
   }
 }
@@ -274,8 +312,50 @@ async function showCurrentLocation() {
   catch (err) {
     if (requestId === view.requestId) {
       setStatus(null);
-      setError(errorMessage(err));
+      setError(errorKey(err));
     }
+  }
+}
+
+/**
+ * Fetch the name of the shown place in the active language and re-render it.
+ *
+ * Geocoding returns names in the requested language, so the place is looked up again
+ * by name and matched on its id. Failures keep the current name.
+ *
+ * @returns {Promise<void>} Resolves once the name is updated or kept.
+ */
+async function localizePlace() {
+  const place = view.place;
+  if (!place || place.kind !== "place" || !place.id || !place.name) {
+    return;
+  }
+  const localizeId = ++view.localizeId;
+  try {
+    const match = (await searchPlaces(place.name, getLang())).find((m) => m.id === place.id);
+    if (!match || localizeId !== view.localizeId || view.place !== place) {
+      return;
+    }
+    view.place = { ...placeFromMatch(match), latitude: place.latitude, longitude: place.longitude };
+    setStoredPreferences({ lastPlace: view.place });
+    renderForecast();
+  }
+  catch {
+    // Keep the name in the previous language.
+  }
+}
+
+/**
+ * Re-render everything the forecast view shows in the newly active language.
+ *
+ * @returns {void}
+ */
+function handleLanguageChange() {
+  renderMessages();
+  renderForecast();
+  localizePlace();
+  if (view.choices.length > 0) {
+    searchAndShow(view.choicesQuery);
   }
 }
 
@@ -292,7 +372,7 @@ export function initForecastView() {
     searchAndShow(el.locationInput.value);
   });
   el.btnCurrentLocation.addEventListener("click", showCurrentLocation);
-  document.addEventListener("languagechange", renderForecast);
+  document.addEventListener("languagechange", handleLanguageChange);
 
   const query = new URLSearchParams(window.location.search).get("location");
   const lastPlace = getStoredPreferences().lastPlace;

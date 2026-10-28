@@ -24,12 +24,23 @@ page.click: Timeout 30000ms exceeded.
 page.click: Timeout 30000ms exceeded.
 ```
 
+## Review Round 1 Rework
+- Each chart column now carries its description in a `.sr-only` span instead of an `aria-label`.
+- Status, errors, the pick list and the place name re-render in the new language; the place is re-geocoded by id.
+- An empty search invalidates pending requests; the update time uses the 24-hour clock.
+- Amount labels start at the 0.1 mm rain threshold; geolocation gives up after 30 s overall.
+- The attribution moved next to the update time, so it shows without scrolling.
+- The browser test exempts its own mocked HTTP 500 and the matching console entry from the error gate.
+
+Rework red phase: `npx vitest run` failed 1 of 24 (the unanswered-prompt timeout), and
+`node tests/forecast-browser.mjs` timed out waiting for `#forecast-chart > li:nth-child(5) .sr-only`.
+
 ## Green Phase
 `npx vitest run`, exit code 0:
 
 ```text
  Test Files  2 passed (2)
-      Tests  21 passed (21)
+      Tests  24 passed (24)
 ```
 
 `node tests/forecast-browser.mjs`, exit code 0:
@@ -39,11 +50,18 @@ ok - two matches are offered to pick from
 ok - the chart shows 12 hourly bars
 ok - the chosen place is the heading
 ok - the summary names the first rainy hour
-ok - bars carry an accessible description (14:00: 1.2 mm rain, 70% chance, 12 °C)
+ok - bars carry a screen reader description (14:00: 1.2 mm rain, 70% chance, 12 °C)
+ok - the update time uses the 24-hour clock (Updated at 12:37)
+ok - amounts below the 0.1 mm rain threshold get no label
 ok - the forecast request uses the picked place
-ok - the Open-Meteo attribution is shown
+ok - the Open-Meteo attribution is visible without scrolling
 ok - the forecast re-renders in Dutch
+ok - the place name follows the language switch
 ok - an unknown place shows an error naming it
+ok - an error message follows the language switch
+ok - an empty search cancels a slower pending search
+ok - an empty search asks for a place
+ok - a failing service shows its error message
 ok - a single match loads directly from ?location
 ok - the last location reloads at startup
 ok - no console, page or network errors

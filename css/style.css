@@ -1023,8 +1023,7 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-text);
 }
 
-.forecast-legend,
-.forecast-attribution {
+.forecast-legend {
   margin: 12px 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-muted);
@@ -1032,11 +1031,7 @@ body.suppress-tooltips [data-tooltip]::before {
   line-height: 1.4;
 }
 
-.forecast-attribution {
-  margin-top: 4px;
-}
-
-.forecast-attribution a {
+.forecast-updated a {
   color: var(--color-primary);
 }
 

@@ -3,10 +3,19 @@
 import { captureViews, check, launchBrowser, startStaticServer } from "./browser-harness.mjs";
 
 const RAIN = [0, 0, 0, 0.05, 0.4, 1.2, 2.6, 0.3, 0, 0, 0, 0.1, 0];
-const PLACES = [
-  { id: 2797656, name: "Gent", admin1: "Flanders", country: "Belgium", latitude: 51.05, longitude: 3.71667 },
-  { id: 2797657, name: "Gent", admin1: "Gelderland", country: "Netherlands", latitude: 51.8, longitude: 5.7 },
-];
+/**
+ * Build the geocoding matches for "Gent" in the requested language.
+ *
+ * @param {string} lang - Language passed to the geocoding API.
+ * @returns {Array<object>} Two matches with localized region and country names.
+ */
+function places(lang) {
+  const nl = lang === "nl";
+  return [
+    { id: 2797656, name: "Gent", admin1: nl ? "Vlaanderen" : "Flanders", country: nl ? "België" : "Belgium", latitude: 51.05, longitude: 3.71667 },
+    { id: 2797657, name: "Gent", admin1: "Gelderland", country: nl ? "Nederland" : "Netherlands", latitude: 51.8, longitude: 5.7 },
+  ];
+}
 
 /**
  * Build a mocked forecast response starting at 10:00.
@@ -35,9 +44,21 @@ async function mockOpenMeteo(context) {
   const urls = [];
   await context.route("https://geocoding-api.open-meteo.com/**", (route) => {
     urls.push(route.request().url());
-    const name = new URL(route.request().url()).searchParams.get("name");
-    const results = name.toLowerCase() === "gent" ? PLACES : name.toLowerCase() === "brussel" ? [PLACES[0]] : undefined;
-    route.fulfill({ json: results ? { results } : { generationtime_ms: 0.1 } });
+    const params = new URL(route.request().url()).searchParams;
+    const name = params.get("name").toLowerCase();
+    const all = places(params.get("language"));
+    if (name === "fout") {
+      route.fulfill({ status: 500, json: { error: true } });
+      return;
+    }
+    const results = name === "gent" || name === "traag" ? all : name === "brussel" ? [all[0]] : undefined;
+    const answer = () => route.fulfill({ json: results ? { results } : { generationtime_ms: 0.1 } });
+    if (name === "traag") {
+      setTimeout(answer, 800);
+    }
+    else {
+      answer();
+    }
   });
   await context.route("https://api.open-meteo.com/**", (route) => {
     urls.push(route.request().url());
@@ -65,21 +86,50 @@ let failed = false;
     check((await page.$$("#forecast-chart > li")).length === 12, "the chart shows 12 hourly bars");
     check((await page.textContent("#forecast-place")).includes("Gent, Flanders, Belgium"), "the chosen place is the heading");
     check((await page.textContent("#forecast-summary")).includes("13:00"), "the summary names the first rainy hour");
-    const label = await page.getAttribute("#forecast-chart > li:nth-child(5)", "aria-label");
-    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C", `bars carry an accessible description (${label})`);
+    const label = await page.textContent("#forecast-chart > li:nth-child(5) .sr-only");
+    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C", `bars carry a screen reader description (${label})`);
+    const updated = await page.textContent("#forecast-updated");
+    check(/\b\d{2}:\d{2}\b/.test(updated) && !/AM|PM/.test(updated), `the update time uses the 24-hour clock (${updated})`);
+    const amounts = await page.$$eval("#forecast-chart .forecast-amount", (spans) => spans.map((s) => s.textContent));
+    check(amounts[2] === "", "amounts below the 0.1 mm rain threshold get no label");
     check(urls.some((u) => u.includes("latitude=51.05") && u.includes("forecast_hours=13")), "the forecast request uses the picked place");
-    check(await page.isVisible("#forecast a[href='https://open-meteo.com/']"), "the Open-Meteo attribution is shown");
+    const attributionInView = await page.$eval("#forecast a[href='https://open-meteo.com/']", (a) => {
+      const box = a.getBoundingClientRect();
+      return box.height > 0 && box.bottom <= window.innerHeight;
+    });
+    check(attributionInView, "the Open-Meteo attribution is visible without scrolling");
     await captureViews(page, "forecast-en");
 
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "nl");
     check((await page.textContent("#forecast-summary")).includes("Regen verwacht"), "the forecast re-renders in Dutch");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Vlaanderen"));
+    check(true, "the place name follows the language switch");
     await captureViews(page, "forecast-nl");
 
     await page.fill("#location-input", "Xyzzy");
     await page.click("#btn-search");
     await page.waitForSelector("#start-error:not(.hidden)");
     check((await page.textContent("#start-error")).includes("Xyzzy"), "an unknown place shows an error naming it");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.getElementById("start-error").textContent.startsWith("No place found"));
+    check(true, "an error message follows the language switch");
+
+    await page.fill("#location-input", "traag");
+    await page.click("#btn-search");
+    await page.fill("#location-input", "");
+    await page.click("#btn-search");
+    await page.waitForTimeout(1200);
+    check(await page.isHidden("#place-choices"), "an empty search cancels a slower pending search");
+    check((await page.textContent("#start-error")).startsWith("Enter a place"), "an empty search asks for a place");
+
+    await page.fill("#location-input", "fout");
+    await page.click("#btn-search");
+    await page.waitForFunction(() => document.getElementById("start-error").textContent.includes("not available right now"));
+    check(true, "a failing service shows its error message");
+    // The mocked HTTP 500 above is intentional; drop its response and console entries from the error gate.
+    const expected = (p) => p.includes("name=fout") || p.includes("status of 500");
+    problems.splice(0, problems.length, ...problems.filter((p) => !expected(p)));
 
     await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
     await page.waitForSelector("#forecast:not(.hidden)");
