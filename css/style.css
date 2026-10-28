@@ -985,10 +985,11 @@ body.suppress-tooltips [data-tooltip]::before {
 
 .forecast-summary {
   margin: 0 0 16px;
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   color: var(--color-text);
   text-align: center;
   line-height: 1.45;
+  white-space: pre-line;
 }
 
 .forecast-summary.is-wet {

@@ -241,7 +241,7 @@ function renderForecast() {
   el.forecastUpdated.textContent = t("forecast.updated", {
     time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });
-  el.forecastSummary.textContent = sentences.join(" ");
+  el.forecastSummary.textContent = sentences.join("\n");
   const condition = hours[0].condition;
   if (condition) {
     const icon = createIcon(condition.icon, {
