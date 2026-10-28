@@ -7,11 +7,11 @@ let changelogHtmlCacheLang = null;
 /**
  * Resolve the changelog file name for a UI language.
  *
- * @param {string} lang - Language code; Dutch uses the untranslated file.
+ * @param {string} lang - Language code; English uses the untranslated file.
  * @returns {string} Relative path of the changelog to fetch.
  */
 function changelogPathForLang(lang) {
-  return lang && lang !== "nl" ? `CHANGELOG.${lang}.md` : "CHANGELOG.md";
+  return lang && lang !== "en" ? `CHANGELOG.${lang}.md` : "CHANGELOG.md";
 }
 
 /**
@@ -46,7 +46,7 @@ function formatInlineMarkdown(text) {
 }
 
 /**
- * Render a changelog document as the HTML shown in the About screen and modal.
+ * Render a changelog document as the HTML shown in the About screen.
  *
  * Version headings become subtitles, bullets become list items with an area badge
  * when they start with an area prefix, and the title, rules and quotes are dropped.
@@ -126,80 +126,51 @@ function renderChangelogMarkdown(md) {
  * Read the current version from the first version heading in the changelog.
  *
  * @param {string} md - Full changelog markdown.
- * @returns {string} Version string, or "onbekend" when no heading was found.
+ * @returns {string} Version string, or the localized "unknown" label when no heading was found.
  */
 function extractVersionFromChangelog(md) {
   const match = md.match(/^##\s+([^\s\[]+)/m);
-  return match ? match[1] : "onbekend";
+  return match ? match[1] : t("version.unknown");
 }
 
 /**
  * Load, render and display the changelog for the active language.
  *
  * The rendered HTML is cached per language. A missing translation falls back to the
- * Dutch changelog, and a failed load shows an error with a direct file link. The
- * version badge on the About screen and the version button are updated as well.
+ * English changelog, and a failed load shows an error with a direct file link. The
+ * version badge on the About screen is updated as well.
  *
  * @returns {Promise<void>} Resolves once the changelog or an error message is shown.
  */
 export async function loadChangelog() {
   const lang = getLang();
   if (changelogHtmlCache && changelogHtmlCacheLang === lang) {
-    if (el.changelogBody) el.changelogBody.innerHTML = changelogHtmlCache;
     if (el.aboutChangelogBody) el.aboutChangelogBody.innerHTML = changelogHtmlCache;
     return;
   }
   const loadingHtml = `<p class="changelog-loading">${t("changelog.loading")}</p>`;
-  if (el.changelogBody) el.changelogBody.innerHTML = loadingHtml;
   if (el.aboutChangelogBody) el.aboutChangelogBody.innerHTML = loadingHtml;
   try {
     let res = await fetch(changelogPathForLang(lang));
-    if (!res.ok && lang !== "nl") {
+    if (!res.ok && lang !== "en") {
       res = await fetch("CHANGELOG.md");
     }
     if (!res.ok) throw new Error("Failed to load CHANGELOG.md: " + res.status);
     const md = await res.text();
     const version = extractVersionFromChangelog(md);
     if (el.aboutVersionTag) el.aboutVersionTag.textContent = version;
-    if (el.btnVersion) el.btnVersion.textContent = version;
     changelogHtmlCache = renderChangelogMarkdown(md);
     changelogHtmlCacheLang = lang;
-    if (el.changelogBody) el.changelogBody.innerHTML = changelogHtmlCache;
     if (el.aboutChangelogBody) el.aboutChangelogBody.innerHTML = changelogHtmlCache;
   } catch (err) {
     console.warn("Failed to load changelog:", err);
     changelogHtmlCache = null;
     changelogHtmlCacheLang = null;
     if (el.aboutVersionTag) el.aboutVersionTag.textContent = t("version.unknown");
-    if (el.btnVersion) el.btnVersion.textContent = t("version.unknown");
     const errHtml = `
       <p class="error">${t("changelog.error")}</p>
       <p class="modal-desc">${t("changelog.error_link").replace("CHANGELOG.md", '<a href="CHANGELOG.md" target="_blank" rel="noopener noreferrer">CHANGELOG.md</a>')}</p>
     `;
-    if (el.changelogBody) el.changelogBody.innerHTML = errHtml;
     if (el.aboutChangelogBody) el.aboutChangelogBody.innerHTML = errHtml;
   }
-}
-
-/**
- * Open the changelog modal, load its content and focus the close button.
- *
- * @returns {void}
- */
-export function openChangelogModal() {
-  if (!el.modalChangelog) return;
-  el.modalChangelog.classList.remove("hidden");
-  loadChangelog();
-  if (el.btnChangelogClose) el.btnChangelogClose.focus();
-}
-
-/**
- * Close the changelog modal and return focus to the version button.
- *
- * @returns {void}
- */
-export function closeChangelogModal() {
-  if (!el.modalChangelog) return;
-  el.modalChangelog.classList.add("hidden");
-  if (el.btnVersion) el.btnVersion.focus();
 }

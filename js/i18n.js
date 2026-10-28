@@ -1,16 +1,16 @@
 /**
  * Lightweight i18n module.
  *
- * Supported languages: "nl" (default), "fr", "de", "it", "en".
+ * Supported languages: "en" (default) and "nl".
  *
  * Usage:
  *   import { t, getLang, setLang, SUPPORTED_LANGS } from "./i18n.js";
- *   await setLang("it");          // load strings, update DOM, fire event
- *   t("quiz.progress", { n: 3, total: 20 });  // → "Frage 3/20"
+ *   await setLang("nl");          // load strings, update DOM, fire event
+ *   t("start.btn_lang_tooltip", { cycle: "EN → [NL]" });
  */
 
-export const SUPPORTED_LANGS = ["nl", "fr", "de", "it", "en"];
-let currentLang = "nl";
+export const SUPPORTED_LANGS = ["en", "nl"];
+let currentLang = "en";
 let dict = {};
 
 /**
@@ -49,8 +49,8 @@ export function getLang() {
 }
 
 /**
- * Detect the preferred language from URL param → localStorage → default "nl".
- * @returns {"nl"|"fr"|"de"|"it"|"en"}
+ * Detect the preferred language from URL param → localStorage → browser language → "en".
+ * @returns {"en"|"nl"}
  */
 export function detectLang() {
   try {
@@ -61,19 +61,20 @@ export function detectLang() {
   } catch (_) {
     // localStorage may be unavailable
   }
-  return "nl";
+  const browserLang = (typeof navigator !== "undefined" && navigator.language) || "";
+  return browserLang.toLowerCase().startsWith("nl") ? "nl" : "en";
 }
 
 /**
  * Load the string dictionary for `lang`, apply it to the DOM, and fire
  * a custom "languagechange" event so modules can re-render dynamic strings.
  *
- * @param {string} lang - Language code to load; unsupported values fall back to "nl".
+ * @param {string} lang - Language code to load; unsupported values fall back to "en".
  * @returns {Promise<void>} Resolves once the dictionary is loaded and applied.
  * @throws {Error} When the dictionary for the language cannot be fetched.
  */
 export async function setLang(lang) {
-  if (!SUPPORTED_LANGS.includes(lang)) lang = "nl";
+  if (!SUPPORTED_LANGS.includes(lang)) lang = "en";
   const res = await fetch(`data/strings.${lang}.json`);
   if (!res.ok) throw new Error(`Could not load strings for language: ${lang}`);
   dict = await res.json();

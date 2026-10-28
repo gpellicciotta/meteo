@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Meteo</title>
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+  <link rel="alternate icon" href="favicon.ico">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#1a56db">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Meteo">
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    (function() {
+      try {
+        var p = new URLSearchParams(window.location.search);
+        var t = (p.get("theme") || "").trim().toLowerCase();
+        var c = (p.get("theme-color") || p.get("themecolor") || p.get("theme_color") || "").trim().toLowerCase();
+        var stored = {};
+        try {
+          var raw = localStorage.getItem("meteo_preferences");
+          if (raw) stored = JSON.parse(raw) || {};
+        } catch (e2) {}
+        var color = (c === "yellow" || c === "geel") ? "yellow" : ((c === "red" || c === "rood") ? "red" : ((c === "blue" || c === "blauw") ? "blue" : (stored.themeColor || "blue")));
+        var setting = (t === "dark" || t === "light" || t === "system") ? t : (stored.theme || "system");
+        var resolved = setting;
+        if (setting === "system") {
+          resolved = (window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches) ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", resolved);
+        document.documentElement.setAttribute("data-theme-setting", setting);
+        document.documentElement.setAttribute("data-theme-color", color);
+      } catch (e) {}
+    })();
+  </script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+<main id="app">
+  <div id="offline-indicator" class="offline-indicator hidden" role="status" aria-live="polite">
+    <span class="offline-icon" data-icon="wifi" aria-hidden="true"></span>
+    <span data-i18n="start.offline">Offline: the forecast cannot be refreshed</span>
+  </div>
+
+  <!-- Start screen -->
+  <section id="screen-start" class="screen">
+    <!-- Header: title and short explanation -->
+    <header class="start-header view-header">
+      <h1 id="start-title" class="start-title" data-i18n="title.app">Meteo</h1>
+      <p id="start-desc" class="start-desc" data-i18n="start.description">Temperature and rain for the next 12 hours.</p>
+    </header>
+
+    <!-- Main content: filled by the forecast feature -->
+    <div id="start-content" class="start-content view-content">
+      <p id="start-error" class="error hidden" role="alert"></p>
+    </div>
+
+    <!-- Footer: meta bar with circle buttons and subtle copyright -->
+    <footer class="start-footer view-footer">
+      <div class="start-bottom-meta">
+        <hr class="start-divider">
+
+        <div class="start-meta-bar" role="region" aria-label="Settings and information" data-i18n-aria="start.meta_bar_aria">
+          <div class="start-meta-group start-meta-actions">
+            <button type="button" id="btn-config" class="start-meta-item start-meta-btn start-meta-btn-action"
+                    aria-label="Open settings"
+                    data-tooltip="Settings"
+                    data-i18n-aria="start.btn_config_aria"
+                    data-i18n-tooltip="start.btn_config_tooltip">
+              <span class="start-meta-svg" data-icon="settings" aria-hidden="true"></span>
+            </button>
+
+            <button type="button" id="btn-lang" class="start-meta-item start-meta-btn start-meta-btn-action btn-lang"
+                    aria-label="Switch language"
+                    data-tooltip="Language: [EN] → NL"
+                    data-i18n-aria="start.btn_lang_aria">
+              <span class="btn-lang-label" aria-hidden="true" style="font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px;">EN</span>
+            </button>
+
+            <button type="button" id="btn-about" class="start-meta-item start-about-btn start-meta-btn-action"
+                    aria-label="About this app (version, release notes &amp; sources)"
+                    data-tooltip="About this app (version, release notes &amp; sources)"
+                    data-i18n-aria="start.btn_about_aria"
+                    data-i18n-tooltip="start.btn_about_tooltip">
+              <span class="start-meta-svg" data-icon="help" aria-hidden="true"></span>
+            </button>
+
+            <button type="button" id="btn-install" class="start-meta-item start-meta-btn start-meta-btn-action btn-install hidden"
+                    aria-label="Install as app"
+                    data-tooltip="Install app"
+                    data-i18n-aria="start.btn_install_aria"
+                    data-i18n-tooltip="start.btn_install_tooltip">
+              <span class="start-meta-svg" data-icon="install" aria-hidden="true"></span>
+            </button>
+          </div>
+        </div>
+
+        <p class="start-copyright" data-i18n="start.copyright">Copyright &copy; Giovanni Pellicciotta</p>
+      </div>
+    </footer>
+  </section>
+
+  <!-- About screen: full-window view replacing the window -->
+  <section id="screen-about" class="screen hidden" aria-label="About Meteo" data-i18n-aria="about.screen_aria">
+    <button id="btn-about-back" class="btn-about-close modal-close view-close-btn" type="button" aria-label="Close" title="Close" data-i18n-aria="about.btn_close_aria" data-i18n-tooltip="about.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
+    <header class="about-header view-header">
+      <h1 class="about-title" data-i18n="about.title">About Meteo</h1>
+    </header>
+
+    <div class="about-content view-content">
+      <div class="about-icons-card">
+        <h2 class="about-section-heading" data-i18n="about.icons_heading">Icons &amp; Symbols</h2>
+        <p class="about-icons-desc" data-i18n="about.icons_description">Overview of interface icons and their functions:</p>
+        <ul class="about-icons-list">
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
+              <span class="about-icon-svg" data-icon="settings" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_config_title">Settings</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_config_desc">Choose the language, theme and color accent.</p>
+            </div>
+          </li>
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
+              <span class="about-icon-badge-text" aria-hidden="true">EN</span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_lang_title">Change Language</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_lang_desc">Switch the interface language (EN, NL).</p>
+            </div>
+          </li>
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
+              <span class="about-icon-svg" data-icon="help" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_about_title">About &amp; Help</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_about_desc">View sources, release notes, support links, and this guide.</p>
+            </div>
+          </li>
+          <li class="about-icon-item">
+            <span class="about-icon-badge">
+              <span class="about-icon-svg" data-icon="install" data-icon-width="18" data-icon-height="18" aria-hidden="true"></span>
+            </span>
+            <div class="about-icon-info">
+              <strong class="about-icon-name" data-i18n="about.icon_install_title">Install App</strong>
+              <p class="about-icon-detail" data-i18n="about.icon_install_desc">Install Meteo as an app on your phone or computer.</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="about-support-card">
+        <h2 class="about-section-heading" data-i18n="about.support_heading">Support the project</h2>
+        <p class="about-support-desc" data-i18n="about.support_description">Meteo is free, open source, and ad-free. If you find the app valuable, consider supporting its development and hosting.</p>
+        <div class="about-support-actions">
+          <a id="about-support-github" href="https://github.com/sponsors/gpellicciotta" target="_blank" rel="noopener noreferrer" class="about-support-link">
+            <span class="support-icon" data-icon="github" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
+            <span class="about-support-text" data-i18n="about.support_github">Support via GitHub Sponsors</span>
+            <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" aria-hidden="true"></span>
+          </a>
+          <a id="about-support-kofi" href="https://ko-fi.com/gpellicciotta" target="_blank" rel="noopener noreferrer" class="about-support-link">
+            <span class="support-icon" data-icon="coffee" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
+            <span class="about-support-text" data-i18n="about.support_kofi">Support via Ko-fi</span>
+            <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" aria-hidden="true"></span>
+          </a>
+          <a id="about-support-stripe" href="https://donate.stripe.com/4gM5kDdELg3t822g3j8AE00" target="_blank" rel="noopener noreferrer" class="about-support-link">
+            <span class="support-icon" data-icon="creditcard" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
+            <span class="about-support-text" data-i18n="about.support_stripe">Support via Stripe</span>
+            <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" aria-hidden="true"></span>
+          </a>
+          <a id="about-support-paypal" href="https://paypal.me/gpellicciotta" target="_blank" rel="noopener noreferrer" class="about-support-link">
+            <span class="support-icon" data-icon="paypal" data-icon-width="16" data-icon-height="16" aria-hidden="true"></span>
+            <span class="about-support-text" data-i18n="about.support_paypal">Support via PayPal</span>
+            <span class="source-icon" data-icon="externalLink" data-icon-width="14" data-icon-height="14" aria-hidden="true"></span>
+          </a>
+        </div>
+      </div>
+
+      <div class="about-version-card">
+        <div class="about-version-header">
+          <span class="about-version-label" data-i18n="about.version_label">App version</span>
+          <span id="about-version-tag" class="about-version-tag"></span>
+        </div>
+        <h2 class="about-section-heading" data-i18n="about.changelog_heading">Version History &amp; Release Notes</h2>
+        <div id="about-changelog-body" class="about-changelog-body">
+          <p class="changelog-loading" data-i18n="about.changelog_loading">Loading version history...</p>
+        </div>
+      </div>
+    </div>
+
+    <footer class="about-footer view-footer">
+      <p class="about-copyright" data-i18n="about.copyright">Copyright &copy; Giovanni Pellicciotta</p>
+    </footer>
+  </section>
+
+  <!-- Settings screen: full-window view, mirroring the About view -->
+  <section id="screen-config" class="screen hidden" aria-label="Settings" data-i18n-aria="config.screen_aria">
+    <button type="button" id="btn-config-close" class="btn-config-close modal-close view-close-btn" aria-label="Close" title="Close" data-i18n-aria="config.btn_close_aria" data-i18n-tooltip="config.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
+    <header class="config-header view-header">
+      <h1 id="config-title" class="config-title" data-i18n="config.title">Settings</h1>
+    </header>
+
+    <div class="config-content view-content">
+      <div id="config-section-general" class="config-section">
+        <h4 class="config-section-title" data-i18n="config.section_general">General</h4>
+        <p class="config-section-intro" data-i18n="config.introduction_general">These settings apply everywhere in the app</p>
+
+        <div class="config-field">
+          <label for="config-language" class="config-label" data-i18n="config.label_language">Language</label>
+          <select id="config-language" class="config-select">
+            <option value="nl">Nederlands</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+
+        <div class="config-field">
+          <label for="config-theme" class="config-label" data-i18n="config.label_theme">Theme</label>
+          <select id="config-theme" class="config-select">
+            <option value="system" data-i18n="config.theme_system">System setting</option>
+            <option value="light" data-i18n="config.theme_light">Light</option>
+            <option value="dark" data-i18n="config.theme_dark">Dark</option>
+          </select>
+        </div>
+
+        <div class="config-field">
+          <label for="config-theme-color" class="config-label" data-i18n="config.label_theme_color">Color</label>
+          <select id="config-theme-color" class="config-select">
+            <option value="blue" data-i18n="config.color_blue">Blue</option>
+            <option value="yellow" data-i18n="config.color_yellow">Yellow</option>
+            <option value="red" data-i18n="config.color_red">Red</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <footer class="config-footer view-footer config-actions">
+      <button type="button" id="btn-config-save" class="btn-primary" data-i18n="config.btn_save">Save</button>
+    </footer>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "meteo",
+  "version": "0.1.0",
+  "description": "Minimal web app showing the temperature and hourly rain forecast for the next 12 hours.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "author": "Giovanni Pellicciotta",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gpellicciotta/meteo.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "test:browser": "node tests/shell-browser.mjs"
+  },
+  "devDependencies": {
+    "playwright": "^1.64.1",
+    "vitest": "^5.0.5"
+  }
+}

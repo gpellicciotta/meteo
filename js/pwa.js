@@ -1,5 +1,4 @@
 import { el } from "./dom.js";
-import { drainReportQueue } from "./report-queue.js";
 
 export let deferredInstallPrompt = null;
 
@@ -60,7 +59,6 @@ export function updateOnlineStatus() {
 
 window.addEventListener("online", () => {
   updateOnlineStatus();
-  drainReportQueue();
 });
 
 window.addEventListener("offline", () => {
@@ -112,7 +110,7 @@ export function registerServiceWorker() {
           if (worker) {
             worker.addEventListener("statechange", () => {
               if (worker.state === "installed" && navigator.serviceWorker.controller) {
-                console.info("New version of the quiz available, activating automatically.");
+                console.info("New version of Meteo available, activating automatically.");
               }
             });
           }

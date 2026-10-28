@@ -32,7 +32,7 @@ from _cli_common import (
 )
 
 PROG = "generate-sw"
-DESCRIPTION = "Generates sw.js precaching all core application assets, traffic signs, and situation photos."
+DESCRIPTION = "Generates sw.js precaching all core application assets."
 ACTIONS = ["generate", "version", "help"]
 DEFAULT_ACTION = "generate"
 EXIT_CODES = [
@@ -40,21 +40,17 @@ EXIT_CODES = [
     (1, "Asset directories missing or write error"),
 ]
 
-SIGNS_DIR = REPO_ROOT / "assets" / "signs"
-SITUATIONS_DIR = REPO_ROOT / "assets" / "situations"
 JS_DIR = REPO_ROOT / "js"
 SW_PATH = REPO_ROOT / "sw.js"
 
 
 def build_sw_content(version: str) -> tuple[str, int]:
     """Generates the full sw.js content with dynamic version cache name and asset paths."""
-    signs = sorted([f"assets/signs/{f}" for f in os.listdir(SIGNS_DIR) if f.endswith(".svg")]) if SIGNS_DIR.exists() else []
-    situations = sorted([f"assets/situations/{f}" for f in os.listdir(SITUATIONS_DIR) if f.endswith(".jpg")]) if SITUATIONS_DIR.exists() else []
     js_modules = sorted([f"js/{f}" for f in os.listdir(JS_DIR) if f.endswith(".js")]) if JS_DIR.exists() else []
     data_dir = REPO_ROOT / "data"
-    data_files = sorted([f"data/{f}" for f in os.listdir(data_dir) if f.endswith(".json") and not f.startswith(".")]) if data_dir.exists() else ["data/questions.json"]
+    data_files = sorted([f"data/{f}" for f in os.listdir(data_dir) if f.endswith(".json") and not f.startswith(".")]) if data_dir.exists() else []
     translated_changelogs = sorted(
-        f"CHANGELOG.{lang}.md" for lang in ("en", "fr", "de", "it") if (REPO_ROOT / f"CHANGELOG.{lang}.md").exists()
+        f"CHANGELOG.{lang}.md" for lang in ("nl",) if (REPO_ROOT / f"CHANGELOG.{lang}.md").exists()
     )
 
     core_assets = [
@@ -75,18 +71,18 @@ def build_sw_content(version: str) -> tuple[str, int]:
         "assets/icons/apple-touch-icon.png",
     ]
 
-    all_assets = core_assets + signs + situations
+    all_assets = core_assets
     # Content changes must produce a new worker even when the version is reused.
     digest = hashlib.sha256(Path(__file__).read_text(encoding="utf-8").encode("utf-8"))
     for asset in all_assets:
         digest.update(asset.encode("utf-8") + b"\0")
         digest.update((REPO_ROOT / ("index.html" if asset == "./" else asset)).read_bytes())
         digest.update(b"\0")
-    cache_name = f"verkeersquiz-v{version}-{digest.hexdigest()[:16]}"
+    cache_name = f"meteo-v{version}-{digest.hexdigest()[:16]}"
 
     formatted_assets = "\n".join(f'  "{a}",' for a in all_assets)
 
-    return f"""// Service Worker for Verkeersregels Quiz PWA
+    return f"""// Service Worker for the Meteo PWA
 const CACHE_NAME = "{cache_name}";
 
 const PRECACHE_ASSETS = [
@@ -94,7 +90,7 @@ const PRECACHE_ASSETS = [
 ];
 
 /**
- * Install: precache all core assets and all traffic sign illustrations.
+ * Install: precache all core application assets.
  *
  * @param {{ExtendableEvent}} event - Install event whose lifetime covers the precaching.
  * @returns {{void}}
@@ -123,7 +119,7 @@ self.addEventListener("activate", (event) => {{
       .then((cacheNames) => {{
         return Promise.all(
           cacheNames
-            .filter((name) => name.startsWith("verkeersquiz-") && name !== CACHE_NAME)
+            .filter((name) => name.startsWith("meteo-") && name !== CACHE_NAME)
             .map((name) => caches.delete(name))
         );
       }})
@@ -151,7 +147,7 @@ self.addEventListener("fetch", (event) => {{
 
   const url = new URL(request.url);
 
-  // Ignore cross-origin API calls (such as Google Apps Script or external docs)
+  // Ignore cross-origin API calls (such as the Open-Meteo forecast and geocoding APIs)
   if (url.origin !== self.location.origin) {{
     return;
   }}

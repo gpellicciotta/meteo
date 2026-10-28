@@ -16,7 +16,7 @@ Mechanical command: python .plan/tasks/T0001-bootstrap-the-meteo-app-shell-from-
 
 The script copies `FUNDING.yml`, `LICENSE.md`, the manifest, five JS modules and four Python scripts verbatim.
 It prunes quiz-only rules from `css/style.css` and keeps only shell keys in `data/strings.{nl,en}.json`.
-Hand edits are measured against the commit that holds the mechanical output.
+Hand edits are measured against commit `bc9991a`, the second mechanical run that added the placeholder icons.
 
 ### Declared Files
 - `index.html`
