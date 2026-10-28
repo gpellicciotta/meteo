@@ -79,3 +79,8 @@ Offer only Dutch and English, and leave an empty start view ready for the foreca
   - Lines touched: 1238.
   - Reopenings: 0.
 
+- [2026-10-28] **[Visual]**
+  Linked the before and after start view screenshots; all captures are listed in validation-proof.md.
+  - [Before desktop](T0001-bootstrap-the-meteo-app-shell-from-verkeersregels-quiz/screenshots/before-quiz-start-desktop-light.png).
+  - [After desktop](T0001-bootstrap-the-meteo-app-shell-from-verkeersregels-quiz/screenshots/start-desktop-light.png).
+
