@@ -41,13 +41,16 @@ export function buildForecastUrl(latitude, longitude) {
  *
  * @param {string} url - Request URL.
  * @param {Function} fetchImpl - Fetch implementation.
+ * @param {number} timeoutMs - Request timeout in milliseconds.
  * @returns {Promise<object>} Parsed JSON body.
  * @throws {ForecastError} With code "network" when the request fails, or "http" on an error status.
  */
-async function getJson(url, fetchImpl) {
+async function getJson(url, fetchImpl, timeoutMs) {
   let res;
+  let signal;
   try {
-    res = await fetchImpl(url);
+    signal = AbortSignal.timeout(timeoutMs);
+    res = await fetchImpl(url, { signal });
   }
   catch (err) {
     throw new ForecastError("network", err && err.message);
@@ -55,7 +58,15 @@ async function getJson(url, fetchImpl) {
   if (!res.ok) {
     throw new ForecastError("http", `HTTP ${res.status}`);
   }
-  return res.json();
+  try {
+    return await res.json();
+  }
+  catch (err) {
+    if (signal.aborted) {
+      throw new ForecastError("network", err && err.message);
+    }
+    throw err;
+  }
 }
 
 /**
@@ -64,11 +75,12 @@ async function getJson(url, fetchImpl) {
  * @param {string} query - Place name or postal code.
  * @param {string} lang - Language for the returned names.
  * @param {Function} [fetchImpl] - Fetch implementation, replaceable in tests.
+ * @param {number} [timeoutMs=10000] - Request timeout in milliseconds.
  * @returns {Promise<Array<{id: number, name: string, admin1: string, country: string,
  *          latitude: number, longitude: number}>>} Up to five matches; empty when none.
  */
-export async function searchPlaces(query, lang, fetchImpl = fetch) {
-  const body = await getJson(buildSearchUrl(query, lang), fetchImpl);
+export async function searchPlaces(query, lang, fetchImpl = fetch, timeoutMs = 10000) {
+  const body = await getJson(buildSearchUrl(query, lang), fetchImpl, timeoutMs);
   const results = Array.isArray(body.results) ? body.results : [];
   return results.map(({ id, name, admin1, country, latitude, longitude }) => ({ id, name, admin1, country, latitude, longitude }));
 }
@@ -79,8 +91,9 @@ export async function searchPlaces(query, lang, fetchImpl = fetch) {
  * @param {number} latitude - Latitude in degrees.
  * @param {number} longitude - Longitude in degrees.
  * @param {Function} [fetchImpl] - Fetch implementation, replaceable in tests.
+ * @param {number} [timeoutMs=10000] - Request timeout in milliseconds.
  * @returns {Promise<ReturnType<typeof parseForecast>>} Parsed forecast.
  */
-export async function fetchForecast(latitude, longitude, fetchImpl = fetch) {
-  return parseForecast(await getJson(buildForecastUrl(latitude, longitude), fetchImpl));
+export async function fetchForecast(latitude, longitude, fetchImpl = fetch, timeoutMs = 10000) {
+  return parseForecast(await getJson(buildForecastUrl(latitude, longitude), fetchImpl, timeoutMs));
 }

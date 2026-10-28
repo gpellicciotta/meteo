@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { barScaleMax, formatPlace, parseForecast, summarizeRain, summarizeWind, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
@@ -172,6 +172,57 @@ describe("formatPlace", () => {
 });
 
 describe("weather API client", () => {
+  it.each([
+    ["searchPlaces", (fetchImpl, timeoutMs) => searchPlaces("Gent", "en", fetchImpl, timeoutMs)],
+    ["fetchForecast", (fetchImpl, timeoutMs) => fetchForecast(0, 0, fetchImpl, timeoutMs)],
+  ])("aborts stalled %s requests with the network error", async (_name, request) => {
+    let signal;
+    const stalled = (_url, options) => {
+      signal = options?.signal;
+      return new Promise((_resolve, reject) => {
+        signal?.addEventListener("abort", () => reject(signal.reason), { once: true });
+      });
+    };
+    const result = request(stalled, 20);
+    expect(signal).toBeInstanceOf(AbortSignal);
+    await expect(result).rejects.toMatchObject({ code: "network" });
+    expect(signal.aborted).toBe(true);
+    expect(signal.reason.name).toBe("TimeoutError");
+  });
+
+  it("defaults both request timeouts to 10 seconds", async () => {
+    const timeout = vi.spyOn(AbortSignal, "timeout");
+    try {
+      await searchPlaces("Gent", "en", fakeFetch(200, {}));
+      await fetchForecast(0, 0, fakeFetch(200, forecastResponse(RAIN)));
+      expect(timeout.mock.calls).toEqual([[10000], [10000]]);
+    }
+    finally {
+      timeout.mockRestore();
+    }
+  });
+
+  it.each([
+    ["searchPlaces", (fetchImpl) => searchPlaces("Gent", "en", fetchImpl, 20)],
+    ["fetchForecast", (fetchImpl) => fetchForecast(0, 0, fetchImpl, 20)],
+  ])("maps %s body timeouts to the network error", async (_name, request) => {
+    const stalledBody = async (_url, { signal }) => ({
+      ok: true,
+      status: 200,
+      json: () => new Promise((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
+      }),
+    });
+    await expect(request(stalledBody)).rejects.toMatchObject({ name: "ForecastError", code: "network" });
+  });
+
+  it("preserves unrelated JSON parsing errors", async () => {
+    const invalidJson = new SyntaxError("Invalid JSON");
+    const malformed = async () => ({ ok: true, json: async () => { throw invalidJson; } });
+    await expect(searchPlaces("Gent", "en", malformed)).rejects.toBe(invalidJson);
+    await expect(fetchForecast(0, 0, malformed)).rejects.toBe(invalidJson);
+  });
+
   it("builds the documented geocoding and forecast URLs", () => {
     expect(buildSearchUrl("Sint-Niklaas & co", "nl")).toBe(
       "https://geocoding-api.open-meteo.com/v1/search?name=Sint-Niklaas+%26+co&count=5&language=nl&format=json",

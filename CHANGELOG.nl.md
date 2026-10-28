@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Plaatszoekopdrachten en weersverzoeken, inclusief antwoordgegevens, beperkt tot 10 seconden, met de bestaande netwerkfout bij een time-out.
 - FrontEnd: Een themagekleurd weericoon met dag/nachtvarianten en vertaalde toegankelijke namen toegevoegd aan het begin van de weersamenvatting.
 - FrontEnd: Hoogste windsnelheid en windstoten vanaf 50 km/u toegevoegd aan de weersamenvatting in het Nederlands en Engels.
 - FrontEnd: De locatieknop staat naast het zoekveld en de plaats en updatetijd staan onder de weerkaart.
