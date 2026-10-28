@@ -1,11 +1,11 @@
 ---
 id: T0003
-owner: ~
-needs: [T0002, T0004]
+owner: "@claude-code"
+needs: []
 branch: —
 worktree: —
-status: ready
-started_at: —
+status: active
+started_at: "2026-10-28T11:39:58Z"
 ended_at: —
 review: agent
 preview: none
@@ -28,3 +28,7 @@ Confirm the live site loads and shows a real forecast.
 ## Execution Log
 - [2026-10-28] **[Doc]**
   Companion task file scaffolded at task creation.
+
+- [2026-10-28] **[Doc]**
+  Marked v0.1.0 released in both changelogs and linked the live site in README.md before publishing.
+

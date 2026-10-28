@@ -13,7 +13,7 @@ A summarized overview of all changes, per version of this project.
 
 ---
 
-## v0.1.0-pre
+## v0.1.0 [released: 2026-10-28]
 - FrontEnd: Replaced the copied traffic-sign icon with a Meteo rain-cloud app icon and manifest name.
 - FrontEnd: Added place search and current location with a 12-hour forecast of hourly rain bars and temperatures from Open-Meteo.
 - FrontEnd: Started Meteo from the Verkeersregels Quiz shell with its start, About and Settings views in English and Dutch.

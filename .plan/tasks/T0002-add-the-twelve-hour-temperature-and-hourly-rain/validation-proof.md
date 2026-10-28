@@ -12,7 +12,7 @@
 
 ```text
  FAIL  tests/forecast.test.js [ tests/forecast.test.js ]
-Error: Cannot find module '../js/forecast.js' imported from C:/Dev-Projects/meteo/tests/forecast.test.js
+Error: Cannot find module '../js/forecast.js' imported from {{project-root}}/tests/forecast.test.js
       Tests  8 passed (8)
 ```
 
