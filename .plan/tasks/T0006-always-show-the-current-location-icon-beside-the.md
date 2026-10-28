@@ -10,6 +10,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+review_status: rejected
+review_round: 1
+reviewed_by: "@claude-2"
 ---
 # T0006: Always show the current-location icon beside the search field and the place and update lines below the forecast card
 
@@ -45,4 +48,14 @@ Specifications: [technical-spec.md](T0006-always-show-the-current-location-icon-
 - [2026-10-28] **[Verify]**
   24 unit tests and both browser scripts passed; outputs in validation-proof.md.
   - [After 1280x900](T0006-always-show-the-current-location-icon-beside-the/screenshots/after-1280x900-light.png).
+
+- [2026-10-28] **[Review]**
+  Round 1 requested (mode: agent).
+
+- [2026-10-28] **[Review]**
+  Round 1 rejected by @claude-2: Tooltip text doubles the accessible name of the location button.
+
+- [2026-10-28] **[Implement]**
+  Named the location button with aria-label after the round 1 rejection, with an exact focused-name check failing first.
+  - Dutch name follows the language switch.
 

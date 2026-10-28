@@ -240,7 +240,12 @@ function measureStartLayout(page) {
         check(layout.overflow <= 0, `the forecast fits without scrolling at ${size} (overflow ${layout.overflow}px)`);
       }
     }
-    check(await page.getByRole("button", { name: "Use current location" }).isVisible(), "the icon button keeps its accessible name");
+    // A shown tooltip must not add its text to the name, so check while the button has keyboard focus.
+    await page.focus("#btn-search");
+    await page.keyboard.press("Tab");
+    const focusedId = await page.evaluate(() => document.activeElement.id);
+    const named = await page.getByRole("button", { name: "Use current location", exact: true }).count();
+    check(focusedId === "btn-current-location" && named === 1, `the focused icon button is named exactly once (${focusedId}, ${named} match)`);
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {

@@ -4,7 +4,7 @@
 - The T0005 compact rules are now the only layout; the `@container start-content` query is gone.
 - `.start-content` is back to `flex: 1 1 auto` without a `container` property.
 - The current-location button is always a 42px icon left of the field, with a tooltip below it.
-- Its label uses the existing `.sr-only` utility in `index.html` (undeclared file, two comment and class edits).
+- `index.html` (undeclared) names the button with `aria-label` and `data-i18n-aria`, without a hidden label span.
 - The place name and the update line sit below the card as two centered lines.
 - `sw.js` was regenerated with `python scripts/generate-sw.py generate` (mechanical).
 
@@ -19,6 +19,17 @@ Smallest viewport heights without a scrollbar once a forecast is shown:
 | 360   | 728px        | 620px |
 
 The two-line place and update block needs about 24px more than the T0005 single line.
+
+## Review Round 1 Rework
+The review found the shown tooltip text doubling the button's accessible name on focus or hover.
+The name check now matches exactly while the button has keyboard focus; it failed first, exit code 1:
+
+```text
+ok - the update time has its own line below the place name at 320x568
+Check failed: the focused icon button is named exactly once (btn-current-location, 0 match)
+```
+
+With `aria-label`, the focused button is named once; in Dutch its aria snapshot reads `button "Gebruik huidige locatie"`.
 
 ## Red Phase
 `node tests/forecast-browser.mjs` after changing the checks, before the CSS change, exit code 1:
@@ -57,7 +68,7 @@ ok - the forecast fits without scrolling at 390x667 (overflow 0px)
 ok - the current-location button sits left of the search field at 320x568
 ok - the place name sits below the chart at 320x568
 ok - the update time has its own line below the place name at 320x568
-ok - the icon button keeps its accessible name
+ok - the focused icon button is named exactly once (btn-current-location, 1 match)
 ok - no console, page or network errors
 ```
 
