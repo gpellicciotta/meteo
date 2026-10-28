@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Added maximum wind speed and gusts from 50 km/h to the forecast summary in English and Dutch.
 - FrontEnd: Moved the location button beside the search field and the place and update lines below the forecast card.
 
 ## v0.1.0 [released: 2026-10-28]

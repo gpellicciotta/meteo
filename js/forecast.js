@@ -3,6 +3,9 @@ export const FORECAST_HOURS = 12;
 // Open-Meteo counts an hour as wet from 0.1 mm, the same threshold as its probability.
 export const RAIN_THRESHOLD_MM = 0.1;
 
+// Product display threshold for gusts, compared before rounding.
+export const STRONG_GUST_THRESHOLD_KMH = 50;
+
 // Lowest top of the bar scale, so drizzle never fills the chart like a downpour.
 export const MIN_SCALE_MM = 2;
 
@@ -41,10 +44,12 @@ function valueAt(series, index) {
  * Open-Meteo reports precipitation and its probability for the hour before each time
  * step, so the response holds 13 steps: hour k runs from step k to step k + 1, taking
  * its label and temperature from step k and its rain and probability from step k + 1.
+ * Wind speed is instantaneous at step k; gusts are the preceding-hour maximum at step k + 1.
  *
  * @param {object} json - Forecast API response body.
  * @returns {{timezone: string, hours: Array<{time: string, label: string, temperature: number|null,
- *          precipitation: number|null, probability: number|null}>}} Parsed forecast.
+ *          precipitation: number|null, probability: number|null,
+ *          windSpeed: number|null, windGusts: number|null}>}} Parsed forecast.
  * @throws {ForecastError} With code "bad_response" when fewer than 13 steps are present.
  */
 export function parseForecast(json) {
@@ -61,6 +66,8 @@ export function parseForecast(json) {
       temperature: valueAt(hourly.temperature_2m, k),
       precipitation: valueAt(hourly.precipitation, k + 1),
       probability: valueAt(hourly.precipitation_probability, k + 1),
+      windSpeed: valueAt(hourly.wind_speed_10m, k),
+      windGusts: valueAt(hourly.wind_gusts_10m, k + 1),
     });
   }
   return { timezone: json.timezone || "", hours };
@@ -77,6 +84,21 @@ export function summarizeRain(hours) {
   const wet = hours.find((h) => (h.precipitation || 0) >= RAIN_THRESHOLD_MM);
   const maxPrecipitation = Math.max(0, ...hours.map((h) => h.precipitation || 0));
   return { firstRainLabel: wet ? wet.label : null, maxPrecipitation };
+}
+
+/**
+ * Return independent wind and gust maxima, preserving missing data as null.
+ *
+ * @param {Array<{windSpeed: number|null, windGusts: number|null}>} hours - Parsed forecast hours.
+ * @returns {{maxSpeed: number|null, maxGusts: number|null}} Highest values in km/h.
+ */
+export function summarizeWind(hours) {
+  const speeds = hours.map((h) => h.windSpeed).filter((v) => v !== null);
+  const gusts = hours.map((h) => h.windGusts).filter((v) => v !== null);
+  return {
+    maxSpeed: speeds.length ? Math.max(...speeds) : null,
+    maxGusts: gusts.length ? Math.max(...gusts) : null,
+  };
 }
 
 /**

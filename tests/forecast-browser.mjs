@@ -30,6 +30,8 @@ function forecastBody() {
       temperature_2m: RAIN.map((_, i) => 9.6 + i / 2),
       precipitation: RAIN,
       precipitation_probability: RAIN.map((v) => (v > 0 ? 70 : 5)),
+      wind_speed_10m: [40, ...Array(11).fill(20), 99],
+      wind_gusts_10m: [99, ...Array(11).fill(35), 70],
     },
   };
 }
@@ -75,7 +77,7 @@ let failed = false;
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
   try {
     const urls = await mockOpenMeteo(context);
-    await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+    check((await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" })).status() === 200, "the local server returns HTTP 200");
     await page.fill("#location-input", "Gent");
     await page.click("#btn-search");
     await page.waitForSelector("#place-choices:not(.hidden) button");
@@ -86,6 +88,8 @@ let failed = false;
     check((await page.$$("#forecast-chart > li")).length === 12, "the chart shows 12 hourly bars");
     check((await page.textContent("#forecast-place")).includes("Gent, Flanders, Belgium"), "the chosen place is the heading");
     check((await page.textContent("#forecast-summary")).includes("13:00"), "the summary names the first rainy hour");
+    check((await page.textContent("#forecast-summary")).endsWith("°C. Wind up to 40 km/h, gusts up to 70 km/h."), "English wind and gust maxima follow the temperature");
+    check(urls.some((u) => new URL(u).searchParams.get("hourly")?.includes("wind_speed_10m,wind_gusts_10m")), "the request includes both wind variables");
     const label = await page.textContent("#forecast-chart > li:nth-child(5) .sr-only");
     check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C", `bars carry a screen reader description (${label})`);
     const updated = await page.textContent("#forecast-updated");
@@ -103,6 +107,7 @@ let failed = false;
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "nl");
     check((await page.textContent("#forecast-summary")).includes("Regen verwacht"), "the forecast re-renders in Dutch");
+    check((await page.textContent("#forecast-summary")).endsWith("°C. Wind tot 40 km/u, windstoten tot 70 km/u."), "the wind summary re-renders in Dutch");
     await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Vlaanderen"));
     check(true, "the place name follows the language switch");
     await captureViews(page, "forecast-nl");
@@ -248,6 +253,49 @@ function measureStartLayout(page) {
     const named = await page.getByRole("button", { name: "Use current location", exact: true }).count();
     check(focusedId === "btn-current-location" && named === 1, `the focused icon button is named exactly once (${focusedId}, ${named} match)`);
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 5: calm wind, threshold boundaries, rounding, and independently missing series.
+{
+  const { browser, context, page, problems } = await launchBrowser();
+  try {
+    await mockOpenMeteo(context);
+    const cases = [
+      [20, 35, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
+      [20.4, 49.9, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
+      [20.6, 50, "Wind up to 21 km/h, gusts up to 50 km/h.", "Wind tot 21 km/u, windstoten tot 50 km/u."],
+      [40, 70.6, "Wind up to 40 km/h, gusts up to 71 km/h.", "Wind tot 40 km/u, windstoten tot 71 km/u."],
+      [0, 0, "Wind up to 0 km/h.", "Wind tot 0 km/u."],
+      [null, null, "", ""],
+      [20, null, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
+      [null, 70, "Gusts up to 70 km/h.", "Windstoten tot 70 km/u."],
+      [null, 35, "", ""],
+    ];
+    for (const [speed, gusts, en, nl] of cases) {
+      const body = forecastBody();
+      body.hourly.wind_speed_10m = RAIN.map(() => speed);
+      body.hourly.wind_gusts_10m = RAIN.map(() => gusts);
+      await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: body }));
+      await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" });
+      await page.waitForSelector("#forecast:not(.hidden)");
+      for (const [lang, expected] of [["en", en], ["nl", nl]]) {
+        if (lang === "nl") {
+          await page.click("#btn-lang");
+          await page.waitForFunction(() => document.documentElement.lang === "nl");
+        }
+        const summary = await page.textContent("#forecast-summary");
+        check(summary.split("°C.")[1] === (expected ? ` ${expected}` : ""), `${lang} summary handles speed ${speed}, gusts ${gusts}`);
+      }
+    }
+    check(problems.length === 0, `no wind scenario console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

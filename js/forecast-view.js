@@ -1,7 +1,7 @@
 import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
-import { RAIN_THRESHOLD_MM, barScaleMax, formatPlace, summarizeRain } from "./forecast.js";
+import { RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, summarizeRain, summarizeWind } from "./forecast.js";
 import { fetchForecast, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 
@@ -207,6 +207,18 @@ function renderForecast() {
       min: formatNumber(Math.min(...temperatures), 0),
       max: formatNumber(Math.max(...temperatures), 0),
     }));
+  }
+
+  const wind = summarizeWind(hours);
+  const strongGusts = wind.maxGusts !== null && wind.maxGusts >= STRONG_GUST_THRESHOLD_KMH;
+  if (wind.maxSpeed !== null) {
+    sentences.push(t(strongGusts ? "forecast.summary_wind_gusts" : "forecast.summary_wind", {
+      speed: formatNumber(wind.maxSpeed, 0),
+      gusts: strongGusts ? formatNumber(wind.maxGusts, 0) : "",
+    }));
+  }
+  else if (strongGusts) {
+    sentences.push(t("forecast.summary_gusts", { gusts: formatNumber(wind.maxGusts, 0) }));
   }
 
   el.forecastPlace.textContent = placeLabel();

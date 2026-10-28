@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v0.1.1-pre
+- FrontEnd: Hoogste windsnelheid en windstoten vanaf 50 km/u toegevoegd aan de weersamenvatting in het Nederlands en Engels.
 - FrontEnd: De locatieknop staat naast het zoekveld en de plaats en updatetijd staan onder de weerkaart.
 
 ## v0.1.0 [released: 2026-10-28]

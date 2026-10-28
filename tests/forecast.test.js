@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { barScaleMax, formatPlace, parseForecast, summarizeRain } from "../js/forecast.js";
+import { barScaleMax, formatPlace, parseForecast, summarizeRain, summarizeWind } from "../js/forecast.js";
 import { buildForecastUrl, buildSearchUrl, fetchForecast, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -47,7 +47,7 @@ describe("parseForecast", () => {
     const forecast = parseForecast(forecastResponse(RAIN));
     expect(forecast.timezone).toBe("Europe/Brussels");
     expect(forecast.hours).toHaveLength(12);
-    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5 });
+    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null });
     expect(forecast.hours[4]).toMatchObject({ label: "14:00", temperature: 14, precipitation: 1.2, probability: 25 });
     expect(forecast.hours[11]).toMatchObject({ label: "21:00", precipitation: 0, probability: 60 });
   });
@@ -60,6 +60,44 @@ describe("parseForecast", () => {
   it("keeps missing values as null", () => {
     const forecast = parseForecast(forecastResponse(RAIN, { precipitation_probability: RAIN.map(() => null) }));
     expect(forecast.hours[0].probability).toBeNull();
+  });
+
+  it("aligns instantaneous speed and preceding-hour gusts across the entire window", () => {
+    const { hours } = parseForecast(forecastResponse(RAIN, {
+      wind_speed_10m: [40, ...Array(11).fill(20), 99],
+      wind_gusts_10m: [99, ...Array(11).fill(35), 70],
+    }));
+    expect(hours[0]).toMatchObject({ windSpeed: 40, windGusts: 35 });
+    expect(hours[11]).toMatchObject({ windSpeed: 20, windGusts: 70 });
+    expect(summarizeWind(hours)).toEqual({ maxSpeed: 40, maxGusts: 70 });
+  });
+
+  it("keeps absent arrays, missing entries, and explicit null wind values as null", () => {
+    const { hours } = parseForecast(forecastResponse(RAIN, {
+      wind_speed_10m: [null, 0], wind_gusts_10m: [90, null, 0],
+    }));
+    expect(hours[0]).toMatchObject({ windSpeed: null, windGusts: null });
+    expect(hours[1]).toMatchObject({ windSpeed: 0, windGusts: 0 });
+    expect(hours[2]).toMatchObject({ windSpeed: null, windGusts: null });
+    expect(parseForecast(forecastResponse(RAIN)).hours.every((h) => h.windSpeed === null && h.windGusts === null)).toBe(true);
+  });
+});
+
+describe("summarizeWind", () => {
+  it("finds independent maxima without rounding or replacing missing data with zero", () => {
+    expect(summarizeWind([
+      { windSpeed: 20.4, windGusts: null },
+      { windSpeed: null, windGusts: 70.6 },
+      { windSpeed: 10, windGusts: 35 },
+    ])).toEqual({ maxSpeed: 20.4, maxGusts: 70.6 });
+    expect(summarizeWind([{ windSpeed: 0, windGusts: 0 }])).toEqual({ maxSpeed: 0, maxGusts: 0 });
+  });
+
+  it("returns null for each missing series independently", () => {
+    expect(summarizeWind([])).toEqual({ maxSpeed: null, maxGusts: null });
+    expect(summarizeWind([{ windSpeed: null, windGusts: null }])).toEqual({ maxSpeed: null, maxGusts: null });
+    expect(summarizeWind([{ windSpeed: null, windGusts: 70 }])).toEqual({ maxSpeed: null, maxGusts: 70 });
+    expect(summarizeWind([{ windSpeed: 20, windGusts: null }])).toEqual({ maxSpeed: 20, maxGusts: null });
   });
 });
 
@@ -97,7 +135,7 @@ describe("weather API client", () => {
     );
     expect(buildForecastUrl(50.85, 4.35)).toBe(
       "https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35"
-      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability&forecast_hours=13&timezone=auto",
+      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m&forecast_hours=13&timezone=auto",
     );
   });
 
