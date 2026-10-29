@@ -1,8 +1,9 @@
 import { el } from "./dom.js";
-import { setStoredPreferences } from "./preferences.js";
+import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
 import { showScreen } from "./screens.js";
 import { applyTheme } from "./theme.js";
 import { getLang, setLang, SUPPORTED_LANGS } from "./i18n.js";
+import { displaySettings } from "./forecast.js";
 
 let initialThemeSetting = "system";
 let initialThemeColor = "blue";
@@ -29,6 +30,7 @@ export function openConfigView() {
   el.configLanguage.value = getLang();
   el.configTheme.value = initialThemeSetting;
   el.configThemeColor.value = initialThemeColor;
+  el.configShowWind.checked = displaySettings(getStoredPreferences()).showWind;
   showScreen("config");
 }
 
@@ -48,6 +50,7 @@ export function closeConfigView() {
  * Apply the settings form, persist it and return to the start view.
  *
  * A changed language is loaded afterwards; the "languagechange" event re-renders the strings.
+ * A "settingschange" event lets the forecast view apply the display settings.
  *
  * @returns {void}
  */
@@ -61,8 +64,9 @@ export function saveConfig() {
   initialThemeSetting = themeSetting;
   initialThemeColor = themeColor;
 
-  setStoredPreferences({ theme: themeSetting, themeColor });
+  setStoredPreferences({ theme: themeSetting, themeColor, showWind: el.configShowWind.checked });
   closeConfigView();
+  document.dispatchEvent(new Event("settingschange"));
 
   if (languageChanged) {
     setLang(newLang).catch((err) => console.warn(err));

@@ -1080,12 +1080,26 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-text);
 }
 
+.forecast-wind {
+  margin-top: 2px;
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}
+
 .forecast-legend {
   margin: 12px 0 0;
   font-size: var(--font-size-xs);
   color: var(--color-muted);
   text-align: center;
   line-height: 1.4;
+}
+
+/* Hourly wind only shows where the forecast still fits without scrolling, with the search row open. */
+@media (max-height: 699px), (min-width: 480px) and (max-height: 799px) {
+  .forecast-wind,
+  .forecast-legend-wind {
+    display: none;
+  }
 }
 
 @media (max-width: 479px) {
@@ -1103,7 +1117,8 @@ body.suppress-tooltips [data-tooltip]::before {
 
   .forecast-amount,
   .forecast-chance,
-  .forecast-time {
+  .forecast-time,
+  .forecast-wind {
     font-size: 0.625rem;
   }
 
@@ -1512,6 +1527,32 @@ body.suppress-tooltips [data-tooltip]::before {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
   outline: none;
+}
+
+.config-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.config-check .config-label {
+  margin-bottom: 0;
+}
+
+.config-checkbox {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.config-hint {
+  margin: 4px 0 0 28px;
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  line-height: 1.4;
 }
 
 .config-field-warning {

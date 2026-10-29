@@ -221,6 +221,19 @@ export function visibleHours(forecast, now) {
 }
 
 /**
+ * Read the forecast display settings from stored preferences.
+ *
+ * Optional parts of the forecast stay off unless a setting holds the boolean true.
+ *
+ * @param {*} prefs - Stored preferences object, as read from storage.
+ * @returns {{showWind: boolean}} Display settings.
+ */
+export function displaySettings(prefs) {
+  const stored = prefs && typeof prefs === "object" ? prefs : {};
+  return { showWind: stored.showWind === true };
+}
+
+/**
  * Decide whether the search row is open after a view event.
  *
  * Without a forecast the row is always open, so a place can be searched.

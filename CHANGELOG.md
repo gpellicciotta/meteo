@@ -13,7 +13,8 @@ A summarized overview of all changes, per version of this project.
 
 ---
 
-## v1.0.1-pre
+## v1.1.0-pre
+- FrontEnd: Added an off-by-default wind setting showing the wind summary and, on tall screens, hourly wind speeds.
 - FrontEnd: Removed the data source links below the forecast, as the About view already credits them.
 
 ## v1.0.0 [released: 2026-10-28]

@@ -2,7 +2,7 @@ import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
 import {
-  MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, formatPlace, isCurrentHour, isStale,
+  MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, displaySettings, formatPlace, isCurrentHour, isStale,
   placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours,
 } from "./forecast.js";
 import { fetchForecast, reversePlace, searchPlaces } from "./weather-api.js";
@@ -154,18 +154,21 @@ function showPlaceChoices(matches, query = "") {
  * The visible parts are hidden from assistive technology; a visually hidden sentence
  * describes the whole hour instead.
  *
- * @param {{label: string, temperature: number|null, precipitation: number|null, probability: number|null}} hour - Forecast hour.
+ * @param {{label: string, temperature: number|null, precipitation: number|null, probability: number|null,
+ *         windSpeed: number|null}} hour - Forecast hour.
  * @param {number} scaleMax - Rain amount drawn as a full-height bar.
  * @param {boolean} isNow - True when the column is the current hour, labeled "Now" instead of its time.
+ * @param {{showWind: boolean}} settings - Display settings from displaySettings().
  * @returns {HTMLLIElement} Chart column.
  */
-function buildHourColumn(hour, scaleMax, isNow) {
+function buildHourColumn(hour, scaleMax, isNow, settings) {
   const rain = hour.precipitation || 0;
   const isWet = rain >= RAIN_THRESHOLD_MM;
   const amount = hour.precipitation === null ? "–" : formatNumber(rain, 1);
   const chance = hour.probability === null ? t("forecast.chance_unknown") : `${hour.probability}%`;
   const temperature = hour.temperature === null ? "–" : formatNumber(hour.temperature, 0);
   const label = isNow ? t("forecast.now") : hour.label;
+  const wind = hour.windSpeed === null ? "–" : formatNumber(hour.windSpeed, 0);
 
   const item = document.createElement("li");
   item.className = "forecast-hour";
@@ -174,7 +177,8 @@ function buildHourColumn(hour, scaleMax, isNow) {
 
   const description = document.createElement("span");
   description.className = "sr-only";
-  description.textContent = t("forecast.hour_aria", { time: label, amount, chance, temp: temperature });
+  description.textContent = t("forecast.hour_aria", { time: label, amount, chance, temp: temperature })
+    + (settings.showWind ? t("forecast.hour_aria_wind", { wind }) : "");
   item.append(description);
 
   const parts = [
@@ -184,6 +188,9 @@ function buildHourColumn(hour, scaleMax, isNow) {
     ["forecast-time", label],
     ["forecast-temp", hour.temperature === null ? "–" : `${temperature}°`],
   ];
+  if (settings.showWind) {
+    parts.push(["forecast-wind", wind]);
+  }
   for (const [className, text] of parts) {
     const span = document.createElement("span");
     span.className = className;
@@ -225,6 +232,7 @@ function renderForecast(event = "rendered") {
     updateSearchRow(event);
     return;
   }
+  const settings = displaySettings(getStoredPreferences());
   const rain = summarizeRain(hours);
   const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
   const rainingNow = startsNow && (hours[0].precipitation || 0) >= RAIN_THRESHOLD_MM;
@@ -244,13 +252,13 @@ function renderForecast(event = "rendered") {
 
   const wind = summarizeWind(hours);
   const strongGusts = wind.maxGusts !== null && wind.maxGusts >= STRONG_GUST_THRESHOLD_KMH;
-  if (wind.maxSpeed !== null) {
+  if (settings.showWind && wind.maxSpeed !== null) {
     sentences.push(t(strongGusts ? "forecast.summary_wind_gusts" : "forecast.summary_wind", {
       speed: formatNumber(wind.maxSpeed, 0),
       gusts: strongGusts ? formatNumber(wind.maxGusts, 0) : "",
     }));
   }
-  else if (strongGusts) {
+  else if (settings.showWind && strongGusts) {
     sentences.push(t("forecast.summary_gusts", { gusts: formatNumber(wind.maxGusts, 0) }));
   }
 
@@ -271,7 +279,8 @@ function renderForecast(event = "rendered") {
   el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
 
   const scaleMax = barScaleMax(hours);
-  el.forecastChart.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0)));
+  el.forecastChart.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0, settings)));
+  el.forecastLegendWind.classList.toggle("hidden", !settings.showWind);
   el.forecast.classList.remove("hidden");
   updateSearchRow(event);
 }
@@ -555,6 +564,7 @@ export function initForecastView() {
     }
   });
   document.addEventListener("languagechange", handleLanguageChange);
+  document.addEventListener("settingschange", () => renderForecast());
   // An installed app resumes from memory, and the back-forward cache restores the page, without reloading.
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") {

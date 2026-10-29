@@ -107,6 +107,20 @@ function reverseBody(nl) {
 }
 
 /**
+ * Store display settings before every page load, keeping the other stored preferences.
+ *
+ * @param {object} context - Playwright browser context.
+ * @param {object} settings - Preference keys to store, such as `{showWind: true}`.
+ * @returns {Promise<void>} Resolves once the init script is registered.
+ */
+function storeSettings(context, settings) {
+  return context.addInitScript((patch) => {
+    const stored = JSON.parse(localStorage.getItem("meteo_preferences") || "{}");
+    localStorage.setItem("meteo_preferences", JSON.stringify({ ...stored, ...patch }));
+  }, settings);
+}
+
+/**
  * Show the search row through the footer button when a shown forecast has hidden it.
  *
  * @param {object} page - Playwright page.
@@ -194,6 +208,7 @@ let failed = false;
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
   try {
     const urls = await mockOpenMeteo(context);
+    await storeSettings(context, { showWind: true });
     await page.clock.install({ time: MOCK_NOW });
     check((await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" })).status() === 200, "the local server returns HTTP 200");
     await page.fill("#location-input", "Gent");
@@ -209,7 +224,7 @@ let failed = false;
     check((await page.textContent("#forecast-summary")).endsWith("°C.\nWind up to 40 km/h, gusts up to 70 km/h."), "English wind and gust maxima follow the temperature");
     check(urls.some((u) => new URL(u).searchParams.get("hourly")?.includes("wind_speed_10m,wind_gusts_10m")), "the request includes both wind variables");
     const label = await page.textContent("#forecast-chart > li:nth-child(5) .sr-only");
-    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C", `bars carry a screen reader description (${label})`);
+    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C, wind 20 km/h", `bars carry a screen reader description (${label})`);
     const updated = await page.textContent("#forecast-updated");
     check(/\b\d{2}:\d{2}\b/.test(updated) && !/AM|PM/.test(updated), `the update time uses the 24-hour clock (${updated})`);
     const amounts = await page.$$eval("#forecast-chart .forecast-amount", (spans) => spans.map((s) => s.textContent));
@@ -427,6 +442,7 @@ function measureStartLayout(page) {
   const { browser, context, page, problems } = await launchBrowser();
   try {
     await mockOpenMeteo(context);
+    await storeSettings(context, { showWind: true });
     await page.clock.install({ time: MOCK_NOW });
     const cases = [
       [20, 35, "Wind up to 20 km/h.", "Wind tot 20 km/u."],
@@ -963,6 +979,88 @@ function measureStartLayout(page) {
         `${theme} ${accent} amounts and wet summary use ${text} (${colors.amount}, ${colors.summary})`);
     }
     check(problems.length === 0, `no accent console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 14: wind stays hidden until the setting is saved, and its hourly row needs a tall enough screen.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
+  try {
+    await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "wind setting scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    await captureViews(page, "wind-off");
+    const windView = () => page.evaluate(() => {
+      const cells = [...document.querySelectorAll("#forecast-chart .forecast-wind")];
+      const legend = document.querySelector("#forecast .forecast-legend-wind");
+      const content = document.getElementById("start-content");
+      return {
+        summary: document.getElementById("forecast-summary").textContent,
+        cells: cells.map((cell) => cell.textContent),
+        visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
+        legend: Boolean(legend && legend.getClientRects().length > 0),
+        description: document.querySelector("#forecast-chart .sr-only").textContent,
+        overflow: content.scrollHeight - content.clientHeight,
+      };
+    });
+    const saveWind = async (on) => {
+      await page.click("#btn-config");
+      const checked = await page.isChecked("#config-show-wind");
+      await page.setChecked("#config-show-wind", on);
+      await page.click("#btn-config-save");
+      await page.waitForSelector("#screen-start:not(.hidden)");
+      return checked;
+    };
+
+    let view = await windView();
+    check(!view.summary.includes("Wind") && view.cells.length === 0, "without a stored setting the forecast shows no wind");
+    check(!view.description.includes("wind"), "without the setting the hour descriptions leave out wind");
+    check(await saveWind(true) === false, "Settings shows the wind checkbox unchecked by default");
+    view = await windView();
+    check(view.summary.endsWith("°C.\nWind up to 40 km/h, gusts up to 70 km/h."), "saving the setting adds the wind summary");
+    check(view.cells.length === 12 && view.cells[0] === "40" && view.cells[1] === "20" && view.visible === 12 && view.legend,
+      `saving the setting shows twelve hourly wind cells and the legend part (${view.cells.slice(0, 2).join(", ")}, ${view.visible} visible)`);
+    check(view.description.endsWith(", wind 40 km/h"), `the first hour description ends with its wind (${view.description})`);
+    check(await page.evaluate(() => JSON.parse(localStorage.getItem("meteo_preferences")).showWind) === true,
+      "localStorage remembers the wind setting");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check((await windView()).cells.length === 12, "a reload keeps the hourly wind shown");
+    await captureViews(page, "wind-on");
+
+    await openSearch(page);
+    for (const [width, height, shown] of [[1280, 800, true], [390, 700, true], [1280, 799, false], [390, 667, false], [390, 844, true]]) {
+      await page.setViewportSize({ width, height });
+      view = await windView();
+      const size = `${width}x${height}`;
+      check(view.visible === (shown ? 12 : 0) && view.legend === shown, `hourly wind is ${shown ? "shown" : "hidden"} at ${size}`);
+      check(view.summary.includes("Wind up to 40 km/h"), `the wind summary stays at ${size}`);
+      if (shown || size === "390x667") {
+        check(view.overflow <= 0, `the forecast with search row fits without scrolling at ${size} (overflow ${view.overflow}px)`);
+      }
+    }
+
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    view = await windView();
+    check(view.description.endsWith(", wind 40 km/u") && view.summary.endsWith("Wind tot 40 km/u, windstoten tot 70 km/u."),
+      "the wind row description and summary follow the Dutch language switch");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "en");
+
+    check(await saveWind(false) === true, "Settings shows the stored wind setting checked");
+    view = await windView();
+    check(!view.summary.includes("Wind") && view.cells.length === 0, "turning the setting off removes the wind summary and row");
+    check(problems.length === 0, `no wind setting console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

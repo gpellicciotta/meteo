@@ -93,7 +93,10 @@
         <div class="forecast-card">
           <p id="forecast-summary" class="forecast-summary"></p>
           <ol id="forecast-chart" class="forecast-chart" aria-label="Rain and temperature per hour" data-i18n-aria="forecast.chart_aria"></ol>
-          <p class="forecast-legend" data-i18n="forecast.legend">Bars show rain in mm per hour, percentages the chance of rain.</p>
+          <p class="forecast-legend">
+            <span data-i18n="forecast.legend">Bars show rain in mm per hour, percentages the chance of rain.</span>
+            <span id="forecast-legend-wind" class="forecast-legend-wind hidden" data-i18n="forecast.legend_wind">The bottom row shows wind in km/h.</span>
+          </p>
         </div>
       </section>
     </div>
@@ -188,7 +191,7 @@
             </span>
             <div class="about-icon-info">
               <strong class="about-icon-name" data-i18n="about.icon_config_title">Settings</strong>
-              <p class="about-icon-detail" data-i18n="about.icon_config_desc">Choose the language, theme and color accent.</p>
+              <p class="about-icon-detail" data-i18n="about.icon_config_desc">Choose the language, theme, color accent and what the forecast shows.</p>
             </div>
           </li>
           <li class="about-icon-item">
@@ -328,6 +331,19 @@
             <option value="yellow" data-i18n="config.color_yellow">Yellow</option>
             <option value="red" data-i18n="config.color_red">Red</option>
           </select>
+        </div>
+      </div>
+
+      <div id="config-section-forecast" class="config-section">
+        <h4 class="config-section-title" data-i18n="config.section_forecast">Forecast</h4>
+        <p class="config-section-intro" data-i18n="config.introduction_forecast">Choose what the forecast card shows</p>
+
+        <div class="config-field">
+          <label class="config-check">
+            <input type="checkbox" id="config-show-wind" class="config-checkbox">
+            <span class="config-label" data-i18n="config.label_show_wind">Show wind</span>
+          </label>
+          <p class="config-hint" data-i18n="config.hint_show_wind">Hourly wind needs a tall enough screen.</p>
         </div>
       </div>
     </div>

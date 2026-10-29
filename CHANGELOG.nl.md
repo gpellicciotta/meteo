@@ -12,7 +12,8 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 
 ---
 
-## v1.0.1-pre
+## v1.1.0-pre
+- FrontEnd: Een windinstelling, standaard uit, toont de windsamenvatting en op hoge schermen de wind per uur.
 - FrontEnd: De bronvermelding onder de voorspelling is weg; de Over-pagina vermeldt de bronnen al.
 
 ## v1.0.0 [released: 2026-10-28]

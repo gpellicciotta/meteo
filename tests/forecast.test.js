@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { STALE_AFTER_MS, barScaleMax, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, displaySettings, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildReverseUrl, buildSearchUrl, fetchForecast, reversePlace, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 
@@ -317,6 +317,18 @@ describe("searchRowOpen", () => {
   it("keeps the row as it is on refreshes and language switches", () => {
     expect(searchRowOpen(true, "rendered", true)).toBe(true);
     expect(searchRowOpen(false, "rendered", true)).toBe(false);
+  });
+});
+
+describe("displaySettings", () => {
+  it.each([[{}], [null], [undefined], ["showWind"]])("turns wind off by default for %j", (prefs) => {
+    expect(displaySettings(prefs)).toEqual({ showWind: false });
+  });
+
+  it("turns wind on only for a stored true", () => {
+    expect(displaySettings({ showWind: true })).toEqual({ showWind: true });
+    expect(displaySettings({ showWind: "true" })).toEqual({ showWind: false });
+    expect(displaySettings({ showWind: 1 })).toEqual({ showWind: false });
   });
 });
 

@@ -15,7 +15,9 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - A summary line tells when rain starts and how heavy it gets, or that it stays dry.
 - A theme-colored icon starts the summary, showing the current hour's weather with day and night variants.
 - Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.
-- The summary includes maximum wind speed and gusts from 50 km/h over the next 12 hours, when available.
+- With the wind setting on, the summary includes maximum wind speed and gusts from 50 km/h, when available.
+- That setting also adds hourly wind speeds below the temperatures, on screens at least 700px tall (800px from 480px wide).
+- Display settings are off by default and remembered in the browser.
 - The last place is remembered and reloaded on your next visit.
 - Its last forecast is saved too and shown when the app starts offline or a refresh fails.
 - The chart always starts at the current hour, also when the app resumes offline.
