@@ -1382,5 +1382,89 @@ function measureStartLayout(page) {
   }
 }
 
+// Scenario 18: hovering a section of the guide sample with a mouse explains it in a tooltip.
+{
+  const { browser, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
+  try {
+    check((await page.goto(`${server.url}?lang=en&view=about`, { waitUntil: "networkidle" })).status() === 200,
+      "guide hover scenario receives HTTP 200");
+    await page.waitForSelector("#screen-about:not(.hidden)");
+    const tipView = () => page.evaluate(() => {
+      const tip = document.querySelector("#guide-sample .guide-tip");
+      const sample = document.getElementById("guide-sample").getBoundingClientRect();
+      const rect = tip ? tip.getBoundingClientRect() : null;
+      const items = [...document.querySelectorAll(".guide-list > li")];
+      return {
+        visible: Boolean(tip && !tip.classList.contains("hidden") && rect.width > 0),
+        text: tip ? [...tip.querySelectorAll(".guide-tip-title, .guide-tip-text")].map((part) => part.textContent).join(" ") : "",
+        inside: Boolean(rect && rect.left >= sample.left - 0.5 && rect.right <= sample.right + 0.5),
+        activeTemps: document.querySelectorAll("#guide-sample .forecast-temp.is-guide-active").length,
+        active: document.querySelectorAll("#guide-sample .is-guide-active").length,
+        activeItems: items.map((item, i) => (item.classList.contains("is-guide-active") ? i + 1 : 0)).filter(Boolean),
+        explanations: items.map((item) => [item.querySelector(".guide-item-title").textContent.trim(),
+          item.querySelector(".guide-item-text").textContent.trim()]),
+      };
+    });
+    const sections = [
+      "#guide-sample .forecast-summary", "#guide-chart > li:nth-child(6) .forecast-amount",
+      "#guide-chart > li:nth-child(6) .forecast-bar-track", "#guide-chart > li:nth-child(3) .forecast-chance",
+      "#guide-chart > li:nth-child(3) .forecast-time", "#guide-chart > li:nth-child(3) .forecast-sky",
+      "#guide-chart > li:nth-child(3) .forecast-temp", "#guide-chart > li:nth-child(3) .forecast-wind",
+      "#guide-sample .guide-place", "#guide-sample .guide-updated",
+    ];
+    for (const [i, selector] of sections.entries()) {
+      await page.locator(selector).scrollIntoViewIfNeeded();
+      await page.hover(selector);
+      const view = await tipView();
+      const [title, text] = view.explanations[i];
+      check(view.visible && view.text.startsWith(`${i + 1}. ${title}`) && view.text.endsWith(text) && view.inside,
+        `hovering section ${i + 1} explains ${title} in a tooltip inside the sample (${view.text.slice(0, 40)})`);
+      check(view.activeItems.join(",") === String(i + 1), `hovering section ${i + 1} highlights its list item`);
+      if (i === 6) {
+        check(view.activeTemps === 12, `hovering a temperature highlights all twelve temperatures (${view.activeTemps})`);
+        await captureViews(page, "guide-hover-temp");
+      }
+    }
+    await page.hover("#guide-sample .guide-badge:nth-of-type(6)");
+    check((await tipView()).text.startsWith("6. Sky"), "hovering badge 6 shows the sky explanation");
+    check(await page.locator("#guide-sample .guide-tip .guide-icons svg").count() === 9, "the sky tooltip shows the nine weather icons");
+    await captureViews(page, "guide-hover-sky");
+    await page.hover("#screen-about .about-title");
+    const left = await tipView();
+    check(!left.visible && left.active === 0 && left.activeItems.length === 0, "leaving the sample hides the tooltip and highlights");
+    check(problems.length === 0, `no guide hover console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 18b: touch phones keep the guide without hover tooltips.
+{
+  const { browser, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  try {
+    await page.goto(`${server.url}?lang=en&view=about`, { waitUntil: "networkidle" });
+    await page.waitForSelector("#screen-about:not(.hidden)");
+    await page.hover("#guide-chart > li:nth-child(3) .forecast-temp");
+    const shown = await page.evaluate(() => {
+      const tip = document.querySelector("#guide-sample .guide-tip");
+      return Boolean(tip && !tip.classList.contains("hidden")) || document.querySelectorAll(".is-guide-active").length > 0;
+    });
+    check(!shown, "a touch phone shows no hover tooltip or highlight in the guide");
+    check(problems.length === 0, `no touch guide console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

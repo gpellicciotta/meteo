@@ -27,6 +27,112 @@ const BADGE_TARGETS = [
   [".guide-updated", null],
 ];
 
+// Hover explanations need a mouse that can hover; touch screens use the badges and list only.
+const HOVER_QUERY = window.matchMedia("(hover: hover) and (pointer: fine)");
+
+// Gap between the tooltip and the hovered element, in pixels.
+const TIP_GAP = 6;
+
+const hover = { section: -1, anchor: null, tip: null };
+
+/**
+ * Find the guide section a node of the sample belongs to.
+ *
+ * @param {EventTarget|null} node - Node under the pointer.
+ * @returns {{section: number, anchor: Element|null}} Index into BADGE_TARGETS and the hovered element,
+ *          or -1 and null for gaps between sections.
+ */
+function sectionAt(node) {
+  if (!(node instanceof Element) || !el.guideSample.contains(node)) {
+    return { section: -1, anchor: null };
+  }
+  const badge = node.closest(".guide-badge");
+  if (badge) {
+    return { section: Number(badge.textContent) - 1, anchor: badge };
+  }
+  for (const [i, [selector]] of BADGE_TARGETS.entries()) {
+    const anchor = node.closest(selector);
+    if (anchor && el.guideSample.contains(anchor)) {
+      return { section: i, anchor };
+    }
+  }
+  return { section: -1, anchor: null };
+}
+
+/**
+ * Place the tooltip above its element, or below it without room above, inside the sample's width.
+ *
+ * @param {Element} anchor - Hovered element.
+ * @returns {void}
+ */
+function positionTip(anchor) {
+  const tip = hover.tip;
+  const box = el.guideSample.getBoundingClientRect();
+  const rect = anchor.getBoundingClientRect();
+  const left = (rect.left + rect.right) / 2 - box.left - tip.offsetWidth / 2;
+  const above = rect.top - tip.offsetHeight - TIP_GAP;
+  tip.style.left = `${Math.max(0, Math.min(left, box.width - tip.offsetWidth))}px`;
+  tip.style.top = `${(above >= 0 ? above : rect.bottom + TIP_GAP) - box.top}px`;
+}
+
+/**
+ * Show the explanation of a section next to the hovered element, highlighting the section and its list item.
+ *
+ * @param {number} section - Index into BADGE_TARGETS, or -1 to hide the explanation.
+ * @param {Element|null} anchor - Hovered element of the section.
+ * @returns {void}
+ */
+function showSection(section, anchor) {
+  if (section === hover.section && anchor === hover.anchor) {
+    return;
+  }
+  if (section !== hover.section) {
+    document.querySelectorAll(".is-guide-active").forEach((node) => node.classList.remove("is-guide-active"));
+  }
+  Object.assign(hover, { section, anchor });
+  if (section < 0) {
+    hover.tip.classList.add("hidden");
+    return;
+  }
+  const item = el.guideItems[section];
+  el.guideSample.querySelectorAll(BADGE_TARGETS[section][0]).forEach((node) => node.classList.add("is-guide-active"));
+  item.classList.add("is-guide-active");
+  const [title, text] = hover.tip.children;
+  title.textContent = `${section + 1}. ${item.querySelector(".guide-item-title").textContent.trim()}`;
+  text.textContent = item.querySelector(".guide-item-text").textContent.trim();
+  // The sky explanation refers to its icons, so the tooltip shows them too, by name only.
+  const icons = item.querySelector(".guide-icons");
+  hover.tip.querySelector(".guide-icons")?.remove();
+  if (icons) {
+    hover.tip.append(icons.cloneNode(true));
+  }
+  hover.tip.classList.remove("hidden");
+  positionTip(anchor);
+}
+
+/**
+ * Explain the hovered section of the sample with a tooltip, for mouse pointers on hover devices.
+ *
+ * @returns {void}
+ */
+function initHoverTips() {
+  hover.tip = document.createElement("div");
+  hover.tip.className = "guide-tip hidden";
+  for (const className of ["guide-tip-title", "guide-tip-text"]) {
+    const part = document.createElement("span");
+    part.className = className;
+    hover.tip.append(part);
+  }
+  el.guideSample.append(hover.tip);
+  el.guideSample.addEventListener("pointermove", (e) => {
+    if (e.pointerType === "mouse" && HOVER_QUERY.matches) {
+      const { section, anchor } = sectionAt(e.target);
+      showSection(section, anchor);
+    }
+  });
+  el.guideSample.addEventListener("pointerleave", () => showSection(-1, null));
+}
+
 /**
  * Center each numbered badge vertically on its element of the sample card.
  *
@@ -77,6 +183,8 @@ export function renderGuide() {
   renderChart(el.guideChart, hours, true, settings);
   el.guidePlace.textContent = t("about.guide_place");
   el.guideUpdated.textContent = t("forecast.updated", { time: "10:20" });
+  // A re-render replaces the hovered cells, so the next pointer move shows the explanation again.
+  showSection(-1, null);
   positionBadges();
 }
 
@@ -92,6 +200,7 @@ export function initGuide() {
     badge.textContent = String(i + 1);
     return badge;
   }));
+  initHoverTips();
   renderGuide();
   document.addEventListener("languagechange", renderGuide);
   document.addEventListener("settingschange", renderGuide);

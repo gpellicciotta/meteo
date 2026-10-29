@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.1.0-pre
+- FrontEnd: Showed each guide explanation in a tooltip when hovering its sample section with a mouse.
 - FrontEnd: Listed all nine weather icons with their meaning under the sky item of the About guide.
 - FrontEnd: Added hourly wind direction arrows above the wind speeds, with spoken compass directions.
 - FrontEnd: Added °F, inch, mph and m/s unit settings, prefilled from the current location's country, else metric.

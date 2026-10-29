@@ -2,8 +2,8 @@
 An overview of all tasks and their planning.
 
 ## Next Milestone
-- [ ] T0026 [needs: T0025] Open the About help view when F1 is pressed.
-- [ ] T0025 Show each guide explanation on hover over its sample element on pointing devices.
+- [ ] T0026 Open the About help view when F1 is pressed.
+- [x] T0025 Show each guide explanation on hover over its sample element on pointing devices.
 - [x] T0024 List every weather icon with its meaning under the sky item of the About guide.
 - [x] T0023 Show the hourly wind direction as an arrow in the wind row.
 - [x] T0022 Add temperature, rain and wind unit settings, prefilled from the current location's country, else metric.

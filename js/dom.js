@@ -39,6 +39,7 @@ export const el = {
   guidePlace: document.getElementById("guide-place"),
   guideUpdated: document.getElementById("guide-updated"),
   guideTexts: document.querySelectorAll("[data-guide-text]"),
+  guideItems: document.querySelectorAll(".guide-list > li"),
   aboutVersionTag: document.getElementById("about-version-tag"),
   btnLang: document.getElementById("btn-lang"),
   startMetaActions: document.querySelector(".start-meta-actions"),

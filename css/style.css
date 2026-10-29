@@ -1271,6 +1271,68 @@ body.suppress-tooltips [data-tooltip]::before {
   gap: 10px;
 }
 
+/* Hover explanation of a sample section, for mouse pointers. */
+.guide-tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  max-width: min(280px, 100%);
+  padding: 6px 9px;
+  border: 1px solid var(--color-tooltip-border);
+  border-radius: var(--radius-md);
+  background: var(--color-tooltip-bg);
+  color: var(--color-tooltip-text);
+  box-shadow: var(--shadow-md);
+  font-size: var(--font-size-xs);
+  line-height: 1.4;
+  text-align: left;
+  pointer-events: none;
+}
+
+.guide-tip-title,
+.guide-tip-text {
+  display: block;
+}
+
+.guide-tip-title {
+  margin-bottom: 2px;
+  font-weight: 700;
+}
+
+.guide-tip .guide-icons {
+  grid-template-columns: repeat(2, max-content);
+  gap: 4px 10px;
+  margin-top: 6px;
+}
+
+.guide-tip .guide-icon {
+  align-items: center;
+  gap: 4px;
+}
+
+.guide-tip .guide-icon-svg,
+.guide-tip .guide-icon-name {
+  color: inherit;
+  font-weight: 400;
+}
+
+.guide-tip .guide-icon-text {
+  display: none;
+}
+
+.guide-sample .is-guide-active,
+.guide-item.is-guide-active {
+  border-radius: var(--radius-sm);
+  background: var(--color-primary-tint);
+  box-shadow: 0 0 0 3px var(--color-primary-tint);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .guide-sample {
+    cursor: help;
+  }
+}
+
 /* Weather icons of the sky item, as many per row as fit. */
 .guide-icons {
   list-style: none;
