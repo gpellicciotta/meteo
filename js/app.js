@@ -2,7 +2,7 @@ import { el } from "./dom.js";
 import { initTheme } from "./theme.js";
 import { applyStoredPreferences } from "./preferences.js";
 import { showScreen } from "./screens.js";
-import { openConfigView, closeConfigView, saveConfig, previewTheme } from "./config-view.js";
+import { openConfigView, closeConfigView, saveConfig, previewTheme, touchUnits } from "./config-view.js";
 import { loadChangelog } from "./changelog.js";
 import { registerServiceWorker, updateOnlineStatus, syncInstallButtonState } from "./pwa.js";
 import { setLang, detectLang, getLang, applyAll, t, SUPPORTED_LANGS } from "./i18n.js";
@@ -33,6 +33,9 @@ el.btnConfigClose.addEventListener("click", closeConfigView);
 el.btnConfigSave.addEventListener("click", saveConfig);
 el.configTheme.addEventListener("change", previewTheme);
 el.configThemeColor.addEventListener("change", previewTheme);
+for (const select of [el.configUnitTemperature, el.configUnitPrecipitation, el.configUnitWind]) {
+  select.addEventListener("change", touchUnits);
+}
 
 document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") {

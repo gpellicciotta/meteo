@@ -1,10 +1,13 @@
 import { el } from "./dom.js";
-import { t } from "./i18n.js";
-import { renderChart, renderSummary } from "./forecast-view.js";
+import { getLang, t } from "./i18n.js";
+import { renderChart, renderSummary, unitLabel } from "./forecast-view.js";
+import { MIN_SCALE_MM, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH } from "./forecast.js";
 import { guideHours } from "./guide-sample.js";
+import { getStoredPreferences } from "./preferences.js";
+import { activeUnits, convertValue } from "./units.js";
 
 // Every optional part of the card is on in the guide, whatever the settings.
-const GUIDE_SETTINGS = { showWind: true, showConditions: true };
+const GUIDE_OPTIONS = { showWind: true, showConditions: true };
 
 // Column of the wettest sample hour, and of the last hour, whose cells the badges point at.
 const WETTEST_COLUMN = 5;
@@ -54,8 +57,24 @@ function positionBadges() {
  */
 export function renderGuide() {
   const hours = guideHours();
-  renderSummary(el.guideSummary, hours, true, GUIDE_SETTINGS);
-  renderChart(el.guideChart, hours, true, GUIDE_SETTINGS);
+  const units = activeUnits(getStoredPreferences());
+  const settings = { ...GUIDE_OPTIONS, units };
+  // Two significant digits keep small thresholds readable, such as 0.0039 in instead of <0.01 in.
+  const threshold = new Intl.NumberFormat(getLang(), { maximumSignificantDigits: 2 });
+  const amount = (kind, value) => `${threshold.format(convertValue(kind, value, units[kind]))} ${unitLabel(kind, units)}`;
+  const vars = {
+    gust: amount("wind", STRONG_GUST_THRESHOLD_KMH),
+    wet: amount("precipitation", RAIN_THRESHOLD_MM),
+    scale: amount("precipitation", MIN_SCALE_MM),
+    rain_unit: unitLabel("precipitation", units),
+    temp_unit: unitLabel("temperature", units),
+    wind_unit: unitLabel("wind", units),
+  };
+  for (const text of el.guideTexts) {
+    text.textContent = t(text.dataset.guideText, vars);
+  }
+  renderSummary(el.guideSummary, hours, true, settings);
+  renderChart(el.guideChart, hours, true, settings);
   el.guidePlace.textContent = t("about.guide_place");
   el.guideUpdated.textContent = t("forecast.updated", { time: "10:20" });
   positionBadges();
@@ -75,6 +94,7 @@ export function initGuide() {
   }));
   renderGuide();
   document.addEventListener("languagechange", renderGuide);
+  document.addEventListener("settingschange", renderGuide);
   // The About view starts hidden, so the badges are placed once it is shown and whenever it resizes.
   new ResizeObserver(positionBadges).observe(el.guideSample);
 }

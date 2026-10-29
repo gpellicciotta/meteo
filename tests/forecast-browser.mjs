@@ -1235,5 +1235,117 @@ function measureStartLayout(page) {
   }
 }
 
+// Scenario 17: unit settings, prefilled from the country of the current location while never set.
+{
+  const { browser, context, page, problems } = await launchBrowser({
+    viewport: { width: 390, height: 844 },
+    geolocation: { latitude: 40.7128, longitude: -74.006 },
+    permissions: ["geolocation"],
+  });
+  try {
+    await mockOpenMeteo(context);
+    let countryCode = "us";
+    await context.route("https://nominatim.openstreetmap.org/**", (route) => route.fulfill({
+      json: { name: "Town", address: { town: "Town", state: "State", country: "Country", country_code: countryCode } },
+    }));
+    await page.clock.install({ time: MOCK_NOW });
+    const storedUnits = () => page.evaluate(() => JSON.parse(localStorage.getItem("meteo_preferences") || "{}").units || null);
+    const chart = () => page.evaluate(() => {
+      const hours = [...document.querySelectorAll("#forecast-chart > li")];
+      return {
+        summary: document.getElementById("forecast-summary").textContent.trim(),
+        temps: hours.map((h) => h.querySelector(".forecast-temp").textContent),
+        amounts: hours.map((h) => h.querySelector(".forecast-amount").textContent),
+        wind: hours.map((h) => h.querySelector(".forecast-wind")?.textContent || ""),
+        description: hours[4].querySelector(".sr-only").textContent,
+      };
+    });
+    const saveConfig = async (choices) => {
+      await page.click("#btn-config");
+      const shown = await page.evaluate(() => ["temperature", "precipitation", "wind"]
+        .map((kind) => document.getElementById(`config-unit-${kind}`).value).join("/"));
+      for (const [selector, value] of Object.entries(choices)) {
+        await page.selectOption(selector, value);
+      }
+      await page.click("#btn-config-save");
+      await page.waitForSelector("#screen-start:not(.hidden)");
+      return shown;
+    };
+
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "units scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    let view = await chart();
+    check(view.summary.includes("(up to 2.6 mm per hour)") && view.summary.endsWith("°C.") && view.temps[0] === "10°",
+      "without stored units a searched place shows metric units");
+    check(await saveConfig({ "#config-theme": "dark" }) === "c/mm/kmh", "Settings shows the metric units by default");
+    check(await storedUnits() === null, "a theme-only save stores no units");
+
+    check(await saveConfig({ "#config-unit-temperature": "f", "#config-unit-precipitation": "in", "#config-unit-wind": "mph",
+      "#config-theme": "light" }) === "c/mm/kmh", "Settings still shows metric before choosing units");
+    await page.evaluate(() => {
+      const prefs = JSON.parse(localStorage.getItem("meteo_preferences"));
+      localStorage.setItem("meteo_preferences", JSON.stringify({ ...prefs, showWind: true }));
+      document.dispatchEvent(new Event("settingschange"));
+    });
+    view = await chart();
+    check(view.summary.includes("(up to 0.10 in per hour)") && view.summary.includes("Temperature between 49 and 59 °F.")
+      && view.summary.endsWith("Wind up to 25 mph, gusts up to 43 mph."), `the summary uses °F, in and mph (${view.summary})`);
+    check(view.temps[0] === "49°" && view.amounts[3] === "0.02" && view.amounts[10] === "<0.01" && view.wind[0] === "25",
+      `the chart uses °F, in and mph (${view.temps[0]}, ${view.amounts[3]}, ${view.amounts[10]}, ${view.wind[0]})`);
+    check(view.description === "14:00: 0.05 in rain, 70% chance, 53 °F, wind 12 mph", `the hour description uses the units (${view.description})`);
+    check(JSON.stringify(await storedUnits()) === JSON.stringify({ temperature: "f", precipitation: "in", wind: "mph" }),
+      "localStorage remembers the chosen units");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check((await chart()).temps[0] === "49°", "a reload keeps the chosen units");
+    await captureViews(page, "units-imperial");
+    await page.click("#btn-about");
+    check((await page.textContent("#guide-summary")).includes("°F."), "the guide sample follows the chosen units");
+    const amountText = await page.textContent("[data-guide-text='about.guide_amount_desc']");
+    check(amountText === "Rain or snow expected in that hour (in). Shown from 0.0039 in.", `the guide texts name the chosen units (${amountText})`);
+    await page.click("#btn-about-back");
+
+    await openSearch(page);
+    await page.click("#btn-current-location");
+    await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Town"));
+    check((await storedUnits()).temperature === "f", "stored units are kept when a current location follows");
+
+    for (const [code, expected] of [["us", "f/in/mph"], ["be", "c/mm/kmh"]]) {
+      countryCode = code;
+      await page.evaluate(() => localStorage.clear());
+      await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+      await page.click("#btn-current-location");
+      await page.waitForFunction(() => document.getElementById("forecast-place").textContent.includes("Town"));
+      await page.waitForFunction(() => Boolean(JSON.parse(localStorage.getItem("meteo_preferences") || "{}").units));
+      const units = await storedUnits();
+      check(`${units.temperature}/${units.precipitation}/${units.wind}` === expected, `a current location in ${code.toUpperCase()} prefills ${expected}`);
+      view = await chart();
+      check(view.temps[0] === (code === "us" ? "49°" : "10°"), `the forecast for ${code.toUpperCase()} shows the prefilled units`);
+      if (code === "us") {
+        await captureViews(page, "units-prefilled-us");
+      }
+    }
+
+    await context.clearPermissions();
+    await page.evaluate(() => localStorage.clear());
+    await page.goto(`${server.url}?lang=en`, { waitUntil: "networkidle" });
+    await page.click("#btn-current-location");
+    await page.waitForSelector("#start-error:not(.hidden)");
+    await page.fill("#location-input", "Brussel");
+    await page.click("#btn-search");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check(await storedUnits() === null && (await chart()).temps[0] === "10°", "a denied location stores no units and keeps metric");
+    check(problems.length === 0, `no units console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
 await server.close();
 process.exit(failed ? 1 : 0);

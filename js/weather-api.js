@@ -118,8 +118,8 @@ export async function searchPlaces(query, lang, fetchImpl = fetch, timeoutMs = 1
  * @param {string} lang - Language for the returned names.
  * @param {Function} [fetchImpl] - Fetch implementation, replaceable in tests.
  * @param {number} [timeoutMs=10000] - Request timeout in milliseconds.
- * @returns {Promise<{name: string, admin1: string, country: string}|null>} Place names, or null
- *          when no town is found.
+ * @returns {Promise<{name: string, admin1: string, country: string, countryCode: string}|null>} Place names
+ *          and the upper-case ISO country code, or null when no town is found.
  */
 export async function reversePlace(latitude, longitude, lang, fetchImpl = fetch, timeoutMs = 10000) {
   const body = await getJson(buildReverseUrl(latitude, longitude, lang), fetchImpl, timeoutMs);
@@ -129,7 +129,12 @@ export async function reversePlace(latitude, longitude, lang, fetchImpl = fetch,
   if (!name) {
     return null;
   }
-  return { name, admin1: first(PROVINCE_FIELDS), country: address.country || "" };
+  return {
+    name,
+    admin1: first(PROVINCE_FIELDS),
+    country: address.country || "",
+    countryCode: String(address.country_code || "").toUpperCase(),
+  };
 }
 
 /**

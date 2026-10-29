@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.1.0-pre
+- FrontEnd: Eenheden voor °F, inch, mph en m/s, vooraf ingevuld volgens het land van je huidige locatie, anders metrisch.
 - FrontEnd: Een gids in Over vervangt de legende en nummert elk onderdeel van een volledige voorbeeldvoorspelling.
 - FrontEnd: Een weerbeeldinstelling, standaard uit, toont het weericoon bij de samenvatting en op hoge schermen per uur.
 - FrontEnd: Een windinstelling, standaard uit, toont de windsamenvatting en op hoge schermen de wind per uur.

@@ -8,6 +8,7 @@ import {
 import { fetchForecast, reversePlace, searchPlaces } from "./weather-api.js";
 import { getCurrentCoordinates } from "./geolocation.js";
 import { createIcon } from "./icons.js";
+import { activeUnits, convertValue, storedUnits, unitDigits, unitsForCountry } from "./units.js";
 
 const view = {
   // The place shown: {kind: "place", id, name, label} or {kind: "coords", label?}, plus latitude and longitude.
@@ -39,6 +40,63 @@ const view = {
  */
 function formatNumber(value, digits) {
   return new Intl.NumberFormat(getLang(), { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
+}
+
+/**
+ * Format a metric forecast value in a unit, for the active language.
+ *
+ * Inches round to hundredths, so a positive amount below 0.005 in reads "<0.01" instead of "0.00".
+ *
+ * @param {"temperature"|"precipitation"|"wind"} kind - Kind of value: °C, mm or km/h.
+ * @param {number} value - Metric value.
+ * @param {{temperature: string, precipitation: string, wind: string}} units - Units to show.
+ * @returns {string} Localized number without its unit.
+ */
+function formatUnitValue(kind, value, units) {
+  const unit = units[kind];
+  const digits = unitDigits(unit);
+  const converted = convertValue(kind, value, unit);
+  const smallest = 10 ** -digits;
+  if (unit === "in" && converted > 0 && converted < smallest / 2) {
+    return `<${formatNumber(smallest, digits)}`;
+  }
+  return formatNumber(converted, digits);
+}
+
+/**
+ * Return the label of the unit shown for a kind of value.
+ *
+ * @param {"temperature"|"precipitation"|"wind"} kind - Kind of value.
+ * @param {{temperature: string, precipitation: string, wind: string}} units - Units to show.
+ * @returns {string} Localized unit label, such as "°F" or "km/u".
+ */
+export function unitLabel(kind, units) {
+  return t(`units.${units[kind]}`);
+}
+
+/**
+ * Read the display settings and units of the forecast from storage.
+ *
+ * @returns {{showWind: boolean, showConditions: boolean, units: object}} Settings for the renderers.
+ */
+function forecastSettings() {
+  const prefs = getStoredPreferences();
+  return { ...displaySettings(prefs), units: activeUnits(prefs) };
+}
+
+/**
+ * Store the usual units of the current location's country while no units were ever set.
+ *
+ * @param {object} place - Shown place; only a current location with a country code counts.
+ * @returns {boolean} True when units were stored.
+ */
+function prefillUnits(place) {
+  const units = place && place.kind === "coords" ? unitsForCountry(place.countryCode) : null;
+  if (!units || storedUnits(getStoredPreferences())) {
+    return false;
+  }
+  setStoredPreferences({ units });
+  return true;
 }
 
 /**
@@ -174,17 +232,18 @@ function buildConditionIcon(condition, className, named) {
  *         windSpeed: number|null, condition: {name: string, icon: string}|null}} hour - Forecast hour.
  * @param {number} scaleMax - Rain amount drawn as a full-height bar.
  * @param {boolean} isNow - True when the column is the current hour, labeled "Now" instead of its time.
- * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
+ * @param {{showWind: boolean, showConditions: boolean, units: object}} settings - Display settings and units.
  * @returns {HTMLLIElement} Chart column.
  */
 function buildHourColumn(hour, scaleMax, isNow, settings) {
   const rain = hour.precipitation || 0;
   const isWet = rain >= RAIN_THRESHOLD_MM;
-  const amount = hour.precipitation === null ? "–" : formatNumber(rain, 1);
+  const { units } = settings;
+  const amount = hour.precipitation === null ? "–" : formatUnitValue("precipitation", rain, units);
   const chance = hour.probability === null ? t("forecast.chance_unknown") : `${hour.probability}%`;
-  const temperature = hour.temperature === null ? "–" : formatNumber(hour.temperature, 0);
+  const temperature = hour.temperature === null ? "–" : formatUnitValue("temperature", hour.temperature, units);
   const label = isNow ? t("forecast.now") : hour.label;
-  const wind = hour.windSpeed === null ? "–" : formatNumber(hour.windSpeed, 0);
+  const wind = hour.windSpeed === null ? "–" : formatUnitValue("wind", hour.windSpeed, units);
 
   const item = document.createElement("li");
   item.className = "forecast-hour";
@@ -195,9 +254,12 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
   description.className = "sr-only";
   const conditionName = settings.showConditions && hour.condition
     ? t(`forecast.condition_${hour.condition.name}`).toLocaleLowerCase(getLang()) : "";
-  description.textContent = t("forecast.hour_aria", { time: label, amount, chance, temp: temperature })
+  description.textContent = t("forecast.hour_aria", {
+    time: label, amount, chance, temp: temperature,
+    rain_unit: unitLabel("precipitation", units), temp_unit: unitLabel("temperature", units),
+  })
     + (conditionName ? t("forecast.hour_aria_condition", { condition: conditionName }) : "")
-    + (settings.showWind ? t("forecast.hour_aria_wind", { wind }) : "");
+    + (settings.showWind ? t("forecast.hour_aria_wind", { wind, unit: unitLabel("wind", units) }) : "");
   item.append(description);
 
   const parts = [
@@ -250,23 +312,29 @@ function updateSearchRow(event) {
  * @param {HTMLElement} target - Summary paragraph to fill.
  * @param {Array<object>} hours - Visible forecast hours.
  * @param {boolean} startsNow - True when the first hour is the current hour.
- * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
+ * @param {{showWind: boolean, showConditions: boolean, units: object}} settings - Display settings and units.
  * @returns {void}
  */
 export function renderSummary(target, hours, startsNow, settings) {
+  const { units } = settings;
+  const rainUnit = unitLabel("precipitation", units);
+  const windUnit = unitLabel("wind", units);
   const rain = summarizeRain(hours);
   const rainingNow = startsNow && (hours[0].precipitation || 0) >= RAIN_THRESHOLD_MM;
   const temperatures = hours.map((h) => h.temperature).filter((v) => v !== null);
   const sentences = [
-    rainingNow ? t("forecast.summary_rain_now", { max: formatNumber(rain.maxPrecipitation, 1) })
+    rainingNow ? t("forecast.summary_rain_now", { max: formatUnitValue("precipitation", rain.maxPrecipitation, units), unit: rainUnit })
       : rain.firstRainLabel
-        ? t("forecast.summary_rain", { time: rain.firstRainLabel, max: formatNumber(rain.maxPrecipitation, 1) })
+        ? t("forecast.summary_rain", {
+          time: rain.firstRainLabel, max: formatUnitValue("precipitation", rain.maxPrecipitation, units), unit: rainUnit,
+        })
         : t("forecast.summary_dry"),
   ];
   if (temperatures.length) {
     sentences.push(t("forecast.summary_temp", {
-      min: formatNumber(Math.min(...temperatures), 0),
-      max: formatNumber(Math.max(...temperatures), 0),
+      min: formatUnitValue("temperature", Math.min(...temperatures), units),
+      max: formatUnitValue("temperature", Math.max(...temperatures), units),
+      unit: unitLabel("temperature", units),
     }));
   }
 
@@ -274,12 +342,13 @@ export function renderSummary(target, hours, startsNow, settings) {
   const strongGusts = wind.maxGusts !== null && wind.maxGusts >= STRONG_GUST_THRESHOLD_KMH;
   if (settings.showWind && wind.maxSpeed !== null) {
     sentences.push(t(strongGusts ? "forecast.summary_wind_gusts" : "forecast.summary_wind", {
-      speed: formatNumber(wind.maxSpeed, 0),
-      gusts: strongGusts ? formatNumber(wind.maxGusts, 0) : "",
+      speed: formatUnitValue("wind", wind.maxSpeed, units),
+      gusts: strongGusts ? formatUnitValue("wind", wind.maxGusts, units) : "",
+      unit: windUnit,
     }));
   }
   else if (settings.showWind && strongGusts) {
-    sentences.push(t("forecast.summary_gusts", { gusts: formatNumber(wind.maxGusts, 0) }));
+    sentences.push(t("forecast.summary_gusts", { gusts: formatUnitValue("wind", wind.maxGusts, units), unit: windUnit }));
   }
 
   target.textContent = sentences.join("\n");
@@ -296,7 +365,7 @@ export function renderSummary(target, hours, startsNow, settings) {
  * @param {HTMLElement} target - Chart list to fill.
  * @param {Array<object>} hours - Visible forecast hours.
  * @param {boolean} startsNow - True when the first hour is the current hour, labeled "Now".
- * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
+ * @param {{showWind: boolean, showConditions: boolean, units: object}} settings - Display settings and units.
  * @returns {void}
  */
 export function renderChart(target, hours, startsNow, settings) {
@@ -317,7 +386,7 @@ function renderForecast(event = "rendered") {
     updateSearchRow(event);
     return;
   }
-  const settings = displaySettings(getStoredPreferences());
+  const settings = forecastSettings();
   const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
   el.forecastPlace.textContent = placeLabel();
   el.forecastUpdated.textContent = t("forecast.updated", {
@@ -513,8 +582,10 @@ async function nameCurrentLocation(place) {
       return;
     }
     place.label = formatPlace(match);
+    place.countryCode = match.countryCode;
     if (view.place === place) {
       setStoredPreferences({ lastPlace: place });
+      prefillUnits(place);
       renderForecast();
     }
   }
@@ -547,9 +618,10 @@ async function localizePlace() {
       return;
     }
     view.place = isCoords
-      ? { ...place, label: formatPlace(match) }
+      ? { ...place, label: formatPlace(match), countryCode: match.countryCode }
       : { ...placeFromMatch(match), latitude: place.latitude, longitude: place.longitude };
     setStoredPreferences({ lastPlace: view.place });
+    prefillUnits(view.place);
     renderForecast();
   }
   catch {
@@ -628,6 +700,7 @@ export function initForecastView() {
     searchAndShow(query);
   }
   else if (lastPlace && typeof lastPlace.latitude === "number" && typeof lastPlace.longitude === "number") {
+    prefillUnits(lastPlace);
     showSavedForecast(lastPlace);
     loadForecast(lastPlace);
   }

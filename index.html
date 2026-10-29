@@ -176,28 +176,28 @@
             <span class="guide-badge" aria-hidden="true">1</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_summary_title">Summary</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_summary_desc">When rain starts and its heaviest hour, then the temperature range. With the wind setting, the strongest wind and gusts from 50 km/h. With the sky setting, an icon shows the current sky.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_summary_desc">When rain starts and its heaviest hour, then the temperature range. With the wind setting, the strongest wind and gusts from 50 km/h. With the sky setting, an icon shows the current sky.</p>
             </div>
           </li>
           <li class="guide-item">
             <span class="guide-badge" aria-hidden="true">2</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_amount_title">Rain amount</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_amount_desc">Rain or snow expected in that hour, in mm. Shown from 0.1 mm.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_amount_desc">Rain or snow expected in that hour (mm). Shown from 0.1 mm.</p>
             </div>
           </li>
           <li class="guide-item">
             <span class="guide-badge" aria-hidden="true">3</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_bar_title">Rain bar</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_bar_desc">Grows with the rain amount. A full bar is the wettest hour, or 2 mm on drier days.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_bar_desc">Grows with the rain amount. A full bar is the wettest hour, or 2 mm on drier days.</p>
             </div>
           </li>
           <li class="guide-item">
             <span class="guide-badge" aria-hidden="true">4</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_chance_title">Chance of rain</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_chance_desc">Probability of more than 0.1 mm of rain or snow in that hour.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_chance_desc">Probability of more than 0.1 mm of rain or snow in that hour.</p>
             </div>
           </li>
           <li class="guide-item">
@@ -218,14 +218,14 @@
             <span class="guide-badge" aria-hidden="true">7</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_temp_title">Temperature</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_temp_desc">Air temperature at the start of each hour, in °C.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_temp_desc">Air temperature at the start of each hour, in °C.</p>
             </div>
           </li>
           <li class="guide-item">
             <span class="guide-badge" aria-hidden="true">8</span>
             <div class="about-icon-info">
               <strong class="guide-item-title about-icon-name" data-i18n="about.guide_wind_title">Wind</strong>
-              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_wind_desc">Wind speed 10 m above the ground at the start of each hour, in km/h. Needs the wind setting and a tall enough screen.</p>
+              <p class="guide-item-text about-icon-detail" data-guide-text="about.guide_wind_desc">Wind speed 10 m above the ground at the start of each hour, in km/h. Needs the wind setting and a tall enough screen.</p>
             </div>
           </li>
           <li class="guide-item">
@@ -433,6 +433,32 @@
             <span class="config-label" data-i18n="config.label_show_conditions">Show sky conditions (sunny, cloudy, …)</span>
           </label>
           <p class="config-hint" data-i18n="config.hint_hourly">Hourly rows need a tall enough screen.</p>
+        </div>
+
+        <div class="config-field">
+          <label for="config-unit-temperature" class="config-label" data-i18n="config.label_unit_temperature">Temperature</label>
+          <select id="config-unit-temperature" class="config-select">
+            <option value="c" data-i18n="config.unit_c">°C (Celsius)</option>
+            <option value="f" data-i18n="config.unit_f">°F (Fahrenheit)</option>
+          </select>
+        </div>
+
+        <div class="config-field">
+          <label for="config-unit-precipitation" class="config-label" data-i18n="config.label_unit_precipitation">Rain</label>
+          <select id="config-unit-precipitation" class="config-select">
+            <option value="mm" data-i18n="config.unit_mm">mm (millimeters)</option>
+            <option value="in" data-i18n="config.unit_in">in (inches)</option>
+          </select>
+        </div>
+
+        <div class="config-field">
+          <label for="config-unit-wind" class="config-label" data-i18n="config.label_unit_wind">Wind</label>
+          <select id="config-unit-wind" class="config-select">
+            <option value="kmh" data-i18n="config.unit_kmh">km/h (kilometers per hour)</option>
+            <option value="mph" data-i18n="config.unit_mph">mph (miles per hour)</option>
+            <option value="ms" data-i18n="config.unit_ms">m/s (meters per second)</option>
+          </select>
+          <p class="config-hint config-hint-flush" data-i18n="config.hint_units">Never set? Using your current location picks the usual units of its country.</p>
         </div>
       </div>
     </div>

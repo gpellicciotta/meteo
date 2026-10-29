@@ -468,7 +468,7 @@ describe("reversePlace", () => {
   it("maps a town answer to its name, province and country", async () => {
     const fetchImpl = fakeFetch(200, SINT_NIKLAAS);
     expect(await reversePlace(51.1655, 4.1437, "nl", fetchImpl)).toEqual({
-      name: "Sint-Niklaas", admin1: "Oost-Vlaanderen", country: "België",
+      name: "Sint-Niklaas", admin1: "Oost-Vlaanderen", country: "België", countryCode: "BE",
     });
     expect(fetchImpl.calls).toEqual([buildReverseUrl(51.1655, 4.1437, "nl")]);
   });
@@ -476,10 +476,10 @@ describe("reversePlace", () => {
   it("prefers city, then village, and the province before the state", async () => {
     const answer = (address) => reversePlace(0, 0, "en", fakeFetch(200, { name: "Top", address }));
     expect(await answer({ city: "Gent", town: "T", village: "V", province: "East Flanders", state: "Flanders" }))
-      .toEqual({ name: "Gent", admin1: "East Flanders", country: "" });
-    expect(await answer({ village: "Lochristi", hamlet: "H", county: "Gent", country: "Belgium" }))
-      .toEqual({ name: "Lochristi", admin1: "Gent", country: "Belgium" });
-    expect(await answer({ state: "Flanders" })).toEqual({ name: "Top", admin1: "Flanders", country: "" });
+      .toEqual({ name: "Gent", admin1: "East Flanders", country: "", countryCode: "" });
+    expect(await answer({ village: "Lochristi", hamlet: "H", county: "Gent", country: "Belgium", country_code: "be" }))
+      .toEqual({ name: "Lochristi", admin1: "Gent", country: "Belgium", countryCode: "BE" });
+    expect(await answer({ state: "Flanders" })).toEqual({ name: "Top", admin1: "Flanders", country: "", countryCode: "" });
   });
 
   it("returns null when no place is found", async () => {
