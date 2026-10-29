@@ -33,6 +33,7 @@ export const el = {
   btnAbout: document.getElementById("btn-about"),
   btnAboutBack: document.getElementById("btn-about-back"),
   aboutChangelogBody: document.getElementById("about-changelog-body"),
+  aboutContent: document.querySelector(".about-content"),
   guideSample: document.getElementById("guide-sample"),
   guideSummary: document.getElementById("guide-summary"),
   guideChart: document.getElementById("guide-chart"),

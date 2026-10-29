@@ -112,7 +112,7 @@
   "about.icon_lang_title": "Change Language",
   "about.icon_lang_desc": "Switch the interface language (EN, NL).",
   "about.icon_about_title": "About & Help",
-  "about.icon_about_desc": "View sources, release notes, support links, and this guide.",
+  "about.icon_about_desc": "View this guide, sources, release notes and support links. Shortcut: F1.",
   "about.icon_install_title": "Install App",
   "about.icon_install_desc": "Install Meteo as an app on your phone or computer.",
   "forecast.search_placeholder": "City, town or postal code",

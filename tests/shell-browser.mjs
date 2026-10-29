@@ -49,6 +49,29 @@ try {
   check((await page.getAttribute("html", "data-theme")) === "light", "closing Settings without saving reverts the preview");
   check(await page.isVisible("#screen-start"), "Escape returns to the start view");
 
+  // A listener added after the app's own one sees whether the app prevented the browser's help.
+  await page.evaluate(() => document.addEventListener("keydown", (e) => {
+    window.f1Prevented = e.key === "F1" ? e.defaultPrevented : window.f1Prevented;
+  }));
+  await page.keyboard.press("F1");
+  check(await page.isVisible("#screen-about") && await page.isHidden("#screen-start"), "F1 opens the About view from the start view");
+  check(await page.evaluate(() => window.f1Prevented === true), "F1 prevents the browser's own help");
+  await page.evaluate(() => {
+    document.querySelector(".about-content").scrollTop = 400;
+  });
+  await page.keyboard.press("F1");
+  check(await page.isVisible("#screen-about") && await page.evaluate(() => document.querySelector(".about-content").scrollTop === 0),
+    "F1 in the About view keeps it open and scrolls back to the guide");
+  await captureViews(page, "about-f1");
+  await page.keyboard.press("Escape");
+  await page.click("#btn-config");
+  await page.selectOption("#config-theme", "dark");
+  await page.keyboard.press("F1");
+  check(await page.isVisible("#screen-about") && await page.isHidden("#screen-config"), "F1 in Settings opens the About view");
+  check((await page.getAttribute("html", "data-theme")) === "light", "F1 in Settings reverts the unsaved theme preview");
+  await page.keyboard.press("Escape");
+  check(await page.isVisible("#screen-start"), "Escape returns to the start view after F1");
+
   check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
 }
 catch (err) {

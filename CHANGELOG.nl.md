@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.1.0-pre
+- FrontEnd: F1 opent de Over-pagina met de uitleg van de voorspelling.
 - FrontEnd: Met de muis over een onderdeel van de voorbeeldkaart toont een tooltip de uitleg ervan.
 - FrontEnd: Het weerbeeld in de gids van Over toont nu alle negen weericonen met hun betekenis.
 - FrontEnd: Pijlen boven de windsnelheden tonen per uur de windrichting, met uitgesproken windstreken.

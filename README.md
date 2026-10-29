@@ -27,6 +27,7 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - The About view explains each part of a numbered sample forecast with every option on.
 - Its sky item lists all nine weather icons with their meaning.
 - With a mouse, hovering a sample section shows its explanation and highlights its list item.
+- Pressing F1 opens the About view at the guide, also from Settings.
 - The last place is remembered and reloaded on your next visit.
 - Its last forecast is saved too and shown when the app starts offline or a refresh fails.
 - The chart always starts at the current hour, also when the app resumes offline.

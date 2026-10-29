@@ -37,7 +37,26 @@ for (const select of [el.configUnitTemperature, el.configUnitPrecipitation, el.c
   select.addEventListener("change", touchUnits);
 }
 
+/**
+ * Open the About view at its forecast guide, leaving Settings without saving first.
+ *
+ * @returns {void}
+ */
+function openHelp() {
+  if (!el.screenConfig.classList.contains("hidden")) {
+    closeConfigView();
+  }
+  showScreen("about");
+  el.aboutContent.scrollTop = 0;
+}
+
 document.addEventListener("keydown", (e) => {
+  // F1 opens help, as in desktop apps, instead of the browser's own help page.
+  if (e.key === "F1") {
+    e.preventDefault();
+    openHelp();
+    return;
+  }
   if (e.key !== "Escape") {
     return;
   }
