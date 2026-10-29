@@ -1,6 +1,6 @@
 {
   "name": "meteo",
-  "version": "1.0.0",
+  "version": "1.0.1-pre",
   "description": "Minimal web app showing the temperature and hourly rain forecast for the next 12 hours.",
   "private": true,
   "type": "module",

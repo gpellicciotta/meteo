@@ -1088,15 +1088,6 @@ body.suppress-tooltips [data-tooltip]::before {
   line-height: 1.4;
 }
 
-.forecast-updated a {
-  color: var(--color-primary);
-}
-
-/* Wraps as a whole to the next line on narrow screens. */
-.forecast-attribution-osm {
-  white-space: nowrap;
-}
-
 @media (max-width: 479px) {
   .forecast-card {
     padding: 12px 8px;

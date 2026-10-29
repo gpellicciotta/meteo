@@ -106,8 +106,6 @@ function reverseBody(nl) {
   };
 }
 
-const OSM_LINK = "#forecast a[href='https://www.openstreetmap.org/copyright']";
-
 /**
  * Show the search row through the footer button when a shown forecast has hidden it.
  *
@@ -217,11 +215,8 @@ let failed = false;
     const amounts = await page.$$eval("#forecast-chart .forecast-amount", (spans) => spans.map((s) => s.textContent));
     check(amounts[2] === "", "amounts below the 0.1 mm rain threshold get no label");
     check(urls.some((u) => u.includes("latitude=51.05") && u.includes("forecast_hours=25")), "the forecast request uses the picked place");
-    const attributionInView = await page.$eval("#forecast a[href='https://open-meteo.com/']", (a) => {
-      const box = a.getBoundingClientRect();
-      return box.height > 0 && box.bottom <= window.innerHeight;
-    });
-    check(attributionInView, "the Open-Meteo attribution is visible without scrolling");
+    check(await page.locator("#forecast a").count() === 0, "the forecast shows no attribution links, which the About view lists");
+    check(await page.isVisible("#forecast-updated"), "the update time is still shown below the place name");
     await captureViews(page, "forecast-en");
 
     await page.click("#btn-lang");
@@ -303,7 +298,7 @@ let failed = false;
       "the current location shows its town, province and country");
     check(reverseUrls.length === 1 && reverseUrls[0].includes("lat=50.850&lon=4.352") && reverseUrls[0].includes("accept-language=en"),
       `the name is looked up once with rounded coordinates (${reverseUrls.join(", ")})`);
-    check(await page.isVisible(OSM_LINK), "the OpenStreetMap attribution is shown with the looked-up name");
+    check(await page.locator("#forecast a").count() === 0, "a named current location shows no attribution links");
     await captureViews(page, "current-location-en");
 
     await page.click("#btn-lang");
@@ -324,13 +319,11 @@ let failed = false;
     await page.waitForFunction(() => document.getElementById("forecast-status").classList.contains("hidden"));
     check((await page.textContent("#forecast-place")) === "Current location (50.85, 4.35)", "a failed lookup keeps the rounded coordinates");
     check(await page.isHidden("#start-error"), "a failed lookup shows no error");
-    check(await page.isHidden(OSM_LINK), "the OpenStreetMap attribution is hidden with the coordinates");
 
     await openSearch(page);
     await page.fill("#location-input", "Brussel");
     await page.click("#btn-search");
     await page.waitForFunction(() => document.getElementById("forecast-place").textContent === "Gent, Flanders, Belgium");
-    check(await page.isHidden(OSM_LINK), "the OpenStreetMap attribution is hidden for a searched place");
     // The mocked HTTP 500 lookup above is intentional; drop its response and console entries from the error gate.
     problems.splice(0, problems.length, ...problems.filter((p) => !p.includes("nominatim.openstreetmap.org") && !p.includes("status of 500")));
     check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);

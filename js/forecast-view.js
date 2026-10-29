@@ -255,7 +255,6 @@ function renderForecast(event = "rendered") {
   }
 
   el.forecastPlace.textContent = placeLabel();
-  el.forecastAttributionOsm.classList.toggle("hidden", !(view.place.kind === "coords" && view.place.label));
   el.forecastUpdated.textContent = t("forecast.updated", {
     time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });

@@ -12,6 +12,9 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 
 ---
 
+## v1.0.1-pre
+- FrontEnd: De bronvermelding onder de voorspelling is weg; de Over-pagina vermeldt de bronnen al.
+
 ## v1.0.0 [released: 2026-10-28]
 - FrontEnd: De regenstaven, hoeveelheden en natte weersamenvatting volgen nu de gekozen accentkleur.
 - FrontEnd: De zoekbalk verdwijnt zodra een voorspelling verschijnt; een zoekknop onderaan toont ze opnieuw.

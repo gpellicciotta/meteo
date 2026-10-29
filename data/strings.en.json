@@ -85,8 +85,6 @@
   "forecast.hour_aria": "{time}: {amount} mm rain, {chance} chance, {temp} °C",
   "forecast.chance_unknown": "unknown",
   "forecast.legend": "Bars show rain in mm per hour, percentages the chance of rain.",
-  "forecast.attribution": "Weather data by Open-Meteo.com",
-  "forecast.attribution_osm": "Place name © OpenStreetMap",
   "forecast.status_searching": "Searching…",
   "forecast.status_locating": "Finding your location…",
   "forecast.status_loading": "Loading the forecast…",

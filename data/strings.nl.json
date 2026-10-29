@@ -85,8 +85,6 @@
   "forecast.hour_aria": "{time}: {amount} mm regen, {chance} kans, {temp} °C",
   "forecast.chance_unknown": "onbekende",
   "forecast.legend": "Staven tonen de regen in mm per uur, percentages de kans op regen.",
-  "forecast.attribution": "Weerdata van Open-Meteo.com",
-  "forecast.attribution_osm": "Plaatsnaam © OpenStreetMap",
   "forecast.status_searching": "Zoeken…",
   "forecast.status_locating": "Je locatie bepalen…",
   "forecast.status_loading": "Voorspelling laden…",
