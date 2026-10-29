@@ -37,6 +37,7 @@ function forecastBody() {
       precipitation_probability: RAIN.map((v) => (v > 0 ? 70 : 5)),
       wind_speed_10m: [40, ...Array(11).fill(20), 99],
       wind_gusts_10m: [99, ...Array(11).fill(35), 70],
+      wind_direction_10m: RAIN.map(() => 225),
       weather_code: [61, ...Array(12).fill(0)],
       is_day: RAIN.map(() => 1),
     },
@@ -224,7 +225,7 @@ let failed = false;
     check((await page.textContent("#forecast-summary")).endsWith("°C.\nWind up to 40 km/h, gusts up to 70 km/h."), "English wind and gust maxima follow the temperature");
     check(urls.some((u) => new URL(u).searchParams.get("hourly")?.includes("wind_speed_10m,wind_gusts_10m")), "the request includes both wind variables");
     const label = await page.textContent("#forecast-chart > li:nth-child(5) .sr-only");
-    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C, wind 20 km/h", `bars carry a screen reader description (${label})`);
+    check(label === "14:00: 1.2 mm rain, 70% chance, 12 °C, wind 20 km/h from the southwest", `bars carry a screen reader description (${label})`);
     const updated = await page.textContent("#forecast-updated");
     check(/\b\d{2}:\d{2}\b/.test(updated) && !/AM|PM/.test(updated), `the update time uses the 24-hour clock (${updated})`);
     const amounts = await page.$$eval("#forecast-chart .forecast-amount", (spans) => spans.map((s) => s.textContent));
@@ -1005,7 +1006,15 @@ function measureStartLayout(page) {
       const content = document.getElementById("start-content");
       return {
         summary: document.getElementById("forecast-summary").textContent,
-        cells: cells.map((cell) => cell.textContent),
+        cells: cells.map((cell) => cell.querySelector(".forecast-wind-speed")?.textContent ?? cell.textContent),
+        arrows: cells.map((cell) => {
+          const arrow = cell.querySelector("svg.forecast-wind-arrow");
+          const speed = cell.querySelector(".forecast-wind-speed");
+          // A rotated arrow has a larger bounding box, so compare its center with the top of the speed.
+          const box = arrow && arrow.getBoundingClientRect();
+          return box && speed && (box.top + box.bottom) / 2 < speed.getBoundingClientRect().top
+            ? arrow.style.transform : "";
+        }),
         visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
         legend: document.querySelectorAll("#forecast .forecast-legend").length,
         description: document.querySelector("#forecast-chart .sr-only").textContent,
@@ -1030,7 +1039,9 @@ function measureStartLayout(page) {
     check(view.cells.length === 12 && view.cells[0] === "40" && view.cells[1] === "20" && view.visible === 12,
       `saving the setting shows twelve hourly wind cells (${view.cells.slice(0, 2).join(", ")}, ${view.visible} visible)`);
     check(view.legend === 0, "the forecast card has no legend, which the About guide replaces");
-    check(view.description.endsWith(", wind 40 km/h"), `the first hour description ends with its wind (${view.description})`);
+    check(view.description.endsWith(", wind 40 km/h from the southwest"), `the first hour description ends with its wind (${view.description})`);
+    check(view.arrows.every((transform) => transform === "rotate(45deg)"),
+      `every wind cell has an arrow pointing northeast above its speed (${view.arrows[0]})`);
     check(await page.evaluate(() => JSON.parse(localStorage.getItem("meteo_preferences")).showWind) === true,
       "localStorage remembers the wind setting");
     await page.reload({ waitUntil: "networkidle" });
@@ -1053,10 +1064,19 @@ function measureStartLayout(page) {
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "nl");
     view = await windView();
-    check(view.description.endsWith(", wind 40 km/u") && view.summary.endsWith("Wind tot 40 km/u, windstoten tot 70 km/u."),
+    check(view.description.endsWith(", wind 40 km/u uit het zuidwesten") && view.summary.endsWith("Wind tot 40 km/u, windstoten tot 70 km/u."),
       "the wind row description and summary follow the Dutch language switch");
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "en");
+
+    const calm = forecastBody();
+    delete calm.hourly.wind_direction_10m;
+    await context.route("https://api.open-meteo.com/**", (route) => route.fulfill({ json: calm }));
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    view = await windView();
+    check(view.cells.length === 12 && view.arrows.every((transform) => transform === "")
+      && view.description.endsWith(", wind 40 km/h"), "without directions the wind cells show no arrows and no direction");
 
     check(await saveWind(false) === true, "Settings shows the stored wind setting checked");
     view = await windView();
@@ -1135,7 +1155,7 @@ function measureStartLayout(page) {
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "nl");
     view = await skyView();
-    check(view.description.endsWith(", regen, wind 40 km/u"), `the hour description follows the Dutch language switch (${view.description})`);
+    check(view.description.endsWith(", regen, wind 40 km/u uit het zuidwesten"), `the hour description follows the Dutch language switch (${view.description})`);
     await page.click("#btn-lang");
     await page.waitForFunction(() => document.documentElement.lang === "en");
 
@@ -1256,7 +1276,7 @@ function measureStartLayout(page) {
         summary: document.getElementById("forecast-summary").textContent.trim(),
         temps: hours.map((h) => h.querySelector(".forecast-temp").textContent),
         amounts: hours.map((h) => h.querySelector(".forecast-amount").textContent),
-        wind: hours.map((h) => h.querySelector(".forecast-wind")?.textContent || ""),
+        wind: hours.map((h) => h.querySelector(".forecast-wind-speed")?.textContent || ""),
         description: hours[4].querySelector(".sr-only").textContent,
       };
     });
@@ -1293,7 +1313,7 @@ function measureStartLayout(page) {
       && view.summary.endsWith("Wind up to 25 mph, gusts up to 43 mph."), `the summary uses °F, in and mph (${view.summary})`);
     check(view.temps[0] === "49°" && view.amounts[3] === "0.02" && view.amounts[10] === "<0.01" && view.wind[0] === "25",
       `the chart uses °F, in and mph (${view.temps[0]}, ${view.amounts[3]}, ${view.amounts[10]}, ${view.wind[0]})`);
-    check(view.description === "14:00: 0.05 in rain, 70% chance, 53 °F, wind 12 mph", `the hour description uses the units (${view.description})`);
+    check(view.description === "14:00: 0.05 in rain, 70% chance, 53 °F, wind 12 mph from the southwest", `the hour description uses the units (${view.description})`);
     check(JSON.stringify(await storedUnits()) === JSON.stringify({ temperature: "f", precipitation: "in", wind: "mph" }),
       "localStorage remembers the chosen units");
     await page.reload({ waitUntil: "networkidle" });

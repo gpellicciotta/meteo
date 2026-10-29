@@ -18,6 +18,7 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.
 - With the wind setting on, the summary includes maximum wind speed and gusts from 50 km/h, when available.
 - That setting also adds hourly wind speeds below the temperatures, on tall enough screens.
+- An arrow above each speed points where the wind blows to; screen readers name where it comes from.
 - Hourly rows need a screen at least 700px tall, or 800px tall from 480px wide.
 - Display settings are off by default and remembered in the browser.
 - Settings choose °C or °F, mm or inches, and km/h, mph or m/s.
@@ -31,7 +32,7 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - With fewer than 6 hours left, the saved forecast gives way to the network error.
 
 The browser fetches the weather and place search data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
-- [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind, weather codes and daylight.
+- [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind speed, gusts and direction, weather codes and daylight.
 - [Geocoding API](https://open-meteo.com/en/docs/geocoding-api) for place and postal code search.
 
 The name of the current location comes from the [OpenStreetMap Nominatim reverse API](https://nominatim.org/release-docs/latest/api/Reverse/).

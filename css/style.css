@@ -1093,9 +1093,19 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .forecast-wind {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   margin-top: 2px;
   font-size: 0.6875rem;
   color: var(--color-muted);
+}
+
+.forecast-wind-arrow {
+  display: block;
+  width: 10px;
+  height: 10px;
+  margin-bottom: 1px;
 }
 
 /* Hourly rows only show where the forecast still fits without scrolling, with the search row open. */

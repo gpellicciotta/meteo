@@ -30,6 +30,10 @@ const ICON_DEFS = {
   "weather-thunder": `
     <path d="M5 14a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 14M13 11l-4 7h5l-3 5"></path>
   `,
+  // Upward arrow, rotated to show where the wind blows to.
+  "wind-arrow": `
+    <path d="M12 21V4M6 10l6-6 6 6"></path>
+  `,
   // Checkmark for correct answers and completed states.
   check: `
     <polyline points="20 6 9 17 4 12"></polyline>

@@ -83,13 +83,13 @@ export function weatherCondition(code, isDay) {
  * Open-Meteo reports precipitation and its probability for the hour before each time
  * step, so the response holds one extra step: hour k runs from step k to step k + 1, taking
  * its label and temperature from step k and its rain and probability from step k + 1.
- * Wind speed is instantaneous at step k; gusts are the preceding-hour maximum at step k + 1.
+ * Wind speed and direction are instantaneous at step k; gusts are the preceding-hour maximum at step k + 1.
  * Weather code and daylight are instantaneous at step k.
  *
  * @param {object} json - Forecast API response body.
  * @returns {{timezone: string, hours: Array<{time: string, label: string, temperature: number|null,
  *          precipitation: number|null, probability: number|null,
- *          windSpeed: number|null, windGusts: number|null,
+ *          windSpeed: number|null, windGusts: number|null, windDirection: number|null,
  *          condition: {name: string, icon: string}|null}>}} Parsed forecast.
  * @throws {ForecastError} With code "bad_response" when fewer than 13 steps are present.
  */
@@ -109,10 +109,27 @@ export function parseForecast(json) {
       probability: valueAt(hourly.precipitation_probability, k + 1),
       windSpeed: valueAt(hourly.wind_speed_10m, k),
       windGusts: valueAt(hourly.wind_gusts_10m, k + 1),
+      windDirection: valueAt(hourly.wind_direction_10m, k),
       condition: weatherCondition(valueAt(hourly.weather_code, k), valueAt(hourly.is_day, k)),
     });
   }
   return { timezone: json.timezone || "", hours };
+}
+
+const COMPASS_POINTS = ["n", "ne", "e", "se", "s", "sw", "w", "nw"];
+
+/**
+ * Name the compass point nearest to a wind direction.
+ *
+ * @param {number|null} degrees - Direction the wind comes from, clockwise from north.
+ * @returns {string|null} One of "n", "ne", "e", "se", "s", "sw", "w" and "nw", or null when missing.
+ */
+export function compassPoint(degrees) {
+  if (typeof degrees !== "number" || !Number.isFinite(degrees)) {
+    return null;
+  }
+  const normalized = ((degrees % 360) + 360) % 360;
+  return COMPASS_POINTS[Math.round(normalized / 45) % COMPASS_POINTS.length];
 }
 
 /**
@@ -280,6 +297,10 @@ function isForecastHour(hour) {
   }
   const numeric = ["temperature", "precipitation", "probability", "windSpeed", "windGusts"];
   if (!numeric.every((key) => hour[key] === null || Number.isFinite(hour[key]))) {
+    return false;
+  }
+  // Forecasts saved before wind directions were fetched have no windDirection at all.
+  if (hour.windDirection !== undefined && hour.windDirection !== null && !Number.isFinite(hour.windDirection)) {
     return false;
   }
   const { condition } = hour;

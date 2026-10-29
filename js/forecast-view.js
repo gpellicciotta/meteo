@@ -2,7 +2,8 @@ import { el } from "./dom.js";
 import { t, getLang } from "./i18n.js";
 import { getStoredPreferences, setStoredPreferences } from "./preferences.js";
 import {
-  MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, displaySettings, formatPlace, isCurrentHour, isStale,
+  MIN_SAVED_HOURS, RAIN_THRESHOLD_MM, STRONG_GUST_THRESHOLD_KMH, barScaleMax, compassPoint, displaySettings, formatPlace,
+  isCurrentHour, isStale,
   placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours,
 } from "./forecast.js";
 import { fetchForecast, reversePlace, searchPlaces } from "./weather-api.js";
@@ -223,6 +224,45 @@ function buildConditionIcon(condition, className, named) {
 }
 
 /**
+ * Describe the wind of an hour for screen readers, naming where it comes from when known.
+ *
+ * @param {{windDirection?: number|null}} hour - Forecast hour.
+ * @param {string} wind - Formatted wind speed.
+ * @param {{wind: string}} units - Units to show.
+ * @returns {string} Description part starting with a comma.
+ */
+function windDescription(hour, wind, units) {
+  const point = compassPoint(hour.windDirection ?? null);
+  const unit = unitLabel("wind", units);
+  return point
+    ? t("forecast.hour_aria_wind_from", { wind, unit, direction: t(`wind.dir_${point}`) })
+    : t("forecast.hour_aria_wind", { wind, unit });
+}
+
+/**
+ * Fill the wind cell of an hour: an arrow pointing where the wind blows to, above the speed.
+ *
+ * Without a direction the arrow slot stays empty, so the speeds of all hours stay aligned.
+ *
+ * @param {HTMLElement} cell - Wind cell of the column.
+ * @param {number|null|undefined} direction - Direction the wind comes from, in degrees.
+ * @param {string} speed - Formatted wind speed.
+ * @returns {void}
+ */
+function fillWindCell(cell, direction, speed) {
+  let arrow = document.createElement("span");
+  if (compassPoint(direction ?? null)) {
+    arrow = createIcon("wind-arrow", { width: 10, height: 10, strokeWidth: 2.6 });
+    arrow.style.transform = `rotate(${(((direction + 180) % 360) + 360) % 360}deg)`;
+  }
+  arrow.classList.add("forecast-wind-arrow");
+  const value = document.createElement("span");
+  value.className = "forecast-wind-speed";
+  value.textContent = speed;
+  cell.replaceChildren(arrow, value);
+}
+
+/**
  * Build one column of the rain chart.
  *
  * The visible parts are hidden from assistive technology; a visually hidden sentence
@@ -259,7 +299,7 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
     rain_unit: unitLabel("precipitation", units), temp_unit: unitLabel("temperature", units),
   })
     + (conditionName ? t("forecast.hour_aria_condition", { condition: conditionName }) : "")
-    + (settings.showWind ? t("forecast.hour_aria_wind", { wind, unit: unitLabel("wind", units) }) : "");
+    + (settings.showWind ? windDescription(hour, wind, units) : "");
   item.append(description);
 
   const parts = [
@@ -288,6 +328,9 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
   item.querySelector(".forecast-bar-track").append(bar);
   if (settings.showConditions && hour.condition) {
     item.querySelector(".forecast-sky").append(buildConditionIcon(hour.condition, "forecast-sky-icon", false));
+  }
+  if (settings.showWind) {
+    fillWindCell(item.querySelector(".forecast-wind"), hour.windDirection, wind);
   }
   return item;
 }

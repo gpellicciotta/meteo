@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.1.0-pre
+- FrontEnd: Added hourly wind direction arrows above the wind speeds, with spoken compass directions.
 - FrontEnd: Added °F, inch, mph and m/s unit settings, prefilled from the current location's country, else metric.
 - FrontEnd: Replaced the forecast legend with an About guide numbering each element of a full sample forecast.
 - FrontEnd: Added an off-by-default sky setting showing the summary condition icon and, on tall screens, hourly condition icons.

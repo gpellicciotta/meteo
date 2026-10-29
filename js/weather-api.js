@@ -54,7 +54,7 @@ export function buildForecastUrl(latitude, longitude) {
   const params = new URLSearchParams({
     latitude: String(latitude),
     longitude: String(longitude),
-    hourly: "temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,weather_code,is_day",
+    hourly: "temperature_2m,precipitation,precipitation_probability,wind_speed_10m,wind_gusts_10m,wind_direction_10m,weather_code,is_day",
     forecast_hours: String(FETCH_HOURS + 1),
     timezone: "auto",
   });

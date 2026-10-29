@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { STALE_AFTER_MS, barScaleMax, displaySettings, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
+import { STALE_AFTER_MS, barScaleMax, compassPoint, displaySettings, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildReverseUrl, buildSearchUrl, fetchForecast, reversePlace, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
 import { guideHours } from "../js/guide-sample.js";
@@ -52,7 +52,7 @@ describe("parseForecast", () => {
     const forecast = parseForecast(forecastResponse(RAIN));
     expect(forecast.timezone).toBe("Europe/Brussels");
     expect(forecast.hours).toHaveLength(12);
-    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null, condition: null });
+    expect(forecast.hours[0]).toEqual({ time: "2026-10-28T10:00", label: "10:00", temperature: 10, precipitation: 0, probability: 5, windSpeed: null, windGusts: null, windDirection: null, condition: null });
     expect(forecast.hours[4]).toMatchObject({ label: "14:00", temperature: 14, precipitation: 1.2, probability: 25 });
     expect(forecast.hours[11]).toMatchObject({ label: "21:00", precipitation: 0, probability: 60 });
   });
@@ -83,6 +83,13 @@ describe("parseForecast", () => {
     expect(summarizeWind(hours)).toEqual({ maxSpeed: 40, maxGusts: 70 });
   });
 
+  it("takes the instantaneous wind direction from the start of each hour", () => {
+    const { hours } = parseForecast(forecastResponse(RAIN, { wind_direction_10m: [225, 270, ...Array(11).fill(90)] }));
+    expect(hours[0].windDirection).toBe(225);
+    expect(hours[1].windDirection).toBe(270);
+    expect(parseForecast(forecastResponse(RAIN)).hours.every((h) => h.windDirection === null)).toBe(true);
+  });
+
   it("keeps absent arrays, missing entries, and explicit null wind values as null", () => {
     const { hours } = parseForecast(forecastResponse(RAIN, {
       wind_speed_10m: [null, 0], wind_gusts_10m: [90, null, 0],
@@ -92,6 +99,13 @@ describe("parseForecast", () => {
     expect(hours[2]).toMatchObject({ windSpeed: null, windGusts: null });
     expect(parseForecast(forecastResponse(RAIN)).hours.every((h) => h.windSpeed === null && h.windGusts === null)).toBe(true);
   });
+});
+
+describe("compassPoint", () => {
+  it.each([[0, "n"], [44, "ne"], [225, "sw"], [330, "nw"], [359, "n"], [360, "n"], [-45, "nw"], [null, null]])(
+    "names %j degrees %j", (degrees, point) => {
+      expect(compassPoint(degrees)).toBe(point);
+    });
 });
 
 describe("weatherCondition", () => {
@@ -260,6 +274,13 @@ describe("restoreForecast", () => {
     expect(restored.fetchedAt).toEqual(new Date("2026-10-28T09:20:00Z"));
   });
 
+  it("accepts hours saved without a wind direction by older versions", () => {
+    const { windDirection, ...older } = forecast.hours[0];
+    const restored = restoreForecast({ ...saved, forecast: { ...forecast, hours: [older] } }, "2797656");
+    expect(windDirection).toBeNull();
+    expect(restored.forecast.hours).toEqual([older]);
+  });
+
   it("ignores the saved forecast of another place", () => {
     expect(restoreForecast(saved, "50.85,4.35")).toBeNull();
   });
@@ -281,6 +302,7 @@ describe("restoreForecast", () => {
       { ...saved, forecast: { ...forecast, hours: [{ ...hour, label: null }] } },
       { ...saved, forecast: { ...forecast, hours: [{ ...hour, temperature: "12" }] } },
       { ...saved, forecast: { ...forecast, hours: [{ ...hour, windGusts: undefined }] } },
+      { ...saved, forecast: { ...forecast, hours: [{ ...hour, windDirection: "sw" }] } },
       { ...saved, forecast: { ...forecast, hours: [{ ...hour, condition: "rain" }] } },
       { ...saved, forecast: { ...forecast, hours: [{ ...hour, condition: { name: "rain", icon: "weather-hail" } }] } },
     ];
@@ -420,7 +442,7 @@ describe("weather API client", () => {
     );
     expect(buildForecastUrl(50.85, 4.35)).toBe(
       "https://api.open-meteo.com/v1/forecast?latitude=50.85&longitude=4.35"
-      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m%2Cweather_code%2Cis_day&forecast_hours=25&timezone=auto",
+      + "&hourly=temperature_2m%2Cprecipitation%2Cprecipitation_probability%2Cwind_speed_10m%2Cwind_gusts_10m%2Cwind_direction_10m%2Cweather_code%2Cis_day&forecast_hours=25&timezone=auto",
     );
   });
 
