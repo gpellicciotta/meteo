@@ -20,6 +20,7 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - That setting also adds hourly wind speeds below the temperatures, on tall enough screens.
 - Hourly rows need a screen at least 700px tall, or 800px tall from 480px wide.
 - Display settings are off by default and remembered in the browser.
+- The About view explains each part of a numbered sample forecast with every option on.
 - The last place is remembered and reloaded on your next visit.
 - Its last forecast is saved too and shown when the app starts offline or a refresh fails.
 - The chart always starts at the current hour, also when the app resumes offline.

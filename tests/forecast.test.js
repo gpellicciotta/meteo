@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from "vitest";
 import { STALE_AFTER_MS, barScaleMax, displaySettings, formatPlace, isCurrentHour, isStale, parseForecast, placeKey, restoreForecast, searchRowOpen, summarizeRain, summarizeWind, visibleHours, weatherCondition } from "../js/forecast.js";
 import { buildForecastUrl, buildReverseUrl, buildSearchUrl, fetchForecast, reversePlace, searchPlaces } from "../js/weather-api.js";
 import { getCurrentCoordinates } from "../js/geolocation.js";
+import { guideHours } from "../js/guide-sample.js";
 
 /**
  * Build an Open-Meteo style hourly forecast response.
@@ -335,6 +336,29 @@ describe("displaySettings", () => {
     expect(displaySettings({ showConditions: true })).toEqual({ showWind: false, showConditions: true });
     expect(displaySettings({ showWind: true, showConditions: true })).toEqual({ showWind: true, showConditions: true });
     expect(displaySettings({ showConditions: "true" })).toEqual({ showWind: false, showConditions: false });
+  });
+});
+
+describe("guideHours", () => {
+  const hours = guideHours();
+
+  it("returns 12 hours from 10:00 with rain from 13:00 up to 2.6 mm", () => {
+    expect(hours).toHaveLength(12);
+    expect(hours[0].label).toBe("10:00");
+    expect(summarizeRain(hours)).toEqual({ firstRainLabel: "13:00", maxPrecipitation: 2.6 });
+  });
+
+  it("has wind and a condition on every hour, with gusts reaching 62 km/h", () => {
+    expect(hours.every((h) => h.windSpeed !== null && h.condition !== null)).toBe(true);
+    expect(summarizeWind(hours).maxGusts).toBe(62);
+  });
+
+  it("shows day icons before 17:00 and night icons after", () => {
+    const icons = hours.map((h) => h.condition.icon);
+    expect(icons.slice(0, 7).some((icon) => icon.endsWith("-day"))).toBe(true);
+    expect(icons.slice(0, 7).some((icon) => icon.endsWith("-night"))).toBe(false);
+    expect(icons.slice(8).some((icon) => icon.endsWith("-night"))).toBe(true);
+    expect(icons.slice(8).some((icon) => icon.endsWith("-day"))).toBe(false);
   });
 });
 

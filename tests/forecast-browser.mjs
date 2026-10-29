@@ -1002,13 +1002,12 @@ function measureStartLayout(page) {
     await captureViews(page, "wind-off");
     const windView = () => page.evaluate(() => {
       const cells = [...document.querySelectorAll("#forecast-chart .forecast-wind")];
-      const legend = document.querySelector("#forecast .forecast-legend-wind");
       const content = document.getElementById("start-content");
       return {
         summary: document.getElementById("forecast-summary").textContent,
         cells: cells.map((cell) => cell.textContent),
         visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
-        legend: Boolean(legend && legend.getClientRects().length > 0),
+        legend: document.querySelectorAll("#forecast .forecast-legend").length,
         description: document.querySelector("#forecast-chart .sr-only").textContent,
         overflow: content.scrollHeight - content.clientHeight,
       };
@@ -1028,8 +1027,9 @@ function measureStartLayout(page) {
     check(await saveWind(true) === false, "Settings shows the wind checkbox unchecked by default");
     view = await windView();
     check(view.summary.endsWith("°C.\nWind up to 40 km/h, gusts up to 70 km/h."), "saving the setting adds the wind summary");
-    check(view.cells.length === 12 && view.cells[0] === "40" && view.cells[1] === "20" && view.visible === 12 && view.legend,
-      `saving the setting shows twelve hourly wind cells and the legend part (${view.cells.slice(0, 2).join(", ")}, ${view.visible} visible)`);
+    check(view.cells.length === 12 && view.cells[0] === "40" && view.cells[1] === "20" && view.visible === 12,
+      `saving the setting shows twelve hourly wind cells (${view.cells.slice(0, 2).join(", ")}, ${view.visible} visible)`);
+    check(view.legend === 0, "the forecast card has no legend, which the About guide replaces");
     check(view.description.endsWith(", wind 40 km/h"), `the first hour description ends with its wind (${view.description})`);
     check(await page.evaluate(() => JSON.parse(localStorage.getItem("meteo_preferences")).showWind) === true,
       "localStorage remembers the wind setting");
@@ -1043,7 +1043,7 @@ function measureStartLayout(page) {
       await page.setViewportSize({ width, height });
       view = await windView();
       const size = `${width}x${height}`;
-      check(view.visible === (shown ? 12 : 0) && view.legend === shown, `hourly wind is ${shown ? "shown" : "hidden"} at ${size}`);
+      check(view.visible === (shown ? 12 : 0), `hourly wind is ${shown ? "shown" : "hidden"} at ${size}`);
       check(view.summary.includes("Wind up to 40 km/h"), `the wind summary stays at ${size}`);
       if (shown || size === "390x667") {
         check(view.overflow <= 0, `the forecast with search row fits without scrolling at ${size} (overflow ${view.overflow}px)`);
@@ -1143,6 +1143,88 @@ function measureStartLayout(page) {
     view = await skyView();
     check(view.summaryIcons.length === 0 && view.icons.length === 0, "turning the setting off removes the summary and hourly icons");
     check(problems.length === 0, `no sky setting console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 16: the About guide numbers every element of a sample card with all options on.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    await mockOpenMeteo(context);
+    check((await page.goto(`${server.url}?lang=en&view=about`, { waitUntil: "networkidle" })).status() === 200,
+      "guide scenario receives HTTP 200");
+    await page.waitForSelector("#screen-about:not(.hidden)");
+    const guideView = () => page.evaluate(() => {
+      const sample = document.getElementById("guide-sample");
+      const center = (node) => {
+        const rect = node.getBoundingClientRect();
+        return (rect.top + rect.bottom) / 2;
+      };
+      const columns = [...sample.querySelectorAll(".forecast-chart > li")];
+      const wettest = columns[5];
+      const last = columns[columns.length - 1];
+      const targets = [
+        sample.querySelector(".forecast-summary"), wettest.querySelector(".forecast-amount"),
+        wettest.querySelector(".forecast-bar-track"), last.querySelector(".forecast-chance"),
+        columns[0].querySelector(".forecast-time"), last.querySelector(".forecast-sky"),
+        columns[0].querySelector(".forecast-temp"), last.querySelector(".forecast-wind"),
+        sample.querySelector(".guide-place"), sample.querySelector(".guide-updated"),
+      ];
+      const badges = [...sample.querySelectorAll(".guide-badge")];
+      const items = [...document.querySelectorAll(".guide-list > li")];
+      return {
+        hidden: sample.getAttribute("aria-hidden"),
+        summary: sample.querySelector(".forecast-summary").textContent.trim(),
+        summaryIcons: sample.querySelectorAll(".forecast-summary svg").length,
+        columns: columns.length,
+        sky: [...sample.querySelectorAll(".forecast-sky")].filter((c) => c.querySelector("svg") && c.getClientRects().length).length,
+        wind: [...sample.querySelectorAll(".forecast-wind")].filter((c) => c.getClientRects().length).length,
+        firstTime: columns[0].querySelector(".forecast-time").textContent,
+        badges: badges.map((badge) => badge.textContent),
+        offsets: badges.map((badge, i) => Math.abs(center(badge) - center(targets[i]))),
+        contained: [sample, ...badges].every((node) => {
+          const rect = node.getBoundingClientRect();
+          return rect.left >= 0 && rect.right <= innerWidth && rect.width > 0;
+        }),
+        overflow: document.documentElement.scrollWidth > innerWidth,
+        items: items.map((item) => [item.querySelector(".guide-item-title").textContent.trim(),
+          item.querySelector(".guide-item-text").textContent.trim()]),
+      };
+    });
+
+    for (const [width, height] of [[390, 844], [320, 568], [1280, 800], [390, 600]]) {
+      await page.setViewportSize({ width, height });
+      await page.waitForTimeout(100);
+      const view = await guideView();
+      const size = `${width}x${height}`;
+      check(view.hidden === "true" && view.summaryIcons === 1 && view.summary.split("\n").length === 3
+        && view.summary.startsWith("Rain expected from 13:00"), `the guide sample shows the full summary at ${size}`);
+      check(view.columns === 12 && view.sky === 12 && view.wind === 12 && view.firstTime === "Now",
+        `the guide sample shows every hourly row at ${size} (${view.sky} sky, ${view.wind} wind)`);
+      check(view.badges.join(",") === "1,2,3,4,5,6,7,8,9,10" && view.offsets.every((offset) => offset <= 2),
+        `ten badges sit on their elements at ${size} (max offset ${Math.max(...view.offsets).toFixed(1)}px)`);
+      check(view.contained && !view.overflow, `the guide stays inside the viewport at ${size}`);
+      check(view.items.length === 10 && view.items.every(([title, text]) => title && text && !text.startsWith("about.")),
+        `the guide lists ten explained elements at ${size}`);
+      if (size === "390x844") {
+        await captureViews(page, "guide");
+      }
+    }
+
+    await page.click("#btn-about-back");
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    await page.click("#btn-about");
+    check((await guideView()).summary.startsWith("Regen verwacht vanaf 13:00"), "the guide sample follows the Dutch language switch");
+    await captureViews(page, "guide-nl");
+    check(problems.length === 0, `no guide console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

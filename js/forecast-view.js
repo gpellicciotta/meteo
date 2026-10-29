@@ -245,21 +245,16 @@ function updateSearchRow(event) {
 }
 
 /**
- * Render the forecast of the current place from the current hour on: heading, summary and chart.
+ * Render the summary sentences of forecast hours, led by the first hour's condition icon.
  *
- * @param {"chosen"|"rendered"} [event] - "chosen" when the forecast belongs to a newly chosen place.
+ * @param {HTMLElement} target - Summary paragraph to fill.
+ * @param {Array<object>} hours - Visible forecast hours.
+ * @param {boolean} startsNow - True when the first hour is the current hour.
+ * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
  * @returns {void}
  */
-function renderForecast(event = "rendered") {
-  const hours = view.place && view.forecast ? visibleHours(view.forecast, Date.now()) : [];
-  if (hours.length === 0) {
-    el.forecast.classList.add("hidden");
-    updateSearchRow(event);
-    return;
-  }
-  const settings = displaySettings(getStoredPreferences());
+export function renderSummary(target, hours, startsNow, settings) {
   const rain = summarizeRain(hours);
-  const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
   const rainingNow = startsNow && (hours[0].precipitation || 0) >= RAIN_THRESHOLD_MM;
   const temperatures = hours.map((h) => h.temperature).filter((v) => v !== null);
   const sentences = [
@@ -287,20 +282,49 @@ function renderForecast(event = "rendered") {
     sentences.push(t("forecast.summary_gusts", { gusts: formatNumber(wind.maxGusts, 0) }));
   }
 
+  target.textContent = sentences.join("\n");
+  const condition = hours[0].condition;
+  if (settings.showConditions && condition) {
+    target.prepend(buildConditionIcon(condition, "forecast-condition", true));
+  }
+  target.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
+}
+
+/**
+ * Render one chart column per forecast hour.
+ *
+ * @param {HTMLElement} target - Chart list to fill.
+ * @param {Array<object>} hours - Visible forecast hours.
+ * @param {boolean} startsNow - True when the first hour is the current hour, labeled "Now".
+ * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
+ * @returns {void}
+ */
+export function renderChart(target, hours, startsNow, settings) {
+  const scaleMax = barScaleMax(hours);
+  target.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0, settings)));
+}
+
+/**
+ * Render the forecast of the current place from the current hour on: heading, summary and chart.
+ *
+ * @param {"chosen"|"rendered"} [event] - "chosen" when the forecast belongs to a newly chosen place.
+ * @returns {void}
+ */
+function renderForecast(event = "rendered") {
+  const hours = view.place && view.forecast ? visibleHours(view.forecast, Date.now()) : [];
+  if (hours.length === 0) {
+    el.forecast.classList.add("hidden");
+    updateSearchRow(event);
+    return;
+  }
+  const settings = displaySettings(getStoredPreferences());
+  const startsNow = isCurrentHour(hours[0].time, view.forecast.timezone, Date.now());
   el.forecastPlace.textContent = placeLabel();
   el.forecastUpdated.textContent = t("forecast.updated", {
     time: view.updatedAt.toLocaleTimeString(getLang(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }),
   });
-  el.forecastSummary.textContent = sentences.join("\n");
-  const condition = hours[0].condition;
-  if (settings.showConditions && condition) {
-    el.forecastSummary.prepend(buildConditionIcon(condition, "forecast-condition", true));
-  }
-  el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
-
-  const scaleMax = barScaleMax(hours);
-  el.forecastChart.replaceChildren(...hours.map((hour, i) => buildHourColumn(hour, scaleMax, startsNow && i === 0, settings)));
-  el.forecastLegendWind.classList.toggle("hidden", !settings.showWind);
+  renderSummary(el.forecastSummary, hours, startsNow, settings);
+  renderChart(el.forecastChart, hours, startsNow, settings);
   el.forecast.classList.remove("hidden");
   updateSearchRow(event);
 }

@@ -93,10 +93,6 @@
         <div class="forecast-card">
           <p id="forecast-summary" class="forecast-summary"></p>
           <ol id="forecast-chart" class="forecast-chart" aria-label="Rain and temperature per hour" data-i18n-aria="forecast.chart_aria"></ol>
-          <p class="forecast-legend">
-            <span data-i18n="forecast.legend">Bars show rain in mm per hour, percentages the chance of rain.</span>
-            <span id="forecast-legend-wind" class="forecast-legend-wind hidden" data-i18n="forecast.legend_wind">The bottom row shows wind in km/h.</span>
-          </p>
         </div>
       </section>
     </div>
@@ -163,6 +159,92 @@
     </header>
 
     <div class="about-content view-content">
+      <div class="about-guide-card">
+        <h2 class="about-section-heading" data-i18n="about.guide_heading">Reading the forecast</h2>
+        <p class="about-icons-desc" data-i18n="about.guide_description">A sample forecast with every option on. The numbers match the list below.</p>
+        <!-- Hidden from assistive technology: the numbered list below carries the same information. -->
+        <div id="guide-sample" class="guide-sample" aria-hidden="true">
+          <div class="forecast-card">
+            <p id="guide-summary" class="forecast-summary"></p>
+            <ol id="guide-chart" class="forecast-chart"></ol>
+          </div>
+          <p id="guide-place" class="forecast-place guide-place"></p>
+          <p id="guide-updated" class="forecast-updated guide-updated"></p>
+        </div>
+        <ol class="guide-list">
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">1</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_summary_title">Summary</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_summary_desc">When rain starts and its heaviest hour, then the temperature range. With the wind setting, the strongest wind and gusts from 50 km/h. With the sky setting, an icon shows the current sky.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">2</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_amount_title">Rain amount</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_amount_desc">Rain or snow expected in that hour, in mm. Shown from 0.1 mm.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">3</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_bar_title">Rain bar</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_bar_desc">Grows with the rain amount. A full bar is the wettest hour, or 2 mm on drier days.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">4</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_chance_title">Chance of rain</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_chance_desc">Probability of more than 0.1 mm of rain or snow in that hour.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">5</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_hour_title">Hour</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_hour_desc">Start of each hour; the first column, the current hour, reads “Now”. Phones label every second hour.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">6</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_sky_title">Sky</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_sky_desc">Clear, partly cloudy, cloudy, fog, rain, snow or thunder; clear skies get night icons after dark. Needs the sky setting and a tall enough screen.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">7</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_temp_title">Temperature</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_temp_desc">Air temperature at the start of each hour, in °C.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">8</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_wind_title">Wind</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_wind_desc">Wind speed 10 m above the ground at the start of each hour, in km/h. Needs the wind setting and a tall enough screen.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">9</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_place_title">Place</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_place_desc">The searched place, or your current location with its town when found.</p>
+            </div>
+          </li>
+          <li class="guide-item">
+            <span class="guide-badge" aria-hidden="true">10</span>
+            <div class="about-icon-info">
+              <strong class="guide-item-title about-icon-name" data-i18n="about.guide_updated_title">Update time</strong>
+              <p class="guide-item-text about-icon-detail" data-i18n="about.guide_updated_desc">When the forecast was fetched. Returning to the app refreshes it once it is 15 minutes old.</p>
+            </div>
+          </li>
+        </ol>
+      </div>
+
       <div class="about-icons-card">
         <h2 class="about-section-heading" data-i18n="about.icons_heading">Icons &amp; Symbols</h2>
         <p class="about-icons-desc" data-i18n="about.icons_description">Overview of interface icons and their functions:</p>
