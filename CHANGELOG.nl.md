@@ -12,17 +12,13 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 
 ---
 
-## v1.1.0-pre
-- FrontEnd: De gele accentknoppen hebben nu witte tekst, in dezelfde gele tinten.
-- FrontEnd: F1 opent de Over-pagina met de uitleg van de voorspelling.
-- FrontEnd: Met de muis over een onderdeel van de voorbeeldkaart toont een tooltip de uitleg ervan.
-- FrontEnd: Het weerbeeld in de gids van Over toont nu alle negen weericonen met hun betekenis.
-- FrontEnd: Pijlen boven de windsnelheden tonen per uur de windrichting, met uitgesproken windstreken.
-- FrontEnd: Eenheden voor °F, inch, mph en m/s, vooraf ingevuld volgens het land van je huidige locatie, anders metrisch.
-- FrontEnd: Een gids in Over vervangt de legende en nummert elk onderdeel van een volledige voorbeeldvoorspelling.
+## v1.1.0 [released: 2026-10-29]
+- FrontEnd: Een windinstelling, standaard uit, toont de windsamenvatting en op hoge schermen de windsnelheid en -richting per uur.
 - FrontEnd: Een weerbeeldinstelling, standaard uit, toont het weericoon bij de samenvatting en op hoge schermen per uur.
-- FrontEnd: Een windinstelling, standaard uit, toont de windsamenvatting en op hoge schermen de wind per uur.
-- FrontEnd: De bronvermelding onder de voorspelling is weg; de Over-pagina vermeldt de bronnen al.
+- FrontEnd: Eenheden voor °F, inch, mph en m/s, vooraf ingevuld volgens het land van je huidige locatie, anders metrisch.
+- FrontEnd: Een gids in Over nummert elk onderdeel van een voorbeeldvoorspelling, met weericonen, muistooltips en F1 als sneltoets.
+- FrontEnd: De legende en bronvermelding onder de voorspelling zijn weg; de Over-pagina behandelt ze nu.
+- FrontEnd: De gele accentknoppen hebben nu witte tekst, in dezelfde gele tinten.
 
 ## v1.0.0 [released: 2026-10-28]
 - FrontEnd: De regenstaven, hoeveelheden en natte weersamenvatting volgen nu de gekozen accentkleur.

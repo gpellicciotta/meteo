@@ -13,17 +13,13 @@ A summarized overview of all changes, per version of this project.
 
 ---
 
-## v1.1.0-pre
-- FrontEnd: Switched the yellow accent buttons to white text, keeping the current yellow shades.
-- FrontEnd: Opened the About view with its forecast guide when F1 is pressed.
-- FrontEnd: Showed each guide explanation in a tooltip when hovering its sample section with a mouse.
-- FrontEnd: Listed all nine weather icons with their meaning under the sky item of the About guide.
-- FrontEnd: Added hourly wind direction arrows above the wind speeds, with spoken compass directions.
-- FrontEnd: Added °F, inch, mph and m/s unit settings, prefilled from the current location's country, else metric.
-- FrontEnd: Replaced the forecast legend with an About guide numbering each element of a full sample forecast.
+## v1.1.0 [released: 2026-10-29]
+- FrontEnd: Added an off-by-default wind setting with the wind summary and, on tall screens, hourly speeds and direction arrows.
 - FrontEnd: Added an off-by-default sky setting showing the summary condition icon and, on tall screens, hourly condition icons.
-- FrontEnd: Added an off-by-default wind setting showing the wind summary and, on tall screens, hourly wind speeds.
-- FrontEnd: Removed the data source links below the forecast, as the About view already credits them.
+- FrontEnd: Added °F, inch, mph and m/s unit settings, prefilled from the current location's country, else metric.
+- FrontEnd: Added an About guide numbering every part of a full sample forecast, with icon meanings, mouse tooltips and F1 access.
+- FrontEnd: Removed the forecast legend and data source links below the forecast, which the About view now covers.
+- FrontEnd: Switched the yellow accent buttons to white text, keeping the current yellow shades.
 
 ## v1.0.0 [released: 2026-10-28]
 - FrontEnd: Colored the rain bars, amounts and wet forecast summary with the chosen accent color.
