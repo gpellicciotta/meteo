@@ -55,9 +55,8 @@ Specifications: [technical-spec.md](T0023-show-the-hourly-wind-direction-as-an-a
   - Lines touched: 184.
   - Reopenings: 0.
 
-- [2026-10-29] **[Complete]**
-  Task completed successfully.
-
 - [2026-10-29] **[Implement]**
   Touched undeclared index.html for the guide wind text default; recount stays at 14 files and 184 lines.
 
+- [2026-10-29] **[Complete]**
+  Task completed successfully.
