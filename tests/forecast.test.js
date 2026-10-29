@@ -321,14 +321,20 @@ describe("searchRowOpen", () => {
 });
 
 describe("displaySettings", () => {
-  it.each([[{}], [null], [undefined], ["showWind"]])("turns wind off by default for %j", (prefs) => {
-    expect(displaySettings(prefs)).toEqual({ showWind: false });
+  it.each([[{}], [null], [undefined], ["showWind"]])("turns wind and sky conditions off by default for %j", (prefs) => {
+    expect(displaySettings(prefs)).toEqual({ showWind: false, showConditions: false });
   });
 
   it("turns wind on only for a stored true", () => {
-    expect(displaySettings({ showWind: true })).toEqual({ showWind: true });
-    expect(displaySettings({ showWind: "true" })).toEqual({ showWind: false });
-    expect(displaySettings({ showWind: 1 })).toEqual({ showWind: false });
+    expect(displaySettings({ showWind: true })).toEqual({ showWind: true, showConditions: false });
+    expect(displaySettings({ showWind: "true" })).toEqual({ showWind: false, showConditions: false });
+    expect(displaySettings({ showWind: 1 })).toEqual({ showWind: false, showConditions: false });
+  });
+
+  it("turns sky conditions on only for a stored true, independently of wind", () => {
+    expect(displaySettings({ showConditions: true })).toEqual({ showWind: false, showConditions: true });
+    expect(displaySettings({ showWind: true, showConditions: true })).toEqual({ showWind: true, showConditions: true });
+    expect(displaySettings({ showConditions: "true" })).toEqual({ showWind: false, showConditions: false });
   });
 });
 

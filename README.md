@@ -13,10 +13,12 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - The forecast shows a bar per hour with the rain in mm, the chance of rain and the temperature.
 - Below 480px, time labels appear every two hours; all twelve hourly bars and screen-reader descriptions remain available.
 - A summary line tells when rain starts and how heavy it gets, or that it stays dry.
-- A theme-colored icon starts the summary, showing the current hour's weather with day and night variants.
+- With the sky setting on, a theme-colored icon starts the summary, showing the current hour's weather.
+- That setting also adds an hourly condition icon row, with day and night variants, on tall enough screens.
 - Unknown conditions omit the icon; clear and partly cloudy icons also require daylight data.
 - With the wind setting on, the summary includes maximum wind speed and gusts from 50 km/h, when available.
-- That setting also adds hourly wind speeds below the temperatures, on screens at least 700px tall (800px from 480px wide).
+- That setting also adds hourly wind speeds below the temperatures, on tall enough screens.
+- Hourly rows need a screen at least 700px tall, or 800px tall from 480px wide.
 - Display settings are off by default and remembered in the browser.
 - The last place is remembered and reloaded on your next visit.
 - Its last forecast is saved too and shown when the app starts offline or a refresh fails.

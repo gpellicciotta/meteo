@@ -24,6 +24,7 @@ export const el = {
   configTheme: document.getElementById("config-theme"),
   configThemeColor: document.getElementById("config-theme-color"),
   configShowWind: document.getElementById("config-show-wind"),
+  configShowConditions: document.getElementById("config-show-conditions"),
   btnInstall: document.getElementById("btn-install"),
   offlineIndicator: document.getElementById("offline-indicator"),
   screenAbout: document.getElementById("screen-about"),

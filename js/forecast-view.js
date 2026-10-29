@@ -149,16 +149,32 @@ function showPlaceChoices(matches, query = "") {
 }
 
 /**
+ * Build the line icon of a weather condition.
+ *
+ * @param {{name: string, icon: string}} condition - Condition from weatherCondition().
+ * @param {string} className - Extra class of the icon.
+ * @param {boolean} named - True to name the icon for assistive technology; false hides it.
+ * @returns {SVGSVGElement} Icon.
+ */
+function buildConditionIcon(condition, className, named) {
+  const icon = createIcon(condition.icon, { className, title: named ? t(`forecast.condition_${condition.name}`) : undefined });
+  if (named) {
+    icon.removeAttribute("aria-hidden");
+  }
+  return icon;
+}
+
+/**
  * Build one column of the rain chart.
  *
  * The visible parts are hidden from assistive technology; a visually hidden sentence
  * describes the whole hour instead.
  *
  * @param {{label: string, temperature: number|null, precipitation: number|null, probability: number|null,
- *         windSpeed: number|null}} hour - Forecast hour.
+ *         windSpeed: number|null, condition: {name: string, icon: string}|null}} hour - Forecast hour.
  * @param {number} scaleMax - Rain amount drawn as a full-height bar.
  * @param {boolean} isNow - True when the column is the current hour, labeled "Now" instead of its time.
- * @param {{showWind: boolean}} settings - Display settings from displaySettings().
+ * @param {{showWind: boolean, showConditions: boolean}} settings - Display settings from displaySettings().
  * @returns {HTMLLIElement} Chart column.
  */
 function buildHourColumn(hour, scaleMax, isNow, settings) {
@@ -177,7 +193,10 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
 
   const description = document.createElement("span");
   description.className = "sr-only";
+  const conditionName = settings.showConditions && hour.condition
+    ? t(`forecast.condition_${hour.condition.name}`).toLocaleLowerCase(getLang()) : "";
   description.textContent = t("forecast.hour_aria", { time: label, amount, chance, temp: temperature })
+    + (conditionName ? t("forecast.hour_aria_condition", { condition: conditionName }) : "")
     + (settings.showWind ? t("forecast.hour_aria_wind", { wind }) : "");
   item.append(description);
 
@@ -186,8 +205,11 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
     ["forecast-bar-track", ""],
     ["forecast-chance", hour.probability === null ? "" : chance],
     ["forecast-time", label],
-    ["forecast-temp", hour.temperature === null ? "–" : `${temperature}°`],
   ];
+  if (settings.showConditions) {
+    parts.push(["forecast-sky", ""]);
+  }
+  parts.push(["forecast-temp", hour.temperature === null ? "–" : `${temperature}°`]);
   if (settings.showWind) {
     parts.push(["forecast-wind", wind]);
   }
@@ -202,6 +224,9 @@ function buildHourColumn(hour, scaleMax, isNow, settings) {
   bar.className = "forecast-bar";
   bar.style.height = `${Math.min(100, (rain / scaleMax) * 100)}%`;
   item.querySelector(".forecast-bar-track").append(bar);
+  if (settings.showConditions && hour.condition) {
+    item.querySelector(".forecast-sky").append(buildConditionIcon(hour.condition, "forecast-sky-icon", false));
+  }
   return item;
 }
 
@@ -268,13 +293,8 @@ function renderForecast(event = "rendered") {
   });
   el.forecastSummary.textContent = sentences.join("\n");
   const condition = hours[0].condition;
-  if (condition) {
-    const icon = createIcon(condition.icon, {
-      className: "forecast-condition",
-      title: t(`forecast.condition_${condition.name}`),
-    });
-    icon.removeAttribute("aria-hidden");
-    el.forecastSummary.prepend(icon);
+  if (settings.showConditions && condition) {
+    el.forecastSummary.prepend(buildConditionIcon(condition, "forecast-condition", true));
   }
   el.forecastSummary.classList.toggle("is-wet", Boolean(rain.firstRainLabel));
 

@@ -226,11 +226,11 @@ export function visibleHours(forecast, now) {
  * Optional parts of the forecast stay off unless a setting holds the boolean true.
  *
  * @param {*} prefs - Stored preferences object, as read from storage.
- * @returns {{showWind: boolean}} Display settings.
+ * @returns {{showWind: boolean, showConditions: boolean}} Display settings.
  */
 export function displaySettings(prefs) {
   const stored = prefs && typeof prefs === "object" ? prefs : {};
-  return { showWind: stored.showWind === true };
+  return { showWind: stored.showWind === true, showConditions: stored.showConditions === true };
 }
 
 /**

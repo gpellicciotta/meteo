@@ -487,6 +487,7 @@ function measureStartLayout(page) {
   const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
   try {
     const urls = await mockOpenMeteo(context);
+    await storeSettings(context, { showConditions: true });
     let body = forecastBody();
     await context.route("https://api.open-meteo.com/**", (route) => {
       urls.push(route.request().url());
@@ -1061,6 +1062,87 @@ function measureStartLayout(page) {
     view = await windView();
     check(!view.summary.includes("Wind") && view.cells.length === 0, "turning the setting off removes the wind summary and row");
     check(problems.length === 0, `no wind setting console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await browser.close();
+  }
+}
+
+// Scenario 15: sky conditions stay hidden until the setting is saved, and their hourly row needs a tall enough screen.
+{
+  const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
+  try {
+    await mockOpenMeteo(context);
+    await page.clock.install({ time: MOCK_NOW });
+    check((await page.goto(`${server.url}?lang=en&location=Brussel`, { waitUntil: "networkidle" })).status() === 200,
+      "sky setting scenario receives HTTP 200");
+    await page.waitForSelector("#forecast:not(.hidden)");
+    const skyView = () => page.evaluate(() => {
+      const cells = [...document.querySelectorAll("#forecast-chart .forecast-sky")];
+      const content = document.getElementById("start-content");
+      return {
+        summaryIcons: [...document.querySelectorAll("#forecast-summary svg")].map((svg) => svg.getAttribute("class")),
+        icons: cells.map((cell) => cell.querySelector("svg")?.getAttribute("class") || ""),
+        visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
+        description: document.querySelector("#forecast-chart .sr-only").textContent,
+        overflow: content.scrollHeight - content.clientHeight,
+      };
+    });
+    const saveSky = async (on, wind = false) => {
+      await page.click("#btn-config");
+      const checked = await page.isChecked("#config-show-conditions");
+      await page.setChecked("#config-show-conditions", on);
+      await page.setChecked("#config-show-wind", wind);
+      await page.click("#btn-config-save");
+      await page.waitForSelector("#screen-start:not(.hidden)");
+      return checked;
+    };
+
+    let view = await skyView();
+    check(view.summaryIcons.length === 0 && view.icons.length === 0, "without a stored setting the forecast shows no condition icons");
+    check(await saveSky(true) === false, "Settings shows the sky checkbox unchecked by default");
+    view = await skyView();
+    check(view.summaryIcons.length === 1 && view.summaryIcons[0].includes("icon-weather-rain"), "saving the setting adds the summary rain icon");
+    check(view.icons.length === 12 && view.visible === 12 && view.icons[0].includes("icon-weather-rain")
+      && view.icons[1].includes("icon-weather-clear-day"), `saving the setting shows twelve hourly icons (${view.icons.slice(0, 2).join(", ")})`);
+    check(view.description.endsWith(", rain"), `the first hour description ends with its condition (${view.description})`);
+    check(await page.evaluate(() => JSON.parse(localStorage.getItem("meteo_preferences")).showConditions) === true,
+      "localStorage remembers the sky setting");
+    await page.reload({ waitUntil: "networkidle" });
+    await page.waitForSelector("#forecast:not(.hidden)");
+    check((await skyView()).icons.length === 12, "a reload keeps the hourly icons shown");
+    await captureViews(page, "sky-on");
+
+    await saveSky(true, true);
+    await captureViews(page, "sky-wind-on");
+    await openSearch(page);
+    for (const [width, height, shown] of [[1280, 800, true], [390, 700, true], [1280, 799, false], [390, 667, false], [320, 568, false]]) {
+      await page.setViewportSize({ width, height });
+      view = await skyView();
+      const size = `${width}x${height}`;
+      check(view.visible === (shown ? 12 : 0) && view.summaryIcons.length === 1,
+        `hourly icons are ${shown ? "shown" : "hidden"} and the summary icon stays at ${size}`);
+      if (shown || size === "390x667") {
+        check(view.overflow <= 0, `the forecast with both rows and the search row fits at ${size} (overflow ${view.overflow}px)`);
+      }
+    }
+    await page.setViewportSize({ width: 1280, height: 800 });
+
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "nl");
+    view = await skyView();
+    check(view.description.endsWith(", regen, wind 40 km/u"), `the hour description follows the Dutch language switch (${view.description})`);
+    await page.click("#btn-lang");
+    await page.waitForFunction(() => document.documentElement.lang === "en");
+
+    check(await saveSky(false) === true, "Settings shows the stored sky setting checked");
+    view = await skyView();
+    check(view.summaryIcons.length === 0 && view.icons.length === 0, "turning the setting off removes the summary and hourly icons");
+    check(problems.length === 0, `no sky setting console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }
   catch (err) {
     failed = true;

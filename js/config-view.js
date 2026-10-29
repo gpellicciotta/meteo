@@ -30,7 +30,9 @@ export function openConfigView() {
   el.configLanguage.value = getLang();
   el.configTheme.value = initialThemeSetting;
   el.configThemeColor.value = initialThemeColor;
-  el.configShowWind.checked = displaySettings(getStoredPreferences()).showWind;
+  const settings = displaySettings(getStoredPreferences());
+  el.configShowWind.checked = settings.showWind;
+  el.configShowConditions.checked = settings.showConditions;
   showScreen("config");
 }
 
@@ -64,7 +66,12 @@ export function saveConfig() {
   initialThemeSetting = themeSetting;
   initialThemeColor = themeColor;
 
-  setStoredPreferences({ theme: themeSetting, themeColor, showWind: el.configShowWind.checked });
+  setStoredPreferences({
+    theme: themeSetting,
+    themeColor,
+    showWind: el.configShowWind.checked,
+    showConditions: el.configShowConditions.checked,
+  });
   closeConfigView();
   document.dispatchEvent(new Event("settingschange"));
 
