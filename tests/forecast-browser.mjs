@@ -1214,6 +1214,16 @@ function measureStartLayout(page) {
           return rect.left >= 0 && rect.right <= innerWidth && rect.width > 0;
         }),
         overflow: document.documentElement.scrollWidth > innerWidth,
+        icons: [...items[5].querySelectorAll(".guide-icons > li")].map((entry) => {
+          const svg = entry.querySelector("svg");
+          const rect = svg ? svg.getBoundingClientRect() : null;
+          return {
+            icon: svg ? [...svg.classList].find((name) => name.startsWith("icon-weather-")) : "",
+            name: entry.querySelector(".guide-icon-name").textContent.trim(),
+            text: entry.querySelector(".guide-icon-text").textContent.trim(),
+            contained: Boolean(rect && rect.width > 0 && rect.left >= 0 && rect.right <= innerWidth),
+          };
+        }),
         items: items.map((item) => [item.querySelector(".guide-item-title").textContent.trim(),
           item.querySelector(".guide-item-text").textContent.trim()]),
       };
@@ -1233,6 +1243,10 @@ function measureStartLayout(page) {
       check(view.contained && !view.overflow, `the guide stays inside the viewport at ${size}`);
       check(view.items.length === 10 && view.items.every(([title, text]) => title && text && !text.startsWith("about.")),
         `the guide lists ten explained elements at ${size}`);
+      const icons = ["clear-day", "clear-night", "partly-day", "partly-night", "cloudy", "fog", "rain", "snow", "thunder"];
+      check(view.icons.map((entry) => entry.icon).join(",") === icons.map((icon) => `icon-weather-${icon}`).join(",")
+        && view.icons.every((entry) => entry.name && entry.text && !entry.text.startsWith("about.") && entry.contained),
+      `the sky item explains all nine weather icons at ${size} (${view.icons.length} listed)`);
       if (size === "390x844") {
         await captureViews(page, "guide");
       }
@@ -1243,6 +1257,7 @@ function measureStartLayout(page) {
     await page.waitForFunction(() => document.documentElement.lang === "nl");
     await page.click("#btn-about");
     check((await guideView()).summary.startsWith("Regen verwacht vanaf 13:00"), "the guide sample follows the Dutch language switch");
+    check((await guideView()).icons[0]?.name === "Helder", "the weather icon names follow the Dutch language switch");
     await captureViews(page, "guide-nl");
     check(problems.length === 0, `no guide console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
   }

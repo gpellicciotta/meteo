@@ -1,5 +1,5 @@
 // Service Worker for the Meteo PWA
-const CACHE_NAME = "meteo-v1.1.0-pre-de0de99203c813cf";
+const CACHE_NAME = "meteo-v1.1.0-pre-c739c10aa3e89e33";
 
 const PRECACHE_ASSETS = [
   "./",

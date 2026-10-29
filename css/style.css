@@ -1271,6 +1271,48 @@ body.suppress-tooltips [data-tooltip]::before {
   gap: 10px;
 }
 
+/* Weather icons of the sky item, as many per row as fit. */
+.guide-icons {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 8px 14px;
+}
+
+.guide-icon {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.guide-icon-svg {
+  display: inline-flex;
+  flex: 0 0 18px;
+  margin-top: 1px;
+  color: var(--color-text);
+}
+
+.guide-icon-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.guide-icon-name {
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.3;
+}
+
+.guide-icon-text {
+  font-size: var(--font-size-xs);
+  color: var(--color-muted);
+  line-height: 1.35;
+}
+
 .guide-item .guide-badge {
   margin-top: 1px;
 }
