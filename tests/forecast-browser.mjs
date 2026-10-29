@@ -975,7 +975,15 @@ function measureStartLayout(page) {
         bar: getComputedStyle(document.querySelector(`${selector} .forecast-bar`)).backgroundColor,
         amount: getComputedStyle(document.querySelector(`${selector} .forecast-amount`)).color,
         summary: getComputedStyle(document.getElementById("forecast-summary")).color,
+        buttonText: ["btn-search", "btn-config"].map((id) => getComputedStyle(document.getElementById(id)).color),
+        buttonFill: getComputedStyle(document.getElementById("btn-config")).backgroundColor,
       }), column);
+      check(colors.buttonText.every((color) => color === rgb("#ffffff")),
+        `${theme} ${accent} buttons use white text (${colors.buttonText.join(", ")})`);
+      if (accent === "yellow") {
+        const fill = theme === "light" ? "#ca8a04" : "#d97706";
+        check(colors.buttonFill === rgb(fill), `${theme} yellow buttons keep the ${fill} fill (${colors.buttonFill})`);
+      }
       check(colors.bar === rgb(bar), `${theme} ${accent} rain bars use ${bar} (${colors.bar})`);
       check(colors.amount === rgb(text) && colors.summary === rgb(text),
         `${theme} ${accent} amounts and wet summary use ${text} (${colors.amount}, ${colors.summary})`);

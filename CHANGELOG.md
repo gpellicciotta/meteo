@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.1.0-pre
+- FrontEnd: Switched the yellow accent buttons to white text, keeping the current yellow shades.
 - FrontEnd: Opened the About view with its forecast guide when F1 is pressed.
 - FrontEnd: Showed each guide explanation in a tooltip when hovering its sample section with a mouse.
 - FrontEnd: Listed all nine weather icons with their meaning under the sky item of the About guide.

@@ -2,6 +2,7 @@
 An overview of all tasks and their planning.
 
 ## Next Milestone
+- [x] T0027 Use white text on yellow accent buttons in light and dark themes.
 - [x] T0026 Open the About help view when F1 is pressed.
 - [x] T0025 Show each guide explanation on hover over its sample element on pointing devices.
 - [x] T0024 List every weather icon with its meaning under the sky item of the About guide.
