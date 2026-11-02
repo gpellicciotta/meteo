@@ -15,3 +15,6 @@ __pycache__/
 logs/
 *.log
 *.lock
+.plan/
+/PLAN.md
+/plan.code-workspace
