@@ -65,16 +65,22 @@ node tests/forecast-browser.mjs  # Playwright browser check of the forecast, wit
 
 Set `SCREENSHOT_DIR` to save desktop and mobile screenshots in light and dark mode during browser checks.
 
+Run quality checks across test suite and markdown linting:
+
+```bash
+python scripts/devops.py check
+```
+
 Serve the site locally for manual review:
 
 ```bash
-python scripts/run-review-server.py serve --port 8062
+python scripts/devops.py serve --port 8062
 ```
 
 Regenerate the service worker after adding, removing or changing any precached file:
 
 ```bash
-python scripts/generate-sw.py generate
+python scripts/devops.py sw
 ```
 
 ## License

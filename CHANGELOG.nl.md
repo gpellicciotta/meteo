@@ -12,6 +12,10 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 
 ---
 
+## v1.2.0-pre
+- DevEx: Geünificeerd [devops.py](scripts/devops.py) CLI-script toegevoegd voor tests, linting, review-server, service worker en implementatie.
+- DevEx: Review-server-operaties samengevoegd in [devops.py](scripts/devops.py) en verouderd run-review-server.py verwijderd.
+
 ## v1.1.0 [released: 2026-10-29]
 - FrontEnd: Een windinstelling, standaard uit, toont de windsamenvatting en op hoge schermen de windsnelheid en -richting per uur.
 - FrontEnd: Een weerbeeldinstelling, standaard uit, toont het weericoon bij de samenvatting en op hoge schermen per uur.

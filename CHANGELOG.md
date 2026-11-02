@@ -13,6 +13,10 @@ A summarized overview of all changes, per version of this project.
 
 ---
 
+## v1.2.0-pre
+- DevEx: Added unified [devops.py](scripts/devops.py) CLI for testing, linting, review server, service worker, and deployment.
+- DevEx: Consolidated review server operations into [devops.py](scripts/devops.py) and removed obsolete run-review-server.py.
+
 ## v1.1.0 [released: 2026-10-29]
 - FrontEnd: Added an off-by-default wind setting with the wind summary and, on tall screens, hourly speeds and direction arrows.
 - FrontEnd: Added an off-by-default sky setting showing the summary condition icon and, on tall screens, hourly condition icons.
