@@ -1,0 +1,142 @@
+
+> meteo@0.1.1-pre test:browser
+> node tests/shell-browser.mjs && node tests/forecast-browser.mjs
+
+ok - start view shows the Meteo title
+ok - Dutch is active with ?lang=nl
+ok - manifest.webmanifest loads with HTTP 200
+ok - assets/favicon.svg loads with HTTP 200
+ok - favicon.ico loads with HTTP 200
+ok - assets/icons/icon-192.png loads with HTTP 200
+ok - Settings view opens
+ok - Settings offers only Dutch and English
+ok - saving returns to the start view
+ok - language button shows EN
+ok - About view opens
+ok - About view shows the version tag
+ok - language button switches back to Dutch
+ok - the language is not stored under the shared key "lang"
+ok - About shows the Dutch changelog in Dutch
+ok - choosing the dark theme previews it at once
+ok - closing Settings without saving reverts the preview
+ok - Escape returns to the start view
+ok - no console, page or network errors
+ok - en hourly-label scenario receives HTTP 200
+ok - nl hourly-label scenario receives HTTP 200
+ok - no hourly-label console, page or network errors
+ok - hourly labels remain separated across 20 language/theme/viewport combinations
+ok - the local server returns HTTP 200
+ok - two matches are offered to pick from
+ok - the chart shows 12 hourly bars
+ok - the chosen place is the heading
+ok - the summary names the first rainy hour
+ok - English wind and gust maxima follow the temperature
+ok - the request includes both wind variables
+ok - bars carry a screen reader description (14:00: 1.2 mm rain, 70% chance, 12 °C)
+ok - the update time uses the 24-hour clock (Updated at 18:48)
+ok - amounts below the 0.1 mm rain threshold get no label
+ok - the forecast request uses the picked place
+ok - the Open-Meteo attribution is visible without scrolling
+ok - the forecast re-renders in Dutch
+ok - the wind summary re-renders in Dutch
+ok - the place name follows the language switch
+ok - an unknown place shows an error naming it
+ok - an error message follows the language switch
+ok - an empty search cancels a slower pending search
+ok - an empty search asks for a place
+ok - a failing service shows its error message
+ok - a single match loads directly from ?location
+ok - the last location reloads at startup
+ok - no console, page or network errors
+ok - the current location shows rounded coordinates
+ok - the forecast uses the device position
+ok - no console, page or network errors
+ok - a denied location shows its error
+ok - no console, page or network errors
+ok - the current-location button sits left of the search field at 1280x900
+ok - the place name sits below the chart at 1280x900
+ok - the update time has its own line below the place name at 1280x900
+ok - the current-location button sits left of the search field at 1280x800
+ok - the place name sits below the chart at 1280x800
+ok - the update time has its own line below the place name at 1280x800
+ok - the forecast fits without scrolling at 1280x800 (overflow 0px)
+ok - the current-location button sits left of the search field at 390x844
+ok - the place name sits below the chart at 390x844
+ok - the update time has its own line below the place name at 390x844
+ok - the current-location button sits left of the search field at 390x667
+ok - the place name sits below the chart at 390x667
+ok - the update time has its own line below the place name at 390x667
+ok - the forecast fits without scrolling at 390x667 (overflow 0px)
+ok - the current-location button sits left of the search field at 320x568
+ok - the place name sits below the chart at 320x568
+ok - the update time has its own line below the place name at 320x568
+ok - the focused icon button is named exactly once (btn-current-location, 1 match)
+ok - no console, page or network errors
+ok - en summary handles speed 20, gusts 35
+ok - nl summary handles speed 20, gusts 35
+ok - en summary handles speed 20.4, gusts 49.9
+ok - nl summary handles speed 20.4, gusts 49.9
+ok - en summary handles speed 20.6, gusts 50
+ok - nl summary handles speed 20.6, gusts 50
+ok - en summary handles speed 40, gusts 70.6
+ok - nl summary handles speed 40, gusts 70.6
+ok - en summary handles speed 0, gusts 0
+ok - nl summary handles speed 0, gusts 0
+ok - en summary handles speed null, gusts null
+ok - nl summary handles speed null, gusts null
+ok - en summary handles speed 20, gusts null
+ok - nl summary handles speed 20, gusts null
+ok - en summary handles speed null, gusts 70
+ok - nl summary handles speed null, gusts 70
+ok - en summary handles speed null, gusts 35
+ok - nl summary handles speed null, gusts 35
+ok - no wind scenario console, page or network errors
+ok - condition scenario receives HTTP 200
+ok - rain icon has an accessible English name
+ok - current-hour rain icon precedes the summary text
+ok - the request includes weather code and daylight
+ok - rain icon follows the Dutch language switch
+ok - condition 0/0 preserves the summary text
+ok - condition 0/0 renders clear-night
+ok - refresh replaces the previous condition icon
+ok - condition 0/1 preserves the summary text
+ok - condition 0/1 renders clear-day
+ok - refresh replaces the previous condition icon
+ok - condition 2/0 preserves the summary text
+ok - condition 2/0 renders partly-night
+ok - refresh replaces the previous condition icon
+ok - condition 2/1 preserves the summary text
+ok - condition 2/1 renders partly-day
+ok - refresh replaces the previous condition icon
+ok - condition 3/1 preserves the summary text
+ok - condition 3/1 renders cloudy
+ok - refresh replaces the previous condition icon
+ok - condition 45/1 preserves the summary text
+ok - condition 45/1 renders fog
+ok - refresh replaces the previous condition icon
+ok - condition 71/1 preserves the summary text
+ok - condition 71/1 renders snow
+ok - refresh replaces the previous condition icon
+ok - condition 95/1 preserves the summary text
+ok - condition 95/1 renders thunder
+ok - refresh replaces the previous condition icon
+ok - condition null/1 preserves the summary text
+ok - condition null/1 omits the icon
+ok - icon adds no summary line at 390px
+ok - condition 999/1 preserves the summary text
+ok - condition 999/1 omits the icon
+ok - icon adds no summary line at 390px
+ok - condition 0/null preserves the summary text
+ok - condition 0/null omits the icon
+ok - icon adds no summary line at 390px
+ok - no condition scenario console, page or network errors
+ok - refresh scenario receives HTTP 200
+ok - the first forecast is fetched at 10:00
+ok - a 5-minute-old forecast is not refreshed
+ok - a background refresh keeps the chart and shows no loading line
+ok - a 16-minute-old forecast is refreshed once on visibilitychange
+ok - a stale forecast requests a refresh again
+ok - a failed refresh keeps the chart and update time without an error
+ok - a page restored from the back-forward cache refreshes a stale forecast
+ok - an offline device skips the refresh
+ok - no refresh scenario console, page or network errors
