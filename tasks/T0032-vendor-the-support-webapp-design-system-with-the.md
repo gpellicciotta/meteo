@@ -5,20 +5,22 @@ session: claude-20261113-c52ebd
 needs: []
 branch: task/T0032-vendor-the-support-webapp-design-system-with-the
 worktree: .plan/work/T0032-vendor-the-support-webapp-design-system-with-the
-status: active
+status: completed
 started_at: "2026-11-13T20:09:59Z"
-ended_at: —
+ended_at: "2026-11-13T21:28:56Z"
 review: agent
 preview: none
 protocol: standard
 usage:
   worker: {turns: 6, duration_s: 8728.6, input: 276, output: 82324, cache_read: 49326552, cache_write: 201290}
-  review: {turns: 2, duration_s: 303.8, input: 212688, output: 6298, cache_read: 1737216, cache_write: 0}
-work_duration: 3734.1
-review_status: pending
+  review: {turns: 4, duration_s: 603.4, input: 321152, output: 10874, cache_read: 3085312, cache_write: 0}
+work_duration: 4737.1
+review_status: approved
 review_round: 2
 review_requested_at: "2026-11-13T21:26:23Z"
-review_session: codex-20261113-89db46
+review_session: codex-20261113-72e173
+reviewed_by: "@codex"
+completion-commit: 33c5cc9e7655dc9371405ed557a51306dbb9c1e4
 ---
 # T0032: Vendor the support.webapp design system with the bright look and move the three screens into its shell.
 
@@ -38,7 +40,7 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [x] **[Verify]**    Run the tests, the vendored check, and the completion check until they pass.
 - [x] **[Visual]**    Record the lossless switch proof: screenshots at 390 and 1440 px, light and dark.
 - [x] **[Doc]**       List every visual difference as a fix or deliberate change, and update CHANGELOG.md.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
@@ -99,6 +101,13 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 
 - [2026-11-13] **[Review]**
   Round 2 requested (mode: agent).
+
+- [2026-11-13] **[Review]**
+  Round 2 approved by @codex: [Decided]** Approved.
+  - Findings: [review-findings-2.md](T0032-vendor-the-support-webapp-design-system-with-the/review-findings-2.md).
+
+- [2026-11-13] **[Complete]**
+  Task completed successfully.
 
 ## Screenshots
 The listed differences are in validation-proof.md; `-end` captures in proof/after show scrolled page ends.
