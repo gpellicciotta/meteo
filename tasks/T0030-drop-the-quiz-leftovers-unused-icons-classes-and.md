@@ -13,11 +13,11 @@ preview: none
 protocol: standard
 usage:
   worker: {turns: 4, duration_s: 3522.0, input: 240, output: 54096, cache_read: 8544726, cache_write: 169736}
-  review: {turns: 4, duration_s: 2122.0, input: 496136, output: 68988, cache_read: 13230728}
+  review: {turns: 6, duration_s: 3689.0, input: 1029592, output: 103322, cache_read: 24937816}
 review_status: pending
 review_round: 2
 review_requested_at: "2026-11-13T19:28:38Z"
-work_duration: 2392.7
+work_duration: 3693.9
 review_session: antigravity-20261113-29f32c
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
@@ -84,6 +84,10 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 
 - [2026-11-13] **[Review]**
   Round 2 requested (mode: agent).
+
+- [2026-11-13] **[Implement]**
+  Rebased onto main at f47d3d6; moved the changelog bullets under v1.3.0-pre and dropped the v1.2.1-pre headings.
+  - npm test: 145 passed after rebase.
 
 ## Screenshots
 Before and after are identical; see validation-proof.md.

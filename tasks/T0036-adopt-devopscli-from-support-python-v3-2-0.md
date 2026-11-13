@@ -12,9 +12,9 @@ review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 4, duration_s: 1895.6, input: 64, output: 10342, cache_read: 3227646, cache_write: 29328}
+  worker: {turns: 6, duration_s: 3556.0, input: 196, output: 45178, cache_read: 12024850, cache_write: 89082}
   review: {turns: 2, duration_s: 1161.0, input: 135640, output: 10136, cache_read: 5475840, cache_write: 0}
-work_duration: 1589.5
+work_duration: 2453.2
 review_status: rejected
 review_round: 1
 review_requested_at: "2026-11-13T18:15:48Z"
@@ -35,6 +35,9 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 - [x] **[Implement]** Implement required changes for T0036.
 - [x] **[Verify]**    Verify implementation with automated test suites.
 - [x] **[Doc]**       Update documentation and CHANGELOG.md.
+- [ ] **[Implement]** Author a failing test that release reopens the next patch -pre heading after tagging.
+- [ ] **[Implement]** Reopen the next patch -pre heading and package.json version after tagging in release.
+- [ ] **[Verify]**    Rebase onto main and rerun all acceptance commands, including both dry runs.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
@@ -63,4 +66,7 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 
 - [2026-11-13] **[Review]**
   Needs acceptance revision: dry runs on main fail without a -pre heading, and a version bump is forbidden. Open question: add a -pre heading, or relax the acceptance?.
+
+- [2026-11-13] **[Decide]**
+  Acceptance revised: main now has v1.3.0-pre, so dry runs can pass after rebase; release must reopen the next patch -pre heading after tagging.
 
