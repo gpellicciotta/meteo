@@ -1,6 +1,7 @@
 ---
 id: T0034
 owner: "@claude"
+session: claude-20261113-ae9be2
 needs: []
 branch: task/T0034-replace-the-app-s-shared-components-with-the
 worktree: .plan/work/T0034-replace-the-app-s-shared-components-with-the
@@ -21,9 +22,9 @@ Keep app-local components, such as the forecast chart, in the app.
 Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires, with T0032's proof harness.
 
 ## Task Execution Steps
-- [ ] **[Read]**      Inventory the app's components against the vendored component list.
-- [ ] **[Implement]** Author tests for each component the app now takes from the vendored copy.
-- [ ] **[Verify]**    Run the new tests and confirm they fail before the switch.
+- [x] **[Read]**      Inventory the app's components against the vendored component list.
+- [x] **[Implement]** Author tests for each component the app now takes from the vendored copy.
+- [x] **[Verify]**    Run the new tests and confirm they fail before the switch.
 - [ ] **[Implement]** Replace the app's copies and switch `style.css` to the public bright entry point.
 - [ ] **[Verify]**    Run the full tests and the lossless switch proof with T0032's harness.
 - [ ] **[Doc]**       Update documentation and CHANGELOG.md.
@@ -32,3 +33,18 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 ## Execution Log
 - [2026-11-13] **[Doc]**
   Companion task file scaffolded at task creation.
+
+- [2026-11-13] **[Read]**
+  Inventoried meteo against components.md: offline indicator, silent worker update, and the empty toast region map to vendored parts.
+  - Tooltips, buttons, fields stay app-local: outside the named scope.
+  - Vendored .icon would resize meteo icons: rename to app-icon.
+
+- [2026-11-13] **[Implement]**
+  Wrote failing unit tests, the update browser scenario, and extended the switch proof with icons and an offline page.
+  - tests/pwa.test.js, tests/update-browser.mjs added.
+
+- [2026-11-13] **[Verify]**
+  Recorded the failure output of the new tests in validation-proof.md; captured proof/before at 7857b0d.
+  - 18 unit tests and the update scenario fail.
+  - Fixed CRLF parsing in tests/accent.test.js, undeclared.
+
