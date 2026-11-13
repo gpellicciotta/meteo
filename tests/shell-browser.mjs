@@ -48,6 +48,11 @@ try {
   await page.keyboard.press("Escape");
   check((await page.getAttribute("html", "data-theme")) === "light", "closing Settings without saving reverts the preview");
   check(await page.isVisible("#screen-start"), "Escape returns to the start view");
+  await page.click("#btn-config");
+  await page.selectOption("#config-theme-color", "yellow");
+  check((await page.getAttribute("html", "data-accent")) === "yellow", "choosing the yellow accent previews it as data-accent");
+  await page.keyboard.press("Escape");
+  check((await page.getAttribute("html", "data-accent")) === "blue", "closing Settings without saving reverts the accent preview");
 
   // A listener added after the app's own one sees whether the app prevented the browser's help.
   await page.evaluate(() => document.addEventListener("keydown", (e) => {
@@ -204,7 +209,7 @@ for (const width of [390, 1440]) {
   }
 }
 
-// The palette overrides of T0031 on the shared contract tokens; dark blue keeps meteo's fill until T0033 decides.
+// The palette overrides of T0031 on the shared contract tokens; docs/specs/visual-style-guide.md lists them.
 const PALETTE = {
   "light blue": { primary: "#1a56db", "primary-hover": "#163f9e", "primary-active": "#163f9e", "on-primary": "#ffffff", link: "#1a56db", "link-hover": "#1a56db", focus: "#1a56db" },
   "dark blue": { primary: "#2563eb", "primary-hover": "#1d4ed8", "primary-active": "#1d4ed8", "on-primary": "#ffffff", link: "#93c5fd", "link-hover": "#93c5fd", focus: "#60a5fa" },
@@ -223,6 +228,7 @@ const TEXT = {
     for (const [name, tokens] of Object.entries(PALETTE)) {
       const [theme, accent] = name.split(" ");
       await palettePage.goto(`${server.url}?lang=en&theme=${theme}&theme-color=${accent}`, { waitUntil: "networkidle" });
+      check((await palettePage.getAttribute("html", "data-accent")) === accent, `the ${name} page sets data-accent="${accent}"`);
       const expected = { ...tokens, ...TEXT[theme] };
       const wrong = [];
       for (const [token, hex] of Object.entries(expected)) {

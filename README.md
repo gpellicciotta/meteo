@@ -109,6 +109,8 @@ node vendor/design/bin/check.mjs   # copy integrity and app style conformance
 
 The page uses the app shell with page scrolling in the narrow column; the three screens are sections of its main area.
 [css/tokens.css](css/tokens.css) is the only app stylesheet with raw colors, including the overrides of the look's tokens.
+The accent sets `data-accent` on the root element, the look's variant attribute.
+The [visual style guide](docs/specs/visual-style-guide.md) lists every override and AA exception.
 
 To update the release, run `vendor` from the new version and rerun the checks:
 

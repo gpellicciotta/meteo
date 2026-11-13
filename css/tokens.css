@@ -1,27 +1,11 @@
 /* ==========================================================================
    Meteo tokens: the app's own colors, and its overrides of bright contract tokens.
    The only app stylesheet that holds raw colors, as the vendored conformance check requires.
-   Contract overrides follow the T0031 assessment; T0033 renames data-theme-color to data-accent.
+   Contract overrides follow the T0031 assessment; docs/specs/visual-style-guide.md lists each one.
+   Accent rules select :root[data-accent], which outranks the look's bare [data-accent] rules.
    ========================================================================== */
 
 :root {
-  /* Primary Theme Color Palette: Blue (Default) */
-  --color-primary: #1a56db;
-  --color-primary-dark: #163f9e;
-  --color-primary-tint: #eff6ff;
-  --color-primary-border: #bae6fd;
-  --color-primary-text: #0369a1;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(26, 86, 219, 0.25);
-  --color-primary-shadow-hover: rgba(26, 86, 219, 0.35);
-  --color-primary-focus: rgba(26, 86, 219, 0.18);
-
-  /* Contract overrides of the blue accent: actions, links, and the focus ring */
-  --color-primary-hover: #163f9e;
-  --color-primary-active: #163f9e;
-  --color-link: #1a56db;
-  --color-focus: #1a56db;
-
   /* Semantic Feedback & State Colors */
   --color-wrong: #c81e1e;
   --color-wrong-bg: #fef2f2;
@@ -87,8 +71,28 @@
   --shadow-tooltip: 0 4px 14px rgba(0, 0, 0, 0.22);
 }
 
-/* Theme Color Variant: Yellow, with white text by choice, a deliberate AA exception */
-:root[data-theme-color="yellow"] {
+/* Accent Variant: Blue, the default when the root carries no data-accent */
+:root,
+:root[data-accent="blue"] {
+  --color-primary: #1a56db;
+  --color-primary-dark: #163f9e;
+  --color-primary-tint: #eff6ff;
+  --color-primary-border: #bae6fd;
+  --color-primary-text: #0369a1;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(26, 86, 219, 0.25);
+  --color-primary-shadow-hover: rgba(26, 86, 219, 0.35);
+  --color-primary-focus: rgba(26, 86, 219, 0.18);
+
+  /* Contract overrides of the blue accent: actions, links, and the focus ring */
+  --color-primary-hover: #163f9e;
+  --color-primary-active: #163f9e;
+  --color-link: #1a56db;
+  --color-focus: #1a56db;
+}
+
+/* Accent Variant: Yellow, with white text by choice, a deliberate AA exception */
+:root[data-accent="yellow"] {
   --color-primary: #b88000;
   --color-primary-dark: #a16207;
   --color-primary-tint: #fefce8;
@@ -107,8 +111,8 @@
   --color-rain-text: #854d0e;
 }
 
-/* Theme Color Variant: Red */
-:root[data-theme-color="red"] {
+/* Accent Variant: Red */
+:root[data-accent="red"] {
   --color-primary: #dc2626;
   --color-primary-dark: #b91c1c;
   --color-primary-tint: #fef2f2;
@@ -165,9 +169,9 @@
   --color-badge-teal-text: #5eead4;
 }
 
-/* Dark Theme + Blue (default); the fill stays #2563eb with white labels until T0033 decides */
-:root[data-theme="dark"][data-theme-color="blue"],
-:root[data-theme="dark"]:not([data-theme-color="yellow"]):not([data-theme-color="red"]) {
+/* Dark Theme + Blue (default); meteo's #2563eb fill with white labels, a deliberate exception */
+:root[data-theme="dark"][data-accent="blue"],
+:root[data-theme="dark"]:not([data-accent="yellow"]):not([data-accent="red"]) {
   --color-primary: #2563eb;
   --color-primary-dark: #1d4ed8;
   --color-primary-tint: #172554;
@@ -184,7 +188,7 @@
 }
 
 /* Dark Theme + Yellow, with white labels as in light */
-:root[data-theme="dark"][data-theme-color="yellow"] {
+:root[data-theme="dark"][data-accent="yellow"] {
   --color-primary: #d97706;
   --color-primary-dark: #b45309;
   --color-primary-tint: #451a03;
@@ -204,7 +208,7 @@
 }
 
 /* Dark Theme + Red */
-:root[data-theme="dark"][data-theme-color="red"] {
+:root[data-theme="dark"][data-accent="red"] {
   --color-primary: #dc2626;
   --color-primary-dark: #b91c1c;
   --color-primary-tint: #450a0a;

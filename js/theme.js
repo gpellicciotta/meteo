@@ -20,7 +20,7 @@ export function applyTheme(themeSetting, themeColor) {
 
   document.documentElement.setAttribute("data-theme", resolvedTheme);
   document.documentElement.setAttribute("data-theme-setting", setting);
-  document.documentElement.setAttribute("data-theme-color", color);
+  document.documentElement.setAttribute("data-accent", color);
 
   const metaThemeColor = document.querySelector('meta[name="theme-color"]');
   if (metaThemeColor) {
@@ -59,7 +59,7 @@ export function initTheme() {
     const handler = () => {
       const currentSetting = (document.documentElement && document.documentElement.getAttribute("data-theme-setting")) || getThemeParam();
       if (currentSetting === "system") {
-        const currentColor = (document.documentElement && document.documentElement.getAttribute("data-theme-color")) || getThemeColorParam();
+        const currentColor = (document.documentElement && document.documentElement.getAttribute("data-accent")) || getThemeColorParam();
         applyTheme("system", currentColor);
       }
     };

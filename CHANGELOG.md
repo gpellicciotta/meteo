@@ -20,6 +20,8 @@ A summarized overview of all changes, per version of this project.
 - FrontEnd: Added a skip link, visible keyboard focus rings, and reduced-motion handling from the shared design system.
 - FrontEnd: Darkened the light yellow accent to `#b88000`, the bright look's AA fill, keeping white labels.
 - DevEx: Vendored support.webapp 0.1.0 with the bright look, pinned in [design.json](design.json) and checked by `devops.py check`.
+- FrontEnd: Renamed the root attribute `data-theme-color` to `data-accent`, the bright look's variant attribute, with no visual change.
+- DevEx: Added a [visual style guide](docs/specs/visual-style-guide.md) listing every palette override and AA exception, including white labels on yellow.
 
 ## v1.2.0 [released: 2026-11-02]
 - DevEx: Added unified [devops.py](scripts/devops.py) CLI for testing, linting, review server, service worker, and deployment.

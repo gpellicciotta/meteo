@@ -38,7 +38,7 @@ export function previewTheme() {
  */
 export function openConfigView() {
   initialThemeSetting = document.documentElement.getAttribute("data-theme-setting") || "system";
-  initialThemeColor = document.documentElement.getAttribute("data-theme-color") || "blue";
+  initialThemeColor = document.documentElement.getAttribute("data-accent") || "blue";
   el.configLanguage.value = getLang();
   el.configTheme.value = initialThemeSetting;
   el.configThemeColor.value = initialThemeColor;
