@@ -1,11 +1,11 @@
 ---
 id: T0034
-owner: ~
-needs: [T0032]
-branch: —
-worktree: —
-status: ready
-started_at: —
+owner: "@claude"
+needs: []
+branch: task/T0034-replace-the-app-s-shared-components-with-the
+worktree: .plan/work/T0034-replace-the-app-s-shared-components-with-the
+status: active
+started_at: "2026-11-13T21:59:46Z"
 ended_at: —
 review: agent
 preview: none
