@@ -13,12 +13,13 @@ preview: none
 protocol: standard
 usage:
   worker: {turns: 6, duration_s: 3566.0, input: 260, output: 55860, cache_read: 9718170, cache_write: 210308}
-  review: {turns: 6, duration_s: 3689.0, input: 1029592, output: 103322, cache_read: 24937816}
-review_status: pending
+  review: {turns: 8, duration_s: 4355.0, input: 1132448, output: 109944, cache_read: 27701336, cache_write: 0}
+review_status: approved
 review_round: 2
 review_requested_at: "2026-11-13T19:28:38Z"
-work_duration: 3693.9
-review_session: antigravity-20261113-29f32c
+work_duration: 374.2
+review_session: codex-20261113-ae1a86
+reviewed_by: "@codex"
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 
@@ -36,7 +37,7 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 - [x] **[Verify]**    Run the tests and the completion check until they pass.
 - [x] **[Visual]**    Record the lossless switch proof: screenshots at 390 and 1440 px, light and dark.
 - [x] **[Doc]**       List every visual difference as a fix or deliberate change, and update CHANGELOG.md.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
@@ -88,6 +89,10 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 - [2026-11-13] **[Implement]**
   Rebased onto main at f47d3d6; moved the changelog bullets under v1.3.0-pre and dropped the v1.2.1-pre headings.
   - npm test: 145 passed after rebase.
+
+- [2026-11-13] **[Review]**
+  Round 2 approved by @codex: [Decided]** Approved.
+  - Findings: [review-findings-2.md](T0030-drop-the-quiz-leftovers-unused-icons-classes-and/review-findings-2.md).
 
 ## Screenshots
 Before and after are identical; see validation-proof.md.
