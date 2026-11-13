@@ -11,6 +11,11 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 964.8, input: 152, output: 83726, cache_read: 7345480, cache_write: 228248}
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T20:08:31Z"
 ---
 # T0031: Assess meteo's fills, states, labels, links, focus, and grounds against the bright look's AA adjustments.
 
@@ -44,4 +49,7 @@ Investigation only: the findings feed the vendoring task, which applies them.
   - Files touched: 0.
   - Lines touched: 0.
   - Reopenings: 0.
+
+- [2026-11-13] **[Review]**
+  Round 1 requested (mode: agent).
 
