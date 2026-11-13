@@ -1,263 +1,55 @@
-
-
 /* ==========================================================================
-   1. Design Tokens & CSS Variables
+   Meteo styles on the support.webapp design system, vendored in vendor/design/.
+   Until T0034 switches to the public bright entry point, the app imports the private
+   shared layers it needs: tokens and motion, reset and focus ring, the app shell, and the bright look.
    ========================================================================== */
-
-:root {
-  /* Primary Theme Color Palette: Blue (Default) */
-  --color-primary: #1a56db;
-  --color-primary-dark: #163f9e;
-  --color-primary-tint: #eff6ff;
-  --color-primary-border: #bae6fd;
-  --color-primary-text: #0369a1;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(26, 86, 219, 0.25);
-  --color-primary-shadow-hover: rgba(26, 86, 219, 0.35);
-  --color-primary-focus: rgba(26, 86, 219, 0.18);
-
-  /* Semantic Feedback & State Colors */
-  --color-wrong: #c81e1e;
-  --color-wrong-bg: #fef2f2;
-  --color-wrong-text: #b91c1c;
-  --color-warning-bg: #fef3c7;
-  --color-warning-border: #fcd34d;
-  --color-warning-text: #92400e;
-
-  /* Rain Chart Colors, following the accent color */
-  --color-rain: #3b82f6;
-  --color-rain-text: #1d4ed8;
-
-  /* Neutral Surface, Background & Typography Colors */
-  --color-bg: #f5f7fa;
-  --color-card: #ffffff;
-  --color-card-subtle: #f8fafc;
-  --color-card-border: #e2e8f0;
-  --color-text: #1f2933;
-  --color-text-strong: #0f172a;
-  --color-muted: #6b7280;
-  --color-border: #cbd5e1;
-  --color-border-subtle: #e2e8f0;
-  --color-btn-tint-hover: rgba(0, 0, 0, 0.05);
-
-  /* Tooltip & Popover Surface Tokens */
-  --color-tooltip-bg: #0f172a;
-  --color-tooltip-text: #ffffff;
-  --color-tooltip-border: transparent;
-
-  /* Categorical / Changelog Badge Tokens */
-  --color-badge-purple-bg: #f3e8ff;
-  --color-badge-purple-text: #6b21a8;
-  --color-badge-green-bg: #dcfce7;
-  --color-badge-green-text: #166534;
-  --color-badge-indigo-bg: #e0e7ff;
-  --color-badge-indigo-text: #3730a3;
-  --color-badge-teal-bg: #ccfbf1;
-  --color-badge-teal-text: #115e59;
-
-  /* Typographic Scale Tokens */
-  --font-size-xs: 0.75rem;
-  --font-size-sm: 0.875rem;
-  --font-size-base: 1rem;
-  --font-size-md: 1.125rem;
-  --font-size-lg: 1.25rem;
-  --font-size-xl: 1.5rem;
-  --font-size-2xl: 1.75rem;
-
-  /* Border Radius Tokens */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius: 10px;
-  --radius-xl: 16px;
-  --radius-full: 9999px;
-  --radius-round: 50%;
-
-  /* Shadows & Elevation */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
-}
-
-/* Theme Color Variant: Yellow, with white text by choice; blue and red offer more contrast */
-:root[data-theme-color="yellow"] {
-  --color-primary: #ca8a04;
-  --color-primary-dark: #a16207;
-  --color-primary-tint: #fefce8;
-  --color-primary-border: #fde047;
-  --color-primary-text: #854d0e;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(202, 138, 4, 0.28);
-  --color-primary-shadow-hover: rgba(202, 138, 4, 0.38);
-  --color-primary-focus: rgba(202, 138, 4, 0.2);
-  --color-rain: #ca8a04;
-  --color-rain-text: #854d0e;
-}
-
-/* Theme Color Variant: Red */
-:root[data-theme-color="red"] {
-  --color-primary: #dc2626;
-  --color-primary-dark: #b91c1c;
-  --color-primary-tint: #fef2f2;
-  --color-primary-border: #fca5a5;
-  --color-primary-text: #991b1b;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(220, 38, 38, 0.28);
-  --color-primary-shadow-hover: rgba(220, 38, 38, 0.38);
-  --color-primary-focus: rgba(220, 38, 38, 0.2);
-  --color-rain: #ef4444;
-  --color-rain-text: #b91c1c;
-}
-
-/* Dark Theme Surface & Feedback Tokens */
-:root[data-theme="dark"] {
-  color-scheme: dark;
-  --color-rain: #60a5fa;
-  --color-rain-text: #93c5fd;
-  --color-bg: #0f172a;
-  --color-card: #1e293b;
-  --color-card-subtle: #141f33;
-  --color-card-border: #334155;
-  --color-text: #f1f5f9;
-  --color-text-strong: #ffffff;
-  --color-muted: #94a3b8;
-  --color-border: #475569;
-  --color-border-subtle: #334155;
-  --color-btn-tint-hover: rgba(255, 255, 255, 0.1);
-
-  --color-wrong: #ef4444;
-  --color-wrong-bg: rgba(153, 27, 27, 0.28);
-  --color-wrong-text: #f87171;
-  --color-warning-bg: #451a03;
-  --color-warning-border: #78350f;
-  --color-warning-text: #fde68a;
-
-  --color-tooltip-bg: #0f172a;
-  --color-tooltip-text: #f1f5f9;
-  --color-tooltip-border: #334155;
-
-  --color-badge-purple-bg: #3b0764;
-  --color-badge-purple-text: #d8b4fe;
-  --color-badge-green-bg: #052e16;
-  --color-badge-green-text: #86efac;
-  --color-badge-indigo-bg: #1e1b4b;
-  --color-badge-indigo-text: #a5b4fc;
-  --color-badge-teal-bg: #042f2e;
-  --color-badge-teal-text: #5eead4;
-}
-
-/* Dark Theme + Blue (default) */
-:root[data-theme="dark"][data-theme-color="blue"],
-:root[data-theme="dark"]:not([data-theme-color="yellow"]):not([data-theme-color="red"]) {
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
-  --color-primary-tint: #172554;
-  --color-primary-border: #1e40af;
-  --color-primary-text: #93c5fd;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(37, 99, 235, 0.3);
-  --color-primary-shadow-hover: rgba(37, 99, 235, 0.45);
-  --color-primary-focus: rgba(37, 99, 235, 0.3);
-}
-
-/* Dark Theme + Yellow */
-:root[data-theme="dark"][data-theme-color="yellow"] {
-  --color-primary: #d97706;
-  --color-primary-dark: #b45309;
-  --color-primary-tint: #451a03;
-  --color-primary-border: #78350f;
-  --color-primary-text: #fde68a;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(217, 119, 6, 0.3);
-  --color-primary-shadow-hover: rgba(217, 119, 6, 0.45);
-  --color-primary-focus: rgba(217, 119, 6, 0.3);
-  --color-rain: #fbbf24;
-  --color-rain-text: #fde68a;
-}
-
-/* Dark Theme + Red */
-:root[data-theme="dark"][data-theme-color="red"] {
-  --color-primary: #dc2626;
-  --color-primary-dark: #b91c1c;
-  --color-primary-tint: #450a0a;
-  --color-primary-border: #991b1b;
-  --color-primary-text: #fca5a5;
-  --color-on-primary: #ffffff;
-  --color-primary-shadow: rgba(220, 38, 38, 0.3);
-  --color-primary-shadow-hover: rgba(220, 38, 38, 0.45);
-  --color-primary-focus: rgba(220, 38, 38, 0.3);
-  --color-rain: #f87171;
-  --color-rain-text: #fca5a5;
-}
-
+@import url('../vendor/design/css/base.css');
+@import url('../vendor/design/css/reset.css');
+@import url('../vendor/design/css/shell.css');
+@import url('../vendor/design/looks/bright/primitives.css');
+@import url('../vendor/design/looks/bright/look.css');
+@import url('tokens.css');
 /* ==========================================================================
    2. Reset & Base Styles
    ========================================================================== */
 
-*, *::before, *::after {
-  box-sizing: border-box;
-}
-
+/* The shell's body grid, the box model, and the focus ring come from the vendored layers. */
 body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-body);
   background: var(--color-bg);
   color: var(--color-text);
   line-height: 1.5;
-  overflow-x: hidden;
-  min-height: 100dvh;
+}
+
+/* Screens: sections of the shell's main area, toggled by screens.js; the start screen fills the column. */
+.app__main {
   display: flex;
   flex-direction: column;
 }
 
-#app {
-  position: relative;
-  width: 100%;
-  margin: 0 auto;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 100dvh;
-  height: 100dvh;
-  max-height: 100dvh;
-  overflow: hidden;
-}
-
-#screen-start,
-#screen-about,
-#screen-config,
 .screen {
   display: flex;
   flex-direction: column;
   flex: 1 1 auto;
-  width: 100%;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-  box-sizing: border-box;
+  min-width: 0;
 }
 
-.view-header {
-  flex-shrink: 0;
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--color-bg);
+/* Screen titles: centered in the top bar, clear of the close button at its end. */
+.app__top-bar .app__title {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(50% + env(safe-area-inset-top) / 2);
+  translate: 0 -50%;
+  margin: 0;
+  padding-inline: calc(var(--target-min) + var(--space-4));
+  text-align: center;
+  pointer-events: none;
 }
 
-.view-content {
-  flex: 1 1 auto;
-  overflow-y: auto;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
-}
-
-.view-footer {
-  flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
-  background: var(--color-bg);
+/* Action bar groups: one per screen, filling the bar. */
+.screen-actions {
+  flex: 1 1 100%;
+  min-width: 0;
 }
 
 h1 {
@@ -287,25 +79,25 @@ label {
 input[type="text"] {
   width: 100%;
   padding: 10px 14px;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-control-border);
   border-radius: var(--radius);
   font-size: var(--font-size-base);
   background: var(--color-card);
   color: var(--color-text);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 input[type="text"]:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
-  outline: none;
 }
 
 /* ==========================================================================
    3. Utilities & Shared Components
    ========================================================================== */
 
-.hidden {
+.hidden,
+[hidden] {
   display: none !important;
 }
 
@@ -335,14 +127,13 @@ input[type="text"]:focus {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  background: var(--color-warning-bg);
-  border: 1px solid var(--color-warning-border);
-  color: var(--color-warning-text);
+  background: var(--color-notice-bg);
+  border: 1px solid var(--color-notice-border);
+  color: var(--color-notice-text);
   font-size: var(--font-size-sm);
   font-weight: 500;
   padding: 10px 14px;
   border-radius: var(--radius);
-  margin-bottom: 16px;
   text-align: center;
 }
 
@@ -362,7 +153,7 @@ button {
   border-radius: var(--radius);
   padding: 12px 20px;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-standard);
 }
 
 .btn-primary {
@@ -376,7 +167,6 @@ button {
 .btn-primary:focus-visible {
   background: var(--color-primary-dark);
   box-shadow: 0 3px 8px var(--color-primary-shadow-hover);
-  outline: none;
 }
 
 /* Accessible Tooltips via CSS pseudo-elements */
@@ -397,7 +187,7 @@ button {
   font-weight: 500;
   line-height: 1.35;
   padding: 6px 12px;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-tile);
   white-space: normal;
   width: max-content;
   max-width: min(240px, 80vw);
@@ -406,7 +196,7 @@ button {
   opacity: 0;
   visibility: hidden;
   display: none;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.22);
+  box-shadow: var(--shadow-tooltip);
   z-index: 1000;
 }
 
@@ -531,7 +321,7 @@ body.suppress-tooltips [data-tooltip]::before {
   }
 }
 
-/* Close & Back Button with accessible focus rings and top-right placement */
+/* Close & Back Button with accessible focus rings, at the end of the top bar */
 .btn-about-close,
 .btn-config-close,
 .view-close-btn,
@@ -542,15 +332,11 @@ body.suppress-tooltips [data-tooltip]::before {
   line-height: 1;
   color: var(--color-muted);
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-chip);
   padding: 4px 8px;
-  transition: color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+  transition: color var(--duration-fast) var(--ease-standard), background-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
   display: inline-flex;
   align-items: center;
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 60;
   justify-content: center;
   width: auto;
   height: auto;
@@ -570,7 +356,6 @@ body.suppress-tooltips [data-tooltip]::before {
 .modal-close:focus-visible {
   color: var(--color-primary);
   background-color: var(--color-btn-tint-hover);
-  outline: none;
   box-shadow: 0 0 0 3px var(--color-primary-border);
 }
 
@@ -580,8 +365,6 @@ body.suppress-tooltips [data-tooltip]::before {
 
 .start-title {
   text-align: center;
-  margin-top: 4px;
-  margin-bottom: 8px;
   font-size: var(--font-size-2xl);
   font-weight: 700;
   line-height: 1.25;
@@ -595,6 +378,7 @@ body.suppress-tooltips [data-tooltip]::before {
   font-size: var(--font-size-sm);
   line-height: 1.45;
   margin: 0 auto 20px;
+  width: 100%;
   max-width: 480px;
 }
 
@@ -624,19 +408,18 @@ body.suppress-tooltips [data-tooltip]::before {
   grid-area: input;
   width: 100%;
   padding: 10px 14px;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-control-border);
   border-radius: var(--radius);
   font-size: var(--font-size-sm);
   background: var(--color-card);
   color: var(--color-text);
   height: 42px;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 }
 
 .location-input:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
-  outline: none;
 }
 
 .btn-start-arrow {
@@ -664,29 +447,10 @@ body.suppress-tooltips [data-tooltip]::before {
   background: var(--color-primary-dark);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px var(--color-primary-shadow-hover);
-  outline: none;
 }
 
 .start-bottom-meta {
-  margin-top: auto;
-  width: 100%;
-}
-
-@media (max-width: 639px) {
-  .start-bottom-meta {
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    background: var(--color-bg);
-    padding-bottom: 4px;
-  }
-}
-
-.start-divider {
-  border: none;
-  border-top: 1px solid var(--color-border-subtle);
-  margin: 28px 0 18px;
-  width: 100%;
+  padding-block: 6px 4px;
 }
 
 .start-meta-bar {
@@ -712,11 +476,11 @@ body.suppress-tooltips [data-tooltip]::before {
   width: 38px;
   height: 38px;
   border-radius: var(--radius-round);
-  border: 1px solid var(--color-border);
+  border: 1px solid var(--color-control-border);
   background: var(--color-card);
   color: var(--color-text);
   box-shadow: var(--shadow-sm);
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-standard);
   cursor: default;
   user-select: none;
   padding: 0;
@@ -744,7 +508,6 @@ body.suppress-tooltips [data-tooltip]::before {
   background: var(--color-primary-tint);
   transform: translateY(-1px);
   box-shadow: 0 3px 8px var(--color-primary-shadow);
-  outline: none;
 }
 
 .start-meta-btn-action:hover,
@@ -754,7 +517,6 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-on-primary);
   transform: translateY(-1px);
   box-shadow: 0 4px 10px var(--color-primary-shadow-hover);
-  outline: none;
 }
 
 .icon {
@@ -797,7 +559,7 @@ body.suppress-tooltips [data-tooltip]::before {
   width: 42px;
   height: 42px;
   padding: 0;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-control-border);
   border-radius: var(--radius);
   background: var(--color-card);
   color: var(--color-primary);
@@ -808,7 +570,6 @@ body.suppress-tooltips [data-tooltip]::before {
 .btn-current-location:focus-visible {
   border-color: var(--color-primary);
   background: var(--color-primary-tint);
-  outline: none;
 }
 
 /* Show the tooltip below and left-aligned, so the scrolling content area does not clip it. */
@@ -879,7 +640,6 @@ body.suppress-tooltips [data-tooltip]::before {
 .place-choice:focus-visible {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
-  outline: none;
 }
 
 /* The place and update time sit below the card, where scrolling them off matters least. */
@@ -971,7 +731,7 @@ body.suppress-tooltips [data-tooltip]::before {
   width: 100%;
   max-width: 32px;
   height: 120px;
-  border-bottom: 2px solid var(--color-border);
+  border-bottom: 2px solid var(--color-control-border);
 }
 
 .forecast-bar {
@@ -980,7 +740,7 @@ body.suppress-tooltips [data-tooltip]::before {
   right: 0;
   bottom: 0;
   background: var(--color-rain);
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border-radius: var(--radius-chip) var(--radius-chip) 0 0;
 }
 
 .forecast-chance {
@@ -1074,38 +834,16 @@ body.suppress-tooltips [data-tooltip]::before {
    9. About Screen (#screen-about)
    ========================================================================== */
 
-.about-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--color-bg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border-subtle);
-  margin-bottom: 0;
-  min-height: 48px;
-}
-
 .about-title {
   font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--color-primary);
-  margin: 0;
-  text-align: center;
-  flex: 1;
 }
 
 .about-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 16px 0;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .about-version-card,
@@ -1200,7 +938,7 @@ body.suppress-tooltips [data-tooltip]::before {
   max-width: min(280px, 100%);
   padding: 6px 9px;
   border: 1px solid var(--color-tooltip-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-tile);
   background: var(--color-tooltip-bg);
   color: var(--color-tooltip-text);
   box-shadow: var(--shadow-md);
@@ -1243,7 +981,7 @@ body.suppress-tooltips [data-tooltip]::before {
 
 .guide-sample .is-guide-active,
 .guide-item.is-guide-active {
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-chip);
   background: var(--color-primary-tint);
   box-shadow: 0 0 0 3px var(--color-primary-tint);
 }
@@ -1322,7 +1060,7 @@ body.suppress-tooltips [data-tooltip]::before {
   padding: 8px 10px;
   background: var(--color-card);
   border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-tile);
 }
 
 .about-icon-badge {
@@ -1407,12 +1145,12 @@ body.suppress-tooltips [data-tooltip]::before {
   padding: 8px 14px;
   background: var(--color-card);
   border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-tile);
   color: var(--color-primary);
   font-weight: 600;
   font-size: var(--font-size-sm);
   text-decoration: none;
-  transition: all 0.15s ease;
+  transition: all var(--duration-fast) var(--ease-standard);
 }
 
 .about-support-link:hover,
@@ -1473,7 +1211,7 @@ body.suppress-tooltips [data-tooltip]::before {
   overflow-y: auto;
   background: var(--color-card);
   border: 1px solid var(--color-card-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-tile);
   padding: 14px 18px;
   font-size: var(--font-size-sm);
   line-height: 1.5;
@@ -1507,7 +1245,7 @@ body.suppress-tooltips [data-tooltip]::before {
   color: var(--color-primary);
   text-decoration: none;
   font-size: var(--font-size-sm);
-  transition: color 0.15s ease;
+  transition: color var(--duration-fast) var(--ease-standard);
 }
 
 .about-source-link:hover,
@@ -1524,13 +1262,7 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .about-footer {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
-  background: var(--color-bg);
   padding: 10px 0;
-  border-top: 1px solid var(--color-border-subtle);
-  margin-top: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -1540,38 +1272,16 @@ body.suppress-tooltips [data-tooltip]::before {
    10. Settings Screen (#screen-config)
    ========================================================================== */
 
-.config-header {
-  position: sticky;
-  top: 0;
-  z-index: 20;
-  background: var(--color-bg);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border-subtle);
-  margin-bottom: 0;
-  min-height: 48px;
-}
-
 .config-title {
   font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--color-primary);
-  margin: 0;
-  text-align: center;
-  flex: 1;
 }
 
 .config-content {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  flex: 1 1 auto;
-  overflow-y: auto;
-  padding: 16px 0;
-  min-height: 0;
-  -webkit-overflow-scrolling: touch;
 }
 
 .config-section {
@@ -1618,18 +1328,17 @@ body.suppress-tooltips [data-tooltip]::before {
   width: 100%;
   padding: 9px 12px;
   font-size: var(--font-size-sm);
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--color-control-border);
   border-radius: var(--radius);
   background: var(--color-card);
   color: var(--color-text);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: border-color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
   cursor: pointer;
 }
 
 .config-select:focus {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px var(--color-primary-focus);
-  outline: none;
 }
 
 .config-check {
@@ -1663,16 +1372,10 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .config-actions {
-  position: sticky;
-  bottom: 0;
-  z-index: 20;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: auto;
   padding: 10px 0;
-  background: var(--color-bg);
-  border-top: 1px solid var(--color-border-subtle);
 }
 
 .config-actions #btn-config-save {
@@ -1729,7 +1432,7 @@ body.suppress-tooltips [data-tooltip]::before {
   text-transform: uppercase;
   letter-spacing: 0.03em;
   padding: 1px 6px;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-chip);
   margin-right: 4px;
   line-height: 1.3;
 }
@@ -1737,7 +1440,7 @@ body.suppress-tooltips [data-tooltip]::before {
 .changelog-badge-frontend { background: var(--color-primary-tint); color: var(--color-primary-text); }
 .changelog-badge-backend { background: var(--color-badge-purple-bg); color: var(--color-badge-purple-text); }
 .changelog-badge-content { background: var(--color-badge-green-bg); color: var(--color-badge-green-text); }
-.changelog-badge-docs { background: var(--color-warning-bg); color: var(--color-warning-text); }
+.changelog-badge-docs { background: var(--color-notice-bg); color: var(--color-notice-text); }
 .changelog-badge-devex { background: var(--color-badge-indigo-bg); color: var(--color-badge-indigo-text); }
 .changelog-badge-config { background: var(--color-card-subtle); color: var(--color-muted); }
 .changelog-badge-security { background: var(--color-wrong-bg); color: var(--color-wrong-text); }
@@ -1767,25 +1470,6 @@ body.suppress-tooltips [data-tooltip]::before {
 
 /* Tablet Breakpoint (>= 640px) */
 @media (min-width: 640px) {
-  body {
-    padding: 24px 16px;
-    align-items: center;
-  }
-
-  #app {
-    max-width: 620px;
-    height: calc(100dvh - 48px);
-    max-height: calc(100dvh - 48px);
-    min-height: 0;
-    background: var(--color-card);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-lg);
-    padding: 24px 32px;
-    overflow: hidden;
-  }
-
-  
-
   .start-meta-bar {
     gap: 28px;
   }
@@ -1803,53 +1487,19 @@ body.suppress-tooltips [data-tooltip]::before {
   .config-section {
     padding: 20px;
   }
-
-  .view-header,
-  .view-footer,
-  .about-header,
-  .config-header,
-  .config-actions {
-    background: var(--color-card);
-  }
 }
 
-/* Desktop Breakpoint (>= 768px) */
+/* Desktop Breakpoint (>= 768px): the start screen keeps its narrower column inside the shell's. */
 @media (min-width: 768px) {
-  body {
-    padding: 32px 16px;
-  }
-
-  #app {
-    max-width: 960px;
-    height: calc(100dvh - 64px);
-    max-height: calc(100dvh - 64px);
-    min-height: 0;
-    padding: 24px 36px;
-    overflow: hidden;
-  }
-
   #screen-start {
+    width: 100%;
     max-width: 580px;
     margin: 0 auto;
   }
-
-  h1 {
-    font-size: 1.8rem;
-  }
 }
 
 /* ==========================================================================
-   13. Dark Theme Overrides & Refinements
-   ========================================================================== */
-
-@media (min-width: 640px) {
-  [data-theme="dark"] #app {
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45), 0 8px 24px rgba(0, 0, 0, 0.35);
-  }
-}
-
-/* ==========================================================================
-   14. Print Media Styles
+   13. Print Media Styles
    ========================================================================== */
 
 @media print {
@@ -1865,20 +1515,22 @@ body.suppress-tooltips [data-tooltip]::before {
 
   #screen-start,
   #screen-about,
-  #screen-config {
+  #screen-config,
+  .app__top-bar,
+  .app__action-bar {
     display: none !important;
   }
 
   body {
-    background: #ffffff !important;
-    color: #111827 !important;
+    background: var(--color-print-bg) !important;
+    color: var(--color-print-text) !important;
     padding: 0 !important;
     margin: 0 !important;
     width: 100% !important;
     max-width: 100% !important;
   }
 
-  #app {
+  .app__main {
     width: 100% !important;
     max-width: 100% !important;
     margin: 0 !important;
@@ -1888,11 +1540,8 @@ body.suppress-tooltips [data-tooltip]::before {
     background: transparent !important;
   }
 
-  
-
   h1 {
     font-size: 1.5rem !important;
     margin: 0 0 8px 0 !important;
   }
 }
-

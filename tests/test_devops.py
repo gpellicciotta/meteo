@@ -108,6 +108,23 @@ class TestDevopsAdapter(unittest.TestCase):
             self.assertFalse(self.project.check())
         tests.assert_not_called()
 
+    def test_design_check_runs_vendored_checker(self) -> None:
+        """Validates design_check runs the vendored support.webapp check.mjs with Node.js."""
+        with patch.object(self.project, "run_command", return_value=True) as run_cmd:
+            self.assertTrue(self.project.design_check())
+        argv = run_cmd.call_args[0][0]
+        self.assertEqual(argv[0], "node")
+        self.assertEqual(Path(argv[1]).relative_to(REPO_ROOT).as_posix(), "vendor/design/bin/check.mjs")
+
+    def test_check_runs_design_check_before_tests(self) -> None:
+        """Validates check runs the design check after lint and skips test when it fails."""
+        with patch.object(self.project, "lint", return_value=True), patch.object(
+            self.project, "design_check", return_value=False
+        ) as design, patch.object(self.project, "test") as tests:
+            self.assertFalse(self.project.check())
+        design.assert_called_once_with()
+        tests.assert_not_called()
+
     def test_release_delegates_to_deploy_flow(self) -> None:
         """Validates release runs the deploy flow without pushing."""
         with patch.object(self.mod, "deploy_flow", return_value=0) as flow:

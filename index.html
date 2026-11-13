@@ -40,23 +40,35 @@
   </script>
   <script type="module" src="js/app.js"></script>
 </head>
-<body>
-<main id="app">
-  <div id="offline-indicator" class="offline-indicator hidden" role="status" aria-live="polite">
+<body class="app app--scroll-page app--width-narrow">
+<a class="skip-link" href="#main" data-i18n="shell.skip_link">Skip to content</a>
+
+<!-- Top bar: the title of the shown screen, and the close button of About and Settings.
+     Every part with data-screen belongs to one screen; screens.js shows only the active screen's parts. -->
+<header class="app__top-bar">
+  <h1 id="start-title" class="app__title start-title" data-screen="start" data-i18n="title.app">Meteo</h1>
+  <h1 class="app__title about-title hidden" data-screen="about" data-i18n="about.title">About Meteo</h1>
+  <h1 id="config-title" class="app__title config-title hidden" data-screen="config" data-i18n="config.title">Settings</h1>
+  <div class="app__top-actions">
+    <button id="btn-about-back" class="btn-about-close modal-close view-close-btn hidden" data-screen="about" type="button" aria-label="Close" title="Close" data-i18n-aria="about.btn_close_aria" data-i18n-tooltip="about.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
+    <button type="button" id="btn-config-close" class="btn-config-close modal-close view-close-btn hidden" data-screen="config" aria-label="Close" title="Close" data-i18n-aria="config.btn_close_aria" data-i18n-tooltip="config.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
+  </div>
+</header>
+
+<div class="app__banners">
+  <div id="offline-indicator" class="offline-indicator" role="status" aria-live="polite" hidden>
     <span class="offline-icon" data-icon="wifi" aria-hidden="true"></span>
     <span data-i18n="start.offline">Offline: the forecast cannot be refreshed</span>
   </div>
+</div>
 
+<main class="app__main" id="main" tabindex="-1">
   <!-- Start screen -->
-  <section id="screen-start" class="screen">
-    <!-- Header: title and short explanation -->
-    <header class="start-header view-header">
-      <h1 id="start-title" class="start-title" data-i18n="title.app">Meteo</h1>
-      <p id="start-desc" class="start-desc" data-i18n="start.description">Temperature and rain for the next 12 hours.</p>
-    </header>
+  <section id="screen-start" class="screen" data-screen="start">
+    <p id="start-desc" class="start-desc" data-i18n="start.description">Temperature and rain for the next 12 hours.</p>
 
     <!-- Main content: location search and the 12-hour forecast -->
-    <div id="start-content" class="start-content view-content">
+    <div id="start-content" class="start-content">
       <form id="location-form" class="location-form" role="search">
         <div class="start-action-row">
           <!-- First in the markup so the keyboard order matches the visual order. -->
@@ -96,69 +108,11 @@
         </div>
       </section>
     </div>
-
-    <!-- Footer: meta bar with circle buttons and subtle copyright -->
-    <footer class="start-footer view-footer">
-      <div class="start-bottom-meta">
-        <hr class="start-divider">
-
-        <div class="start-meta-bar" role="region" aria-label="Settings and information" data-i18n-aria="start.meta_bar_aria">
-          <div class="start-meta-group start-meta-actions">
-            <button type="button" id="btn-change-place" class="start-meta-item start-meta-btn start-meta-btn-action hidden"
-                    aria-controls="location-form" aria-expanded="true"
-                    aria-label="Search another place"
-                    data-tooltip="Search another place"
-                    data-i18n-aria="start.btn_change_place_aria"
-                    data-i18n-tooltip="start.btn_change_place_tooltip">
-              <span class="start-meta-svg" data-icon="search" aria-hidden="true"></span>
-            </button>
-
-            <button type="button" id="btn-config" class="start-meta-item start-meta-btn start-meta-btn-action"
-                    aria-label="Open settings"
-                    data-tooltip="Settings"
-                    data-i18n-aria="start.btn_config_aria"
-                    data-i18n-tooltip="start.btn_config_tooltip">
-              <span class="start-meta-svg" data-icon="settings" aria-hidden="true"></span>
-            </button>
-
-            <button type="button" id="btn-lang" class="start-meta-item start-meta-btn start-meta-btn-action btn-lang"
-                    aria-label="Switch language"
-                    data-tooltip="Language: [EN] → NL"
-                    data-i18n-aria="start.btn_lang_aria">
-              <span class="btn-lang-label" aria-hidden="true" style="font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px;">EN</span>
-            </button>
-
-            <button type="button" id="btn-about" class="start-meta-item start-about-btn start-meta-btn-action"
-                    aria-label="About this app (version, release notes &amp; sources)"
-                    data-tooltip="About this app (version, release notes &amp; sources)"
-                    data-i18n-aria="start.btn_about_aria"
-                    data-i18n-tooltip="start.btn_about_tooltip">
-              <span class="start-meta-svg" data-icon="help" aria-hidden="true"></span>
-            </button>
-
-            <button type="button" id="btn-install" class="start-meta-item start-meta-btn start-meta-btn-action btn-install hidden"
-                    aria-label="Install as app"
-                    data-tooltip="Install app"
-                    data-i18n-aria="start.btn_install_aria"
-                    data-i18n-tooltip="start.btn_install_tooltip">
-              <span class="start-meta-svg" data-icon="install" aria-hidden="true"></span>
-            </button>
-          </div>
-        </div>
-
-        <p class="start-copyright" data-i18n="start.copyright">Copyright &copy; Giovanni Pellicciotta</p>
-      </div>
-    </footer>
   </section>
 
-  <!-- About screen: full-window view replacing the window -->
-  <section id="screen-about" class="screen hidden" aria-label="About Meteo" data-i18n-aria="about.screen_aria">
-    <button id="btn-about-back" class="btn-about-close modal-close view-close-btn" type="button" aria-label="Close" title="Close" data-i18n-aria="about.btn_close_aria" data-i18n-tooltip="about.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
-    <header class="about-header view-header">
-      <h1 class="about-title" data-i18n="about.title">About Meteo</h1>
-    </header>
-
-    <div class="about-content view-content">
+  <!-- About screen: replaces the start screen in the main area -->
+  <section id="screen-about" class="screen hidden" data-screen="about" aria-label="About Meteo" data-i18n-aria="about.screen_aria">
+    <div class="about-content">
       <div class="about-guide-card">
         <h2 class="about-section-heading" data-i18n="about.guide_heading">Reading the forecast</h2>
         <p class="about-icons-desc" data-i18n="about.guide_description">A sample forecast with every option on. The numbers match the list below.</p>
@@ -436,20 +390,11 @@
         </div>
       </div>
     </div>
-
-    <footer class="about-footer view-footer">
-      <p class="about-copyright" data-i18n="about.copyright">Copyright &copy; Giovanni Pellicciotta</p>
-    </footer>
   </section>
 
-  <!-- Settings screen: full-window view, mirroring the About view -->
-  <section id="screen-config" class="screen hidden" aria-label="Settings" data-i18n-aria="config.screen_aria">
-    <button type="button" id="btn-config-close" class="btn-config-close modal-close view-close-btn" aria-label="Close" title="Close" data-i18n-aria="config.btn_close_aria" data-i18n-tooltip="config.btn_close_aria"><span class="modal-close-icon" data-icon="close" aria-hidden="true"></span></button>
-    <header class="config-header view-header">
-      <h1 id="config-title" class="config-title" data-i18n="config.title">Settings</h1>
-    </header>
-
-    <div class="config-content view-content">
+  <!-- Settings screen: replaces the start screen in the main area, mirroring the About view -->
+  <section id="screen-config" class="screen hidden" data-screen="config" aria-label="Settings" data-i18n-aria="config.screen_aria">
+    <div class="config-content">
       <div id="config-section-general" class="config-section">
         <h4 class="config-section-title" data-i18n="config.section_general">General</h4>
         <p class="config-section-intro" data-i18n="config.introduction_general">These settings apply everywhere in the app</p>
@@ -527,11 +472,69 @@
         </div>
       </div>
     </div>
-
-    <footer class="config-footer view-footer config-actions">
-      <button type="button" id="btn-config-save" class="btn-primary" data-i18n="config.btn_save">Save</button>
-    </footer>
   </section>
 </main>
+
+<!-- Action bar: one group per screen -->
+<div class="app__action-bar">
+  <!-- Start: meta bar with circle buttons and subtle copyright -->
+  <div class="screen-actions start-bottom-meta" data-screen="start">
+    <div class="start-meta-bar" role="region" aria-label="Settings and information" data-i18n-aria="start.meta_bar_aria">
+      <div class="start-meta-group start-meta-actions">
+        <button type="button" id="btn-change-place" class="start-meta-item start-meta-btn start-meta-btn-action hidden"
+                aria-controls="location-form" aria-expanded="true"
+                aria-label="Search another place"
+                data-tooltip="Search another place"
+                data-i18n-aria="start.btn_change_place_aria"
+                data-i18n-tooltip="start.btn_change_place_tooltip">
+          <span class="start-meta-svg" data-icon="search" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" id="btn-config" class="start-meta-item start-meta-btn start-meta-btn-action"
+                aria-label="Open settings"
+                data-tooltip="Settings"
+                data-i18n-aria="start.btn_config_aria"
+                data-i18n-tooltip="start.btn_config_tooltip">
+          <span class="start-meta-svg" data-icon="settings" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" id="btn-lang" class="start-meta-item start-meta-btn start-meta-btn-action btn-lang"
+                aria-label="Switch language"
+                data-tooltip="Language: [EN] → NL"
+                data-i18n-aria="start.btn_lang_aria">
+          <span class="btn-lang-label" aria-hidden="true" style="font-weight: 700; font-size: 0.75rem; letter-spacing: 0.5px;">EN</span>
+        </button>
+
+        <button type="button" id="btn-about" class="start-meta-item start-about-btn start-meta-btn-action"
+                aria-label="About this app (version, release notes &amp; sources)"
+                data-tooltip="About this app (version, release notes &amp; sources)"
+                data-i18n-aria="start.btn_about_aria"
+                data-i18n-tooltip="start.btn_about_tooltip">
+          <span class="start-meta-svg" data-icon="help" aria-hidden="true"></span>
+        </button>
+
+        <button type="button" id="btn-install" class="start-meta-item start-meta-btn start-meta-btn-action btn-install hidden"
+                aria-label="Install as app"
+                data-tooltip="Install app"
+                data-i18n-aria="start.btn_install_aria"
+                data-i18n-tooltip="start.btn_install_tooltip">
+          <span class="start-meta-svg" data-icon="install" aria-hidden="true"></span>
+        </button>
+      </div>
+    </div>
+
+    <p class="start-copyright" data-i18n="start.copyright">Copyright &copy; Giovanni Pellicciotta</p>
+  </div>
+
+  <div class="screen-actions about-footer hidden" data-screen="about">
+    <p class="about-copyright" data-i18n="about.copyright">Copyright &copy; Giovanni Pellicciotta</p>
+  </div>
+
+  <div class="screen-actions config-actions hidden" data-screen="config">
+    <button type="button" id="btn-config-save" class="btn-primary" data-i18n="config.btn_save">Save</button>
+  </div>
+</div>
+
+<div class="app__overlays"><div class="toast-region" role="region" aria-label="Notifications" data-i18n-aria="shell.notifications_aria"></div></div>
 </body>
 </html>

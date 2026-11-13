@@ -16,6 +16,10 @@ A summarized overview of all changes, per version of this project.
 ## v1.3.0-pre
 - DevEx: Rebuilt [devops.py](scripts/devops.py) on support-python v3.2.0 DevopsCli, adding `test --slow`, `format`, `release`, and a project-local `.venv`.
 - FrontEnd: Removed unused quiz leftovers: 16 icons, 12 style classes, and 9 tokens, with no visual change.
+- FrontEnd: Moved the three screens into the support.webapp app shell: sticky top and action bars, a narrow centered column, and no wide-screen card.
+- FrontEnd: Added a skip link, visible keyboard focus rings, and reduced-motion handling from the shared design system.
+- FrontEnd: Darkened the light yellow accent to `#b88000`, the bright look's AA fill, keeping white labels.
+- DevEx: Vendored support.webapp 0.1.0 with the bright look, pinned in [design.json](design.json) and checked by `devops.py check`.
 
 ## v1.2.0 [released: 2026-11-02]
 - DevEx: Added unified [devops.py](scripts/devops.py) CLI for testing, linting, review server, service worker, and deployment.

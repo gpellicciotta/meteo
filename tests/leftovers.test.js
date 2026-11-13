@@ -41,7 +41,10 @@ function whole(name) {
   return new RegExp(`(?<![\\w-])${name}(?![\\w-])`);
 }
 
-const css = read("css/style.css").replace(/\/\*[\s\S]*?\*\//g, "");
+// The app's own stylesheets, without comments and without the imports of the vendored layers.
+const css = ["css/style.css", "css/tokens.css"].map(read).join("\n").replace(/\/\*[\s\S]*?\*\//g, "").replace(/@import[^;]*;/g, "");
+// Overrides of contract tokens are read by the vendored stylesheets, not by the app's own rules.
+const contractTokens = new Set(JSON.parse(read("vendor/design/contract.json")).tokens.map((token) => token.name));
 const html = read("index.html");
 const scripts = readdirSync(join(ROOT, "js")).filter((f) => f !== "icons.js").map((f) => read(`js/${f}`)).join("\n");
 // Element ids share names with classes, so id lookups do not count as class usage.
@@ -83,7 +86,7 @@ describe("quiz leftovers", () => {
   });
 
   it("every custom property is read by a rule, the markup, or a script", () => {
-    const unused = cssTokens.filter((t) => !new RegExp(`var\\(${t}(?![\\w-])`).test(css) && !whole(t).test(html + scripts));
+    const unused = cssTokens.filter((t) => !contractTokens.has(t) && !new RegExp(`var\\(${t}(?![\\w-])`).test(css) && !whole(t).test(html + scripts));
     expect(unused).toEqual([]);
   });
 });

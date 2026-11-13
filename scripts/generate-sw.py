@@ -13,6 +13,8 @@ from __future__ import annotations
 
 import hashlib
 import os
+import posixpath
+import re
 import sys
 import time
 from pathlib import Path
@@ -42,6 +44,23 @@ EXIT_CODES = [
 
 JS_DIR = REPO_ROOT / "js"
 SW_PATH = REPO_ROOT / "sw.js"
+CSS_ENTRY = "css/style.css"
+CSS_IMPORT = re.compile(r"""@import\s+url\(\s*["']?([^"')]+)["']?\s*\)""")
+
+
+def stylesheet_assets(entry: str = CSS_ENTRY) -> list[str]:
+    """Lists a stylesheet and every stylesheet it imports, recursively, in import order."""
+    assets: list[str] = []
+
+    def visit(rel: str) -> None:
+        if rel in assets:
+            return
+        assets.append(rel)
+        for target in CSS_IMPORT.findall((REPO_ROOT / rel).read_text(encoding="utf-8")):
+            visit(posixpath.normpath(posixpath.join(posixpath.dirname(rel), target)))
+
+    visit(entry)
+    return assets
 
 
 def build_sw_content(version: str) -> tuple[str, int]:
@@ -57,7 +76,7 @@ def build_sw_content(version: str) -> tuple[str, int]:
         "./",
         "index.html",
         "manifest.webmanifest",
-        "css/style.css",
+        *stylesheet_assets(),
         *js_modules,
         *data_files,
         "CHANGELOG.md",

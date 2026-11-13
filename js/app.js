@@ -1,7 +1,7 @@
 import { el } from "./dom.js";
 import { initTheme } from "./theme.js";
 import { applyStoredPreferences } from "./preferences.js";
-import { showScreen } from "./screens.js";
+import { currentScreen, showScreen } from "./screens.js";
 import { openConfigView, closeConfigView, saveConfig, previewTheme, touchUnits } from "./config-view.js";
 import { loadChangelog } from "./changelog.js";
 import { registerServiceWorker, updateOnlineStatus, syncInstallButtonState } from "./pwa.js";
@@ -43,11 +43,10 @@ for (const select of [el.configUnitTemperature, el.configUnitPrecipitation, el.c
  * @returns {void}
  */
 function openHelp() {
-  if (!el.screenConfig.classList.contains("hidden")) {
+  if (currentScreen() === "config") {
     closeConfigView();
   }
   showScreen("about");
-  el.aboutContent.scrollTop = 0;
 }
 
 document.addEventListener("keydown", (e) => {
@@ -60,10 +59,10 @@ document.addEventListener("keydown", (e) => {
   if (e.key !== "Escape") {
     return;
   }
-  if (!el.screenConfig.classList.contains("hidden")) {
+  if (currentScreen() === "config") {
     closeConfigView();
   }
-  else if (!el.screenAbout.classList.contains("hidden")) {
+  else if (currentScreen() === "about") {
     showScreen("start");
   }
 });
@@ -127,7 +126,7 @@ el.btnLang.addEventListener("click", () => {
 document.addEventListener("languagechange", () => {
   applyAll();
   updateLangButton();
-  if (!el.screenAbout.classList.contains("hidden")) {
+  if (currentScreen() === "about") {
     loadChangelog();
   }
 });

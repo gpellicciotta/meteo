@@ -15,6 +15,10 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ## v1.3.0-pre
 - DevEx: [devops.py](scripts/devops.py) herbouwd op DevopsCli van support-python v3.2.0, met `test --slow`, `format`, `release` en een projectlokale `.venv`.
 - FrontEnd: Ongebruikte quiz-restanten verwijderd: 16 iconen, 12 stijlklassen en 9 tokens, zonder visuele wijziging.
+- FrontEnd: De drie schermen staan in de app-shell van support.webapp: vaste boven- en actiebalk, een smalle gecentreerde kolom en geen kaart op brede schermen.
+- FrontEnd: Een link naar de inhoud, zichtbare focusringen voor het toetsenbord en minder beweging uit het gedeelde ontwerpsysteem toegevoegd.
+- FrontEnd: Het lichtgele accent donkerder gemaakt tot `#b88000`, de AA-kleur van de bright-look, met witte labels.
+- DevEx: support.webapp 0.1.0 met de bright-look meegeleverd, vastgezet in [design.json](design.json) en gecontroleerd door `devops.py check`.
 
 ## v1.2.0 [released: 2026-11-02]
 - DevEx: Geünificeerd [devops.py](scripts/devops.py) CLI-script toegevoegd voor tests, linting, review-server, service worker en implementatie.

@@ -1,0 +1,40 @@
+/* Private bright palette and system stacks; meteo 8937c32 with documented AA adjustments. */
+:root {
+  --white: #ffffff;
+  --slate-50: #f8fafc;
+  --slate-75: #f5f7fa;
+  --slate-200: #e2e8f0;
+  --slate-400: #94a3b8;
+  --slate-500: #788595;
+  --slate-600: #596270;
+  --slate-800: #334155;
+  --slate-900: #1e293b;
+  --slate-925: #141f33;
+  --slate-950: #0f172a;
+  --blue-200: #bfdbfe;
+  --blue-300: #93c5fd;
+  --blue-400: #60a5fa;
+  --blue-600: #1a56db;
+  --blue-800: #163f9e;
+  --red-900: #7f1d1d;
+  --red-800: #991b1b;
+  --red-700: #b91c1c;
+  --red-400: #f87171;
+  --red-300: #fca5a5;
+  --red-200: #fecaca;
+  --green-700: #15803d;
+  --green-400: #4ade80;
+  --shadow-tint-light: rgb(17 18 22 / 14%);
+  --shadow-tint-dark: rgb(0 0 0 / 55%);
+  --scrim-light: rgb(17 18 22 / 40%);
+  --scrim-dark: rgb(0 0 0 / 65%);
+  --font-family-system: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-family-mono: ui-monospace, 'Cascadia Mono', 'SF Mono', Menlo, Consolas, monospace;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --yellow-700: #b88000;
+  --yellow-600: #d97706;
+  --ink-950: #111827;
+  --red-600: #dc2626;
+}

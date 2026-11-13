@@ -56,11 +56,10 @@ try {
   await page.keyboard.press("F1");
   check(await page.isVisible("#screen-about") && await page.isHidden("#screen-start"), "F1 opens the About view from the start view");
   check(await page.evaluate(() => window.f1Prevented === true), "F1 prevents the browser's own help");
-  await page.evaluate(() => {
-    document.querySelector(".about-content").scrollTop = 400;
-  });
+  await page.evaluate(() => window.scrollTo(0, 400));
+  check(await page.evaluate(() => window.scrollY > 0), "the About view scrolls the page, as the shell's page scroll mode does");
   await page.keyboard.press("F1");
-  check(await page.isVisible("#screen-about") && await page.evaluate(() => document.querySelector(".about-content").scrollTop === 0),
+  check(await page.isVisible("#screen-about") && await page.evaluate(() => window.scrollY === 0),
     "F1 in the About view keeps it open and scrolls back to the guide");
   await captureViews(page, "about-f1");
   await page.keyboard.press("Escape");
@@ -117,6 +116,131 @@ for (const width of [390, 1280]) {
   }
   finally {
     await sized.close();
+  }
+}
+
+/**
+ * Resolve a CSS color expression, such as a custom property, to the color the browser computes.
+ *
+ * @param {object} page - Playwright page.
+ * @param {string} expression - CSS color value, such as "var(--color-focus)".
+ * @returns {Promise<string>} Computed color, such as "rgb(26, 86, 219)".
+ */
+function resolveColor(page, expression) {
+  return page.evaluate((value) => {
+    const probe = document.createElement("span");
+    probe.style.color = value;
+    document.body.append(probe);
+    const color = getComputedStyle(probe).color;
+    probe.remove();
+    return color;
+  }, expression);
+}
+
+/**
+ * Convert a #rrggbb color to the rgb() form of computed styles.
+ *
+ * @param {string} hex - Color such as "#1a56db".
+ * @returns {string} Color such as "rgb(26, 86, 219)".
+ */
+function rgb(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+// The app shell at phone and desktop widths, in both themes.
+for (const width of [390, 1440]) {
+  for (const theme of ["light", "dark"]) {
+    const size = `${width}px ${theme}`;
+    const { browser: sized, page: sizedPage, problems: sizedProblems } = await launchBrowser({ viewport: { width, height: width === 390 ? 844 : 900 } });
+    try {
+      await sizedPage.goto(`${server.url}?lang=en&theme=${theme}`, { waitUntil: "networkidle" });
+      const layout = await sizedPage.evaluate(() => {
+        const main = document.getElementById("main");
+        const style = getComputedStyle(main);
+        return {
+          horizontal: document.documentElement.scrollWidth - window.innerWidth,
+          topBar: getComputedStyle(document.querySelector(".app__top-bar")).position,
+          actionBar: getComputedStyle(document.querySelector(".app__action-bar")).position,
+          column: main.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight),
+          narrow: parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--width-narrow")) * 16,
+          banners: getComputedStyle(document.querySelector(".app__banners")).display,
+        };
+      });
+      check(layout.horizontal <= 0, `no horizontal scroll at ${size} (${layout.horizontal}px)`);
+      check(layout.topBar === "sticky" && layout.actionBar === "sticky", `the top bar and the action bar stick at ${size}`);
+      check(layout.column <= layout.narrow + 0.5 && (width < layout.narrow || layout.column >= layout.narrow - 0.5),
+        `the main column fills up to --width-narrow, ${layout.narrow}px, at ${size} (${layout.column.toFixed(1)}px)`);
+      check(layout.banners === "none", `the banners area takes no room while online at ${size}`);
+
+      await sizedPage.keyboard.press("Tab");
+      const skip = await sizedPage.evaluate(() => {
+        const r = document.activeElement.getBoundingClientRect();
+        return { cls: document.activeElement.className, top: r.top, bottom: r.bottom };
+      });
+      check(skip.cls === "skip-link" && skip.top >= 0 && skip.bottom > skip.top, `Tab first reaches the visible skip link at ${size}`);
+      await sizedPage.keyboard.press("Tab");
+      const ring = await sizedPage.evaluate(() => {
+        const style = getComputedStyle(document.activeElement);
+        return { id: document.activeElement.id, style: style.outlineStyle, width: style.outlineWidth, color: style.outlineColor };
+      });
+      const focusColor = await resolveColor(sizedPage, "var(--color-focus)");
+      check(ring.id === "btn-current-location" && ring.style === "solid" && ring.width === "2px" && ring.color === focusColor,
+        `keyboard focus shows the shared 2px focus ring at ${size} (${ring.style} ${ring.width} ${ring.color})`);
+
+      const durations = await sizedPage.$$eval(".btn-start-arrow, .start-meta-item, .location-input, .config-select",
+        (nodes) => nodes.map((node) => getComputedStyle(node).transitionDuration));
+      check(durations.length > 4 && durations.every((value) => value.split(",").every((part) => parseFloat(part) === 0)),
+        `reduced motion turns every control transition off at ${size} (${[...new Set(durations)].join(" | ")})`);
+      check(sizedProblems.length === 0, `no shell console, page or network errors at ${size}${sizedProblems.length ? `:\n${sizedProblems.join("\n")}` : ""}`);
+    }
+    catch (err) {
+      failed = true;
+      console.error(err.message);
+    }
+    finally {
+      await sized.close();
+    }
+  }
+}
+
+// The palette overrides of T0031 on the shared contract tokens; dark blue keeps meteo's fill until T0033 decides.
+const PALETTE = {
+  "light blue": { primary: "#1a56db", "primary-hover": "#163f9e", "primary-active": "#163f9e", "on-primary": "#ffffff", link: "#1a56db", "link-hover": "#1a56db", focus: "#1a56db" },
+  "dark blue": { primary: "#2563eb", "primary-hover": "#1d4ed8", "primary-active": "#1d4ed8", "on-primary": "#ffffff", link: "#93c5fd", "link-hover": "#93c5fd", focus: "#60a5fa" },
+  "light yellow": { primary: "#b88000", "primary-hover": "#a16207", "primary-active": "#a16207", "on-primary": "#ffffff", link: "#a16207", "link-hover": "#854d0e", focus: "#b88000" },
+  "dark yellow": { primary: "#d97706", "primary-hover": "#b45309", "primary-active": "#b45309", "on-primary": "#ffffff", link: "#d97706", "link-hover": "#fde68a", focus: "#d97706" },
+  "light red": { primary: "#dc2626", "primary-hover": "#b91c1c", "primary-active": "#b91c1c", "on-primary": "#ffffff", link: "#b91c1c", "link-hover": "#991b1b", focus: "#dc2626" },
+  "dark red": { primary: "#dc2626", "primary-hover": "#b91c1c", "primary-active": "#b91c1c", "on-primary": "#ffffff", link: "#fca5a5", "link-hover": "#fca5a5", focus: "#dc2626" },
+};
+const TEXT = {
+  light: { text: "#1f2933", "text-muted": "#6b7280" },
+  dark: { text: "#f1f5f9", "text-muted": "#94a3b8" },
+};
+{
+  const { browser: palette, page: palettePage, problems: paletteProblems } = await launchBrowser({ viewport: { width: 390, height: 844 } });
+  try {
+    for (const [name, tokens] of Object.entries(PALETTE)) {
+      const [theme, accent] = name.split(" ");
+      await palettePage.goto(`${server.url}?lang=en&theme=${theme}&theme-color=${accent}`, { waitUntil: "networkidle" });
+      const expected = { ...tokens, ...TEXT[theme] };
+      const wrong = [];
+      for (const [token, hex] of Object.entries(expected)) {
+        const actual = await resolveColor(palettePage, `var(--color-${token})`);
+        if (actual !== rgb(hex)) {
+          wrong.push(`--color-${token} ${actual} instead of ${hex}`);
+        }
+      }
+      check(wrong.length === 0, `the ${name} contract tokens follow the assessed overrides${wrong.length ? `: ${wrong.join("; ")}` : ""}`);
+    }
+    check(paletteProblems.length === 0, `no palette console, page or network errors${paletteProblems.length ? `:\n${paletteProblems.join("\n")}` : ""}`);
+  }
+  catch (err) {
+    failed = true;
+    console.error(err.message);
+  }
+  finally {
+    await palette.close();
   }
 }
 

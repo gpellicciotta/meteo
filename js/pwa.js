@@ -53,7 +53,7 @@ window.addEventListener("appinstalled", () => {
 export function updateOnlineStatus() {
   const isOnline = typeof navigator.onLine === "boolean" ? navigator.onLine : true;
   if (el.offlineIndicator) {
-    el.offlineIndicator.classList.toggle("hidden", isOnline);
+    el.offlineIndicator.hidden = isOnline;
   }
 }
 

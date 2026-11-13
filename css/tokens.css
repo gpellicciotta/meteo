@@ -1,0 +1,224 @@
+/* ==========================================================================
+   Meteo tokens: the app's own colors, and its overrides of bright contract tokens.
+   The only app stylesheet that holds raw colors, as the vendored conformance check requires.
+   Contract overrides follow the T0031 assessment; T0033 renames data-theme-color to data-accent.
+   ========================================================================== */
+
+:root {
+  /* Primary Theme Color Palette: Blue (Default) */
+  --color-primary: #1a56db;
+  --color-primary-dark: #163f9e;
+  --color-primary-tint: #eff6ff;
+  --color-primary-border: #bae6fd;
+  --color-primary-text: #0369a1;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(26, 86, 219, 0.25);
+  --color-primary-shadow-hover: rgba(26, 86, 219, 0.35);
+  --color-primary-focus: rgba(26, 86, 219, 0.18);
+
+  /* Contract overrides of the blue accent: actions, links, and the focus ring */
+  --color-primary-hover: #163f9e;
+  --color-primary-active: #163f9e;
+  --color-link: #1a56db;
+  --color-focus: #1a56db;
+
+  /* Semantic Feedback & State Colors */
+  --color-wrong: #c81e1e;
+  --color-wrong-bg: #fef2f2;
+  --color-wrong-text: #b91c1c;
+  --color-notice-bg: #fef3c7;
+  --color-notice-border: #fcd34d;
+  --color-notice-text: #92400e;
+
+  /* Rain Chart Colors, following the accent color */
+  --color-rain: #3b82f6;
+  --color-rain-text: #1d4ed8;
+
+  /* Neutral Surface, Background & Typography Colors */
+  --color-bg: #f5f7fa;
+  --color-card: #ffffff;
+  --color-card-subtle: #f8fafc;
+  --color-card-border: #e2e8f0;
+  --color-text: #1f2933;
+  --color-text-muted: #6b7280;
+  --color-text-strong: #0f172a;
+  --color-muted: #6b7280;
+  --color-control-border: #cbd5e1;
+  --color-border-subtle: #e2e8f0;
+  --color-btn-tint-hover: rgba(0, 0, 0, 0.05);
+
+  /* Tooltip & Popover Surface Tokens */
+  --color-tooltip-bg: #0f172a;
+  --color-tooltip-text: #ffffff;
+  --color-tooltip-border: transparent;
+
+  /* Categorical / Changelog Badge Tokens */
+  --color-badge-purple-bg: #f3e8ff;
+  --color-badge-purple-text: #6b21a8;
+  --color-badge-green-bg: #dcfce7;
+  --color-badge-green-text: #166534;
+  --color-badge-indigo-bg: #e0e7ff;
+  --color-badge-indigo-text: #3730a3;
+  --color-badge-teal-bg: #ccfbf1;
+  --color-badge-teal-text: #115e59;
+
+  /* Print Colors */
+  --color-print-bg: #ffffff;
+  --color-print-text: #111827;
+
+  /* Typographic Scale Tokens */
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-md: 1.125rem;
+  --font-size-lg: 1.25rem;
+  --font-size-xl: 1.5rem;
+  --font-size-2xl: 1.75rem;
+
+  /* Border Radius Tokens; --radius-chip (4px) comes from the bright look */
+  --radius-tile: 6px;
+  --radius: 10px;
+  --radius-full: 9999px;
+  --radius-round: 50%;
+
+  /* Shadows & Elevation */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-tooltip: 0 4px 14px rgba(0, 0, 0, 0.22);
+}
+
+/* Theme Color Variant: Yellow, with white text by choice, a deliberate AA exception */
+:root[data-theme-color="yellow"] {
+  --color-primary: #b88000;
+  --color-primary-dark: #a16207;
+  --color-primary-tint: #fefce8;
+  --color-primary-border: #fde047;
+  --color-primary-text: #854d0e;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(202, 138, 4, 0.28);
+  --color-primary-shadow-hover: rgba(202, 138, 4, 0.38);
+  --color-primary-focus: rgba(202, 138, 4, 0.2);
+  --color-primary-hover: #a16207;
+  --color-primary-active: #a16207;
+  --color-link: #a16207;
+  --color-link-hover: #854d0e;
+  --color-focus: #b88000;
+  --color-rain: #ca8a04;
+  --color-rain-text: #854d0e;
+}
+
+/* Theme Color Variant: Red */
+:root[data-theme-color="red"] {
+  --color-primary: #dc2626;
+  --color-primary-dark: #b91c1c;
+  --color-primary-tint: #fef2f2;
+  --color-primary-border: #fca5a5;
+  --color-primary-text: #991b1b;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(220, 38, 38, 0.28);
+  --color-primary-shadow-hover: rgba(220, 38, 38, 0.38);
+  --color-primary-focus: rgba(220, 38, 38, 0.2);
+  --color-primary-hover: #b91c1c;
+  --color-primary-active: #b91c1c;
+  --color-link: #b91c1c;
+  --color-link-hover: #991b1b;
+  --color-focus: #dc2626;
+  --color-rain: #ef4444;
+  --color-rain-text: #b91c1c;
+}
+
+/* Dark Theme Surface & Feedback Tokens */
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-rain: #60a5fa;
+  --color-rain-text: #93c5fd;
+  --color-bg: #0f172a;
+  --color-card: #1e293b;
+  --color-card-subtle: #141f33;
+  --color-card-border: #334155;
+  --color-text: #f1f5f9;
+  --color-text-muted: #94a3b8;
+  --color-text-strong: #ffffff;
+  --color-muted: #94a3b8;
+  --color-control-border: #475569;
+  --color-border-subtle: #334155;
+  --color-btn-tint-hover: rgba(255, 255, 255, 0.1);
+
+  --color-wrong: #ef4444;
+  --color-wrong-bg: rgba(153, 27, 27, 0.28);
+  --color-wrong-text: #f87171;
+  --color-notice-bg: #451a03;
+  --color-notice-border: #78350f;
+  --color-notice-text: #fde68a;
+
+  --color-tooltip-bg: #0f172a;
+  --color-tooltip-text: #f1f5f9;
+  --color-tooltip-border: #334155;
+
+  --color-badge-purple-bg: #3b0764;
+  --color-badge-purple-text: #d8b4fe;
+  --color-badge-green-bg: #052e16;
+  --color-badge-green-text: #86efac;
+  --color-badge-indigo-bg: #1e1b4b;
+  --color-badge-indigo-text: #a5b4fc;
+  --color-badge-teal-bg: #042f2e;
+  --color-badge-teal-text: #5eead4;
+}
+
+/* Dark Theme + Blue (default); the fill stays #2563eb with white labels until T0033 decides */
+:root[data-theme="dark"][data-theme-color="blue"],
+:root[data-theme="dark"]:not([data-theme-color="yellow"]):not([data-theme-color="red"]) {
+  --color-primary: #2563eb;
+  --color-primary-dark: #1d4ed8;
+  --color-primary-tint: #172554;
+  --color-primary-border: #1e40af;
+  --color-primary-text: #93c5fd;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(37, 99, 235, 0.3);
+  --color-primary-shadow-hover: rgba(37, 99, 235, 0.45);
+  --color-primary-focus: rgba(37, 99, 235, 0.3);
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1d4ed8;
+  --color-link: #93c5fd;
+  --color-focus: #60a5fa;
+}
+
+/* Dark Theme + Yellow, with white labels as in light */
+:root[data-theme="dark"][data-theme-color="yellow"] {
+  --color-primary: #d97706;
+  --color-primary-dark: #b45309;
+  --color-primary-tint: #451a03;
+  --color-primary-border: #78350f;
+  --color-primary-text: #fde68a;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(217, 119, 6, 0.3);
+  --color-primary-shadow-hover: rgba(217, 119, 6, 0.45);
+  --color-primary-focus: rgba(217, 119, 6, 0.3);
+  --color-primary-hover: #b45309;
+  --color-primary-active: #b45309;
+  --color-link: #d97706;
+  --color-link-hover: #fde68a;
+  --color-focus: #d97706;
+  --color-rain: #fbbf24;
+  --color-rain-text: #fde68a;
+}
+
+/* Dark Theme + Red */
+:root[data-theme="dark"][data-theme-color="red"] {
+  --color-primary: #dc2626;
+  --color-primary-dark: #b91c1c;
+  --color-primary-tint: #450a0a;
+  --color-primary-border: #991b1b;
+  --color-primary-text: #fca5a5;
+  --color-on-primary: #ffffff;
+  --color-primary-shadow: rgba(220, 38, 38, 0.3);
+  --color-primary-shadow-hover: rgba(220, 38, 38, 0.45);
+  --color-primary-focus: rgba(220, 38, 38, 0.3);
+  --color-primary-hover: #b91c1c;
+  --color-primary-active: #b91c1c;
+  --color-link: #fca5a5;
+  --color-link-hover: #fca5a5;
+  --color-focus: #dc2626;
+  --color-rain: #f87171;
+  --color-rain-text: #fca5a5;
+}

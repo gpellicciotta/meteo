@@ -1,5 +1,7 @@
 {
   "title.app": "Meteo",
+  "shell.skip_link": "Skip to content",
+  "shell.notifications_aria": "Notifications",
   "start.description": "Temperature and rain for the next 12 hours.",
   "start.meta_bar_aria": "Settings and information",
   "start.btn_change_place_aria": "Search another place",

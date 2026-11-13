@@ -69,6 +69,7 @@ CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
 CHANGELOG_NL_PATH = REPO_ROOT / "CHANGELOG.nl.md"
 PACKAGE_JSON_PATH = REPO_ROOT / "package.json"
 SW_SCRIPT_PATH = REPO_ROOT / "scripts" / "generate-sw.py"
+DESIGN_CHECK_PATH = REPO_ROOT / "vendor" / "design" / "bin" / "check.mjs"
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8062
@@ -339,9 +340,13 @@ class MeteoProject(NodeProject):
         self.logger.info("Nothing to build; skipping.")
         return True
 
+    def design_check(self) -> bool:
+        """Runs the vendored support.webapp check: copy integrity and app style conformance."""
+        return self.run_command(["node", str(DESIGN_CHECK_PATH)])
+
     def check(self) -> bool:
-        """Runs lint and the fast tests, stopping at the first failure."""
-        return self.lint() and self.test()
+        """Runs lint, the vendored design check, and the fast tests, stopping at the first failure."""
+        return self.lint() and self.design_check() and self.test()
 
     def action_summaries(self) -> dict[str, str]:
         """Describes the overridden actions in the help screen."""
@@ -350,7 +355,7 @@ class MeteoProject(NodeProject):
             "format": "fix the core Markdown documents with lint-markdown, offline",
             "test": "run the Python unittest suite and npm test; --slow runs the browser suites",
             "build": "skipped: the app is static and has no outputs",
-            "check": "run lint and the fast tests, stopping at the first failure",
+            "check": "run lint, the vendored design check, and the fast tests, stopping at the first failure",
             "release": "validate, freeze the changelogs and sw.js, commit, tag locally, and open the next -pre version",
         }
 

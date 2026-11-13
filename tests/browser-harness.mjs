@@ -19,18 +19,20 @@ const MIME_TYPES = {
 };
 
 /**
- * Serve the repository root over HTTP on a free local port.
+ * Serve the repository root, or another web root, over HTTP on a free local port.
  *
  * Runs inside the test process, so no separate server process needs to be stopped.
  *
+ * @param {string} [root] - Folder to serve; the switch proof serves an export of the base commit.
  * @returns {Promise<{url: string, close: () => Promise<void>}>} Base URL and a close function.
  */
-export function startStaticServer() {
+export function startStaticServer(root = ROOT) {
+  const base = resolve(root);
   const server = createServer((req, res) => {
     const path = decodeURIComponent(new URL(req.url, "http://localhost").pathname);
-    const file = normalize(join(ROOT, path.endsWith("/") ? `${path}index.html` : path));
+    const file = normalize(join(base, path.endsWith("/") ? `${path}index.html` : path));
     try {
-      if (!file.startsWith(ROOT) || !statSync(file).isFile()) {
+      if (!file.startsWith(base) || !statSync(file).isFile()) {
         throw new Error("not a file");
       }
       res.writeHead(200, {

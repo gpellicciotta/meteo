@@ -1,0 +1,2 @@
+# Keep the vendored design system byte-identical to its manifest hashes on every platform.
+vendor/design/** -text

@@ -1,5 +1,7 @@
 {
   "title.app": "Meteo",
+  "shell.skip_link": "Naar de inhoud",
+  "shell.notifications_aria": "Meldingen",
   "start.description": "Temperatuur en regen voor de komende 12 uur.",
   "start.meta_bar_aria": "Instellingen en informatie",
   "start.btn_change_place_aria": "Zoek een andere plaats",

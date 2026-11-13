@@ -73,7 +73,7 @@ python -m venv .venv
 .venv/Scripts/python -m pip install -r scripts/requirements.txt   # .venv/bin/python on macOS and Linux
 ```
 
-Run quality checks across test suite and markdown linting:
+Run quality checks across markdown linting, the vendored design check, and the test suites:
 
 ```bash
 python scripts/devops.py check
@@ -96,6 +96,34 @@ Regenerate the service worker after adding, removing or changing any precached f
 
 ```bash
 python scripts/devops.py sw
+```
+
+## Design System
+The app uses the [support.webapp](https://github.com/gpellicciotta/support.webapp) design system with its `bright` look.
+A pinned release is vendored in [vendor/design](vendor/design); [design.json](design.json) records its version and look.
+Never edit vendored files: the vendored check fails on any changed, missing, or extra file.
+
+```bash
+node vendor/design/bin/check.mjs   # copy integrity and app style conformance
+```
+
+The page uses the app shell with page scrolling in the narrow column; the three screens are sections of its main area.
+[css/tokens.css](css/tokens.css) is the only app stylesheet with raw colors, including the overrides of the look's tokens.
+
+To update the release, run `vendor` from the new version and rerun the checks:
+
+```bash
+npx @gpellicciotta/support.webapp@{{version}} vendor --look bright --to vendor/design
+python scripts/devops.py sw
+python scripts/devops.py check
+```
+
+Prove that a switch keeps the appearance with screenshots and computed styles, before and after:
+
+```bash
+node tests/switch-proof.mjs --root {{before-web-root}} --out {{dir}}/before
+node tests/switch-proof.mjs --out {{dir}}/after
+node tests/switch-proof.mjs --compare {{dir}}/before/styles.json {{dir}}/after/styles.json
 ```
 
 ## License

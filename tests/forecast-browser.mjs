@@ -134,6 +134,32 @@ async function openSearch(page) {
   }
 }
 
+/**
+ * Resize the viewport and wait until the page has handled its resize event at the new size.
+ *
+ * Playwright returns before the page dispatches the event, and app.js blurs a focused tooltip
+ * control on resize, so a late event would steal the focus that a following keyboard step sets.
+ *
+ * @param {object} page - Playwright page.
+ * @param {number} width - New viewport width in CSS pixels.
+ * @param {number} height - New viewport height in CSS pixels; the size must differ from the current one.
+ * @returns {Promise<void>} Resolves once the resize event at the new size has fired.
+ */
+async function resizeViewport(page, width, height) {
+  await page.evaluate(([w, h]) => {
+    window.resizedTo = new Promise((resolve) => {
+      window.addEventListener("resize", function done() {
+        if (window.innerWidth === w && window.innerHeight === h) {
+          window.removeEventListener("resize", done);
+          resolve();
+        }
+      });
+    });
+  }, [width, height]);
+  await page.setViewportSize({ width, height });
+  await page.evaluate(() => window.resizedTo);
+}
+
 const server = await startStaticServer();
 let failed = false;
 
@@ -375,7 +401,7 @@ let failed = false;
 }
 
 /**
- * Measure the start view layout: overflow of the content area and the boxes of key elements.
+ * Measure the start view layout: overflow of the content area or the page, and the boxes of key elements.
  *
  * @param {object} page - Playwright page showing a forecast.
  * @returns {Promise<object>} Overflow in pixels and bounding boxes keyed by element.
@@ -388,7 +414,7 @@ function measureStartLayout(page) {
     };
     const content = document.getElementById("start-content");
     return {
-      overflow: content.scrollHeight - content.clientHeight,
+      overflow: Math.max(content.scrollHeight - content.clientHeight, document.documentElement.scrollHeight - window.innerHeight),
       locate: box("#btn-current-location"),
       input: box("#location-input"),
       place: box("#forecast-place"),
@@ -409,7 +435,7 @@ function measureStartLayout(page) {
     await openSearch(page);
 
     for (const [width, height] of [[1280, 900], [1280, 800], [390, 844], [390, 667], [320, 568]]) {
-      await page.setViewportSize({ width, height });
+      await resizeViewport(page, width, height);
       const layout = await measureStartLayout(page);
       const size = `${width}x${height}`;
       const sameRow = Math.abs((layout.locate.top + layout.locate.bottom) - (layout.input.top + layout.input.bottom)) <= 2;
@@ -981,7 +1007,8 @@ function measureStartLayout(page) {
       check(colors.buttonText.every((color) => color === rgb("#ffffff")),
         `${theme} ${accent} buttons use white text (${colors.buttonText.join(", ")})`);
       if (accent === "yellow") {
-        const fill = theme === "light" ? "#ca8a04" : "#d97706";
+        // Light yellow takes the bright look's AA-adjusted fill (support.webapp ADR-0002), kept by the T0031 overrides.
+        const fill = theme === "light" ? "#b88000" : "#d97706";
         check(colors.buttonFill === rgb(fill), `${theme} yellow buttons keep the ${fill} fill (${colors.buttonFill})`);
       }
       check(colors.bar === rgb(bar), `${theme} ${accent} rain bars use ${bar} (${colors.bar})`);
@@ -1026,7 +1053,7 @@ function measureStartLayout(page) {
         visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
         legend: document.querySelectorAll("#forecast .forecast-legend").length,
         description: document.querySelector("#forecast-chart .sr-only").textContent,
-        overflow: content.scrollHeight - content.clientHeight,
+        overflow: Math.max(content.scrollHeight - content.clientHeight, document.documentElement.scrollHeight - window.innerHeight),
       };
     });
     const saveWind = async (on) => {
@@ -1117,7 +1144,7 @@ function measureStartLayout(page) {
         icons: cells.map((cell) => cell.querySelector("svg")?.getAttribute("class") || ""),
         visible: cells.filter((cell) => cell.getClientRects().length > 0).length,
         description: document.querySelector("#forecast-chart .sr-only").textContent,
-        overflow: content.scrollHeight - content.clientHeight,
+        overflow: Math.max(content.scrollHeight - content.clientHeight, document.documentElement.scrollHeight - window.innerHeight),
       };
     });
     const saveSky = async (on, wind = false) => {
@@ -1437,7 +1464,7 @@ function measureStartLayout(page) {
     check((await tipView()).text.startsWith("6. Sky"), "hovering badge 6 shows the sky explanation");
     check(await page.locator("#guide-sample .guide-tip .guide-icons svg").count() === 9, "the sky tooltip shows the nine weather icons");
     await captureViews(page, "guide-hover-sky");
-    await page.hover("#screen-about .about-title");
+    await page.hover("#screen-about .about-section-heading");
     const left = await tipView();
     check(!left.visible && left.active === 0 && left.activeItems.length === 0, "leaving the sample hides the tooltip and highlights");
     check(problems.length === 0, `no guide hover console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
