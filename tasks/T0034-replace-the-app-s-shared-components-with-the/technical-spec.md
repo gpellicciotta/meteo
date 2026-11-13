@@ -56,6 +56,10 @@ Counted, modified files:
 - `data/strings.nl.json`
 - `README.md`
 - `CHANGELOG.nl.md`
+- `docs/specs/visual-style-guide.md`
+- `tests/accent.test.js`
+- `tests/shell-browser.mjs`
+- `package.json`
 
 Added or uncounted files:
 - `tests/pwa.test.js`, `tests/update-browser.mjs` (added).

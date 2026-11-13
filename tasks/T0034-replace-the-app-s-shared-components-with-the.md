@@ -1,19 +1,20 @@
 ---
 id: T0034
-owner: "@claude"
-session: claude-20261113-ae9be2
+owner: "@codex"
+session: codex-20261113-afc2ca
 needs: []
 branch: task/T0034-replace-the-app-s-shared-components-with-the
 worktree: .plan/work/T0034-replace-the-app-s-shared-components-with-the
-status: active
+status: suspended
 started_at: "2026-11-13T21:59:46Z"
 ended_at: —
 review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 2, duration_s: 3606.0, input: 4, output: 4}
-work_duration: 1828.2
+  worker: {turns: 4, duration_s: 6070.6, input: 4, output: 4, cache_read: 0, cache_write: 0}
+work_duration: 3116.3
+contributors: "@claude"
 ---
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
@@ -28,9 +29,9 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [x] **[Read]**      Inventory the app's components against the vendored component list.
 - [x] **[Implement]** Author tests for each component the app now takes from the vendored copy.
 - [x] **[Verify]**    Run the new tests and confirm they fail before the switch.
-- [ ] **[Implement]** Replace the app's copies and switch `style.css` to the public bright entry point.
+- [x] **[Implement]** Replace the app's copies and switch `style.css` to the public bright entry point.
 - [ ] **[Verify]**    Run the full tests and the lossless switch proof with T0032's harness.
-- [ ] **[Doc]**       Update documentation and CHANGELOG.md.
+- [x] **[Doc]**       Update documentation and CHANGELOG.md.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
@@ -50,4 +51,19 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
   Recorded the failure output of the new tests in validation-proof.md; captured proof/before at 7857b0d.
   - 18 unit tests and the update scenario fail.
   - Fixed CRLF parsing in tests/accent.test.js, undeclared.
+
+- [2026-11-13] **[Verify]**
+  Passed 187 unit tests, browser suites, design integrity/conformance, Markdown lint, and switch comparison. Full check blocked by existing recursive release tests; step 5 remains unchecked. Evidence and screenshots saved in validation-proof.md.
+
+- [2026-11-13] **[Verify]**
+  Size note: 18 counted files, 352 changed lines; shared adoption remains one concern. Added style-guide documentation, browser coverage, package script, and CRLF test repair beyond the original declaration. Generated sw.js is excluded.
+  - Files touched: 18.
+  - Lines touched: 352.
+  - Reopenings: 0.
+
+- [2026-11-13] **[Verify]**
+  Committed documentation and refreshed cache as 6f29f5e; implementation is in ba4bf08. Completion validation reports only TF022 because verification and review remain unchecked. Needs review: required full-check verification cannot finish until release-test recursion is resolved or waived.
+
+- [2026-11-13] **[Verify]**
+  Confirmed no remaining descendants from the recursive test tree. Normal task validation passed; completion validation remains blocked by unchecked verification. Implementation and documentation are committed; working tree is clean.
 
