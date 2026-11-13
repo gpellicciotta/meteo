@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.3.0-pre
+- FrontEnd: Moved icons to external sprites while preserving glyphs, presentation, and offline availability.
 - DevEx: Rebuilt [devops.py](scripts/devops.py) on support-python v3.2.0 DevopsCli, adding `test --slow`, `format`, `release`, and a project-local `.venv`.
 - FrontEnd: Removed unused quiz leftovers: 16 icons, 12 style classes, and 9 tokens, with no visual change.
 - FrontEnd: Moved the three screens into the support.webapp app shell: sticky top and action bars, a narrow centered column, and no wide-screen card.

@@ -1,112 +1,31 @@
-const ICON_DEFS = {
-  // Current-hour weather, using the same stroke and theme color as interface icons.
-  "weather-clear-day": `
-    <circle cx="12" cy="12" r="4"></circle>
-    <path d="M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5"></path>
-  `,
-  "weather-clear-night": `
-    <path d="M20.5 14A9 9 0 0 1 10 3a9 9 0 1 0 10.5 11Z"></path>
-  `,
-  "weather-partly-day": `
-    <path d="M6 13a4 4 0 1 1 7-4M8 2v2M2 8h2M3 3l1.5 1.5M13 3l-1.5 1.5"></path>
-    <path d="M8 21a4 4 0 0 1 0-8h1a5 5 0 0 1 9.5 0 4 4 0 0 1 .5 8Z"></path>
-  `,
-  "weather-partly-night": `
-    <path d="M6 14A7 7 0 0 1 9 2a6 6 0 0 0 5 8"></path>
-    <path d="M8 21a4 4 0 0 1 0-8h1a5 5 0 0 1 9.5 0 4 4 0 0 1 .5 8Z"></path>
-  `,
-  "weather-cloudy": `
-    <path d="M6 19a5 5 0 0 1 0-10h1a6 6 0 0 1 11.5 1A4.5 4.5 0 0 1 18 19Z"></path>
-  `,
-  "weather-fog": `
-    <path d="M5 12a4 4 0 0 1 0-8 6 6 0 0 1 11.5 2A3 3 0 0 1 19 12M3 16h18M5 20h14"></path>
-  `,
-  "weather-rain": `
-    <path d="M5 14a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 14M8 17l-1 3m6-3-1 5m6-5-1 3"></path>
-  `,
-  "weather-snow": `
-    <path d="M5 13a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 13M7 17v4m-2-2h4m8-2v4m-2-2h4"></path>
-  `,
-  "weather-thunder": `
-    <path d="M5 14a4 4 0 0 1 0-8h1a6 6 0 0 1 11.5 1A3.5 3.5 0 0 1 18 14M13 11l-4 7h5l-3 5"></path>
-  `,
-  // Upward arrow, rotated to show where the wind blows to.
-  "wind-arrow": `
-    <path d="M12 21V4M6 10l6-6 6 6"></path>
-  `,
-  // X mark for closing controls and incorrect answers.
-  close: `
-    <line x1="18" y1="6" x2="6" y2="18"></line>
-    <line x1="6" y1="6" x2="18" y2="18"></line>
-  `,
-  // Crosshair around a dot for using the current location.
-  locate: `
-    <circle cx="12" cy="12" r="7"></circle>
-    <circle cx="12" cy="12" r="2.5"></circle>
-    <line x1="12" y1="2" x2="12" y2="5"></line>
-    <line x1="12" y1="19" x2="12" y2="22"></line>
-    <line x1="2" y1="12" x2="5" y2="12"></line>
-    <line x1="19" y1="12" x2="22" y2="12"></line>
-  `,
-  // Magnifying glass for searching another place.
-  search: `
-    <circle cx="11" cy="11" r="7"></circle>
-    <line x1="16" y1="16" x2="21" y2="21"></line>
-  `,
-  // Outward arrow from a box for external links.
-  externalLink: `
-    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
-    <polyline points="15 3 21 3 21 9"></polyline>
-    <line x1="10" y1="14" x2="21" y2="3"></line>
-  `,
-  // Question mark for help and about controls.
-  help: `
-    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
-    <line x1="12" y1="17" x2="12.01" y2="17"></line>
-  `,
-  // Gear for configuration and settings controls.
-  settings: `
-    <circle cx="12" cy="12" r="3"></circle>
-    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0 .33-1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-  `,
-  // Download arrow into a tray for app installation controls.
-  install: `
-    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-    <polyline points="7 10 12 15 17 10"></polyline>
-    <line x1="12" y1="15" x2="12" y2="3"></line>
-  `,
-  // Wireless signal marker for offline-status messaging.
-  wifi: `
-    <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-    <path d="M8.53 16.11a6 6 0 0 1 6.94 0"></path>
-    <line x1="12" y1="20" x2="12.01" y2="20"></line>
-  `,
-  // Coffee cup icon for Ko-fi support.
-  coffee: `
-    <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
-    <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>
-    <line x1="6" y1="1" x2="6" y2="4"></line>
-    <line x1="10" y1="1" x2="10" y2="4"></line>
-    <line x1="14" y1="1" x2="14" y2="4"></line>
-  `,
-  // Credit card icon for Stripe donation links.
-  creditcard: `
-    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-    <line x1="1" y1="10" x2="23" y2="10"></line>
-  `,
-  // PayPal logo for donation links.
-  paypal: `
-    <path fill="currentColor" stroke="none" d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.972.382-1.054.9l-1.116 7.106zm14.146-14.42a3.35 3.35 0 0 0-.607-.541c-.013.076-.026.155-.044.237-.983 5.05-4.349 6.797-8.647 6.797h-2.19c-.524 0-.972.382-1.054.9l-1.298 8.27h3.766c.459 0 .851-.334.923-.788l.038-.2 1.05-6.684.067-.373a.933.933 0 0 1 .922-.788h1.378c3.76 0 6.704-1.528 7.564-5.945.36-1.848.14-3.385-.889-4.39a3.784 3.784 0 0 0-.62-.476z"></path>
-  `,
-  // GitHub logo for developer profile and sponsor links.
-  github: `
-    <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
-  `,
+const ICON_REFS = {
+  "weather-clear-day": "assets/icons.svg#icon-weather-clear-day",
+  "weather-clear-night": "assets/icons.svg#icon-weather-clear-night",
+  "weather-partly-day": "assets/icons.svg#icon-weather-partly-day",
+  "weather-partly-night": "assets/icons.svg#icon-weather-partly-night",
+  "weather-cloudy": "assets/icons.svg#icon-weather-cloudy",
+  "weather-fog": "assets/icons.svg#icon-weather-fog",
+  "weather-rain": "assets/icons.svg#icon-weather-rain",
+  "weather-snow": "assets/icons.svg#icon-weather-snow",
+  "weather-thunder": "assets/icons.svg#icon-weather-thunder",
+  "wind-arrow": "assets/icons.svg#icon-wind-arrow",
+  "close": "vendor/design/looks/bright/icons.svg#icon-close",
+  "locate": "assets/icons.svg#icon-locate",
+  "search": "vendor/design/looks/bright/icons.svg#icon-search",
+  "externalLink": "assets/icons.svg#icon-externalLink",
+  "help": "vendor/design/looks/bright/icons.svg#icon-help",
+  "settings": "vendor/design/looks/bright/icons.svg#icon-settings",
+  "install": "assets/icons.svg#icon-install",
+  "wifi": "assets/icons.svg#icon-wifi",
+  "coffee": "assets/icons.svg#icon-coffee",
+  "creditcard": "assets/icons.svg#icon-creditcard",
+  "paypal": "assets/icons.svg#icon-paypal",
+  "github": "assets/icons.svg#icon-github",
 };
 
 /**
  * Create an SVG element for a named UI icon.
- * @param {string} name - Key of an icon in ICON_DEFS.
+ * @param {string} name - Key of an icon in ICON_REFS.
  * @param {Object} [options] - SVG presentation and accessibility options.
  * @param {string} [options.className] - Additional CSS class name.
  * @param {number} [options.width=16] - Rendered width in pixels.
@@ -121,8 +40,8 @@ const ICON_DEFS = {
  * @returns {SVGElement|null} Generated SVG element, or null for an unknown icon.
  */
 export function createIcon(name, options = {}) {
-  const def = ICON_DEFS[name];
-  if (!def) {
+  const ref = Object.hasOwn(ICON_REFS, name) ? ICON_REFS[name] : null;
+  if (!ref) {
     return null;
   }
 
@@ -146,14 +65,16 @@ export function createIcon(name, options = {}) {
     svg.setAttribute("aria-label", options.title);
   }
 
-  svg.innerHTML = def;
+  const use = document.createElementNS("http://www.w3.org/2000/svg", "use");
+  use.setAttribute("href", ref);
+  svg.appendChild(use);
   return svg;
 }
 
 /**
  * Create a named UI icon and append it to a target element.
  * @param {Element} target - Element that receives the generated icon.
- * @param {string} name - Key of an icon in ICON_DEFS.
+ * @param {string} name - Key of an icon in ICON_REFS.
  * @param {Object} [options] - Options forwarded to createIcon.
  * @returns {SVGElement|null} Appended SVG element, or null for an unknown icon.
  */
@@ -167,7 +88,7 @@ export function appendIcon(target, name, options = {}) {
 /**
  * Replace a target element's contents with a named UI icon.
  * @param {Element|null} target - Element whose contents will be replaced.
- * @param {string} name - Key of an icon in ICON_DEFS.
+ * @param {string} name - Key of an icon in ICON_REFS.
  * @param {Object} [options] - Options forwarded to createIcon.
  * @returns {SVGElement|null} Replacement SVG element, or null if no icon is rendered.
  */

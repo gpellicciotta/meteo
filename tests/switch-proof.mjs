@@ -101,12 +101,15 @@ async function capture(root, out) {
           if (accent !== "blue" && width !== 390) {
             continue;
           }
-          const { browser, context, page } = await launchBrowser({ viewport: { width, height } });
+          const { browser, context, page, problems } = await launchBrowser({ viewport: { width, height } });
           try {
             await mockOpenMeteo(context);
             await page.clock.install({ time: MOCK_NOW });
             for (const [name, spec] of Object.entries(PAGES)) {
-              await page.goto(`${server.url}?lang=en&theme=${theme}&theme-color=${accent}${spec.query}`, { waitUntil: "networkidle" });
+              const response = await page.goto(`${server.url}?lang=en&theme=${theme}&theme-color=${accent}${spec.query}`, { waitUntil: "networkidle" });
+              if (response.status() !== 200) {
+                throw new Error(`Page returned ${response.status()}`);
+              }
               if (spec.ready) {
                 await page.waitForSelector(spec.ready);
               }
@@ -123,6 +126,25 @@ async function capture(root, out) {
               }
               styles[key] = await snapshot(page, spec.selectors);
               console.log(`captured ${key}`);
+            }
+            await page.evaluate(async () => {
+              const { createIcon } = await import("./js/icons.js");
+              const names = Object.keys(await (await fetch("tests/fixtures/icon-geometry.json")).json());
+              document.querySelector("main").replaceChildren(...names.map((name) => {
+                const row = document.createElement("div");
+                row.textContent = name;
+                row.append(createIcon(name), createIcon(name, { width: 32, height: 32, strokeWidth: 1.5 }));
+                return row;
+              }));
+            });
+            await page.waitForTimeout(100);
+            const iconKey = `icons-${width}-${theme}-${accent}`;
+            styles[iconKey] = await snapshot(page, [".icon-search", ".icon-weather-clear-day", ".icon-paypal"]);
+            if (accent === "blue") {
+              await page.screenshot({ path: join(out, `icons-${width}-${theme}.png`), fullPage: true });
+            }
+            if (problems.length) {
+              throw new Error(problems.join("\n"));
             }
           }
           finally {

@@ -2,6 +2,11 @@
 Meteo reuses a shared design system and keeps only a few local colors and overrides.
 
 ## Design System
+- [icons.js](../../js/icons.js) references external symbols while preserving caller sizes, strokes, colors, and labels.
+- Close, search, help, and settings use the unchanged bright sprite.
+- [icons.svg](../../assets/icons.svg) retains weather and other glyphs absent from the pinned bright sprite.
+- Both sprites are precached for offline use.
+- Reproduce the migration with `node scripts/migrate-icons.mjs`, using the recorded original geometry fixture.
 - Meteo uses [support.webapp](https://github.com/gpellicciotta/support.webapp) with its `bright` look.
 - [design.json](../../design.json) pins the version; the release is vendored in [vendor/design](../../vendor/design).
 - The look's own page is [bright.md](https://github.com/gpellicciotta/support.webapp/blob/main/docs/specs/looks/bright.md).

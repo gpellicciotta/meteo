@@ -49,7 +49,7 @@ const html = read("index.html");
 const scripts = readdirSync(join(ROOT, "js")).filter((f) => f !== "icons.js").map((f) => read(`js/${f}`)).join("\n");
 // Element ids share names with classes, so id lookups do not count as class usage.
 const classScripts = scripts.replace(/getElementById\("[^"]*"\)/g, "");
-const iconNames = [...read("js/icons.js").matchAll(/^ {2}"?([A-Za-z-]+)"?: `/gm)].map((m) => m[1]);
+const iconNames = [...read("js/icons.js").matchAll(/^ {2}"([A-Za-z-]+)": "/gm)].map((m) => m[1]);
 const cssClasses = [...new Set([...css.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map((m) => m[1]))].filter((c) => !/^\d+$/.test(c));
 const markupClasses = new Set([...html.matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/)));
 const cssTokens = [...new Set([...css.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]))];

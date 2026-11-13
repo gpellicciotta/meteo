@@ -78,6 +78,8 @@ def build_sw_content(version: str) -> tuple[str, int]:
         "manifest.webmanifest",
         *stylesheet_assets(),
         *js_modules,
+        "assets/icons.svg",
+        "vendor/design/looks/bright/icons.svg",
         *data_files,
         "CHANGELOG.md",
         *translated_changelogs,
