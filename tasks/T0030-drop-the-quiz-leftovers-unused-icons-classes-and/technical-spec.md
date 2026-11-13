@@ -4,17 +4,24 @@ Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the 
 ---
 
 ## Declared Files
-Files are listed when the task starts, after reading the app at a recorded commit.
+Recorded after reading the app at 8937c32.
 
-Size note: No estimate yet; the task counts as above the large line until refined.
+### Source
+- css/style.css
+- js/icons.js
+
+### Test files
+- tests/leftovers.test.js
+
+### Docs
+- CHANGELOG.md
+- CHANGELOG.nl.md
+
+Size estimate: 5 files, 292 lines
 
 ### Tests
-- Unit: a test that fails while any removed class or token name is still referenced.
-- Integration: the app's browser tests on its three screens at 390 and 1440 px, light and dark, unchanged before and after
+- Unit: tests/leftovers.test.js fails while any removed icon, class, or token is still referenced.
+- Unit: it also fails on any unused icon, stylesheet class, or custom property, with whole-name matching.
+- Integration: the browser tests on Start, About, Settings, and Forecast at 390 and 1440 px, light and dark, unchanged before and after.
 
-Completion check: `npm test` and the browser tests, exit code 0
-
-## Declared Files (recorded at 8937c32)
-- css/style.css, js/icons.js, tests/leftovers.test.js, CHANGELOG.md, CHANGELOG.nl.md
-- Size estimate: 5 files, about 300 lines, mostly deletions.
-- Removed icons (16), classes (11), tokens (8): see tests/leftovers.test.js.
+Completion check: `npm test` and `npm run test:browser`, exit code 0
