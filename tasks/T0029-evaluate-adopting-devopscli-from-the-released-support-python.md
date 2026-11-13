@@ -11,6 +11,11 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 306.8, input: 84, output: 15454, cache_read: 2348236, cache_write: 108486}
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T17:50:12Z"
 ---
 # T0029: Evaluate adopting DevopsCli from the released support-python v2.0.0, keeping project-specific actions through add_action
 
@@ -38,4 +43,7 @@ Record the decision in the Execution Log, and adopt it in a follow-up task when 
 
 - [2026-11-13] **[Doc]**
   Cost: Python dependency and venv in a Node repo; pin latest v3.2.0, not v2.0.0; v3 needs explicit copyright. Rewrite tests/test_devops.py. No changelog entry: no pre-release heading, no product change.
+
+- [2026-11-13] **[Review]**
+  Round 1 requested (mode: agent).
 
