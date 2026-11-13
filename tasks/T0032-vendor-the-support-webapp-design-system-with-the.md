@@ -1,11 +1,11 @@
 ---
 id: T0032
-owner: ~
-needs: [T0030, T0031]
-branch: —
-worktree: —
-status: ready
-started_at: —
+owner: "@claude"
+needs: []
+branch: task/T0032-vendor-the-support-webapp-design-system-with-the
+worktree: .plan/work/T0032-vendor-the-support-webapp-design-system-with-the
+status: active
+started_at: "2026-11-13T20:09:59Z"
 ended_at: —
 review: agent
 preview: none
