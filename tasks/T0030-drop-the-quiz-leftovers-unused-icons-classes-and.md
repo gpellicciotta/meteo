@@ -12,7 +12,7 @@ review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 4, duration_s: 3522.0, input: 240, output: 54096, cache_read: 8544726, cache_write: 169736}
+  worker: {turns: 6, duration_s: 3566.0, input: 260, output: 55860, cache_read: 9718170, cache_write: 210308}
   review: {turns: 6, duration_s: 3689.0, input: 1029592, output: 103322, cache_read: 24937816}
 review_status: pending
 review_round: 2
