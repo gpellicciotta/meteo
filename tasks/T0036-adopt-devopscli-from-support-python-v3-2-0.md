@@ -11,36 +11,19 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 1830.6, input: 40, output: 6956, cache_read: 1881002, cache_write: 12640}
+work_duration: 939.6
 ---
 # T0036: Adopt DevopsCli from support-python v3.2.0 in scripts/devops.py via MeteoProject(NodeProject): override test, lint, build, release; keep serve, sw, deploy through add_action; see T0029 findings
 
 ## Goals
-Adopt DevopsCli from support-python v3.2.0 in scripts/devops.py via MeteoProject(NodeProject): override test, lint, build, release; keep serve, sw, deploy through add_action; see T0029 findings.
+Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProject(NodeProject)`; see T0029 findings.
 
-Source: Execution Log and `validation-proof.md` of T0029.
-
-### Dependency
-- Pin `support-python` at `v3.2.0` in `scripts/requirements.txt`, installed into a project-local `.venv`.
-- Do not pin `v2.0.0`: it lacks `--skip-github-release` and `--slow`, and it hardcodes the banner copyright.
-- Pass `copyright` to `DevopsCli`, because v3 defaults it to empty.
-
-### Adapter overrides on `MeteoProject(NodeProject)`
-- `test`: run `python -m unittest discover -s tests` and then `npm test`; both must pass.
-- `test_slow`: run `npm run test:browser`; add `test:slow` as an alias only if needed.
-- `lint`: run `lint-markdown check --offline` on `LICENSE.md`, `README.md`, `CHANGELOG.md`, `CHANGELOG.nl.md`.
-- `build`: no-op, so `npm pack` never runs.
-- `release`: delegate to the existing deploy flow: `sw.js` regeneration in the release commit, `CHANGELOG.nl.md` freeze, plan branch push.
-
-### Retained actions through `add_action`
-- `serve`, `sw`, `deploy`.
-
-### Acceptance checks
-- `devops test` runs the Python and Node suites, and fails when either fails.
-- `devops test --slow` runs the browser suites.
-- `devops lint` and `devops check` pass.
-- `devops versions` reports agreement.
-- `devops release --dry-run` and `devops deploy --dry-run` pass on `main`.
-- `tests/test_devops.py` is rewritten for the new structure and passes.
+- Pin `support-python` at `v3.2.0` in `scripts/requirements.txt`, installed into a project-local `.venv`; pass `copyright`.
+- Override `test` (unittest, then `npm test`), `test_slow` (`npm run test:browser`), `lint` (`lint-markdown check --offline` on core docs), `build` (no-op), `release` (existing deploy flow).
+- Keep `serve`, `sw`, `deploy` through `add_action`.
+- Accept when `test`, `test --slow`, `lint`, `check`, `versions`, and both dry runs pass on `main`, and `tests/test_devops.py` is rewritten.
 
 ## Task Execution Steps
 - [x] **[Implement]** Implement required changes for T0036.
@@ -57,4 +40,8 @@ Source: Execution Log and `validation-proof.md` of T0029.
 
 - [2026-11-13] **[Doc]**
   No CHANGELOG entry: no -pre heading exists and version bumps are forbidden. README updated. Release dry-run fails on missing -pre heading; see validation-proof.md.
+
+- [2026-11-13] **[Verify]**
+  Completion validation found 1 errors; pending fix turn 1 of 2.
+  - TF014.
 
