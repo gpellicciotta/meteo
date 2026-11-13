@@ -2,7 +2,7 @@
 An overview of all tasks and their planning.
 
 ## Next Milestone
-- [ ] T0029 Evaluate adopting DevopsCli from the released support-python v2.0.0, keeping project-specific actions through add_action.
+- [~] T0029 [owner: @claude] Evaluate adopting DevopsCli from the released support-python v2.0.0, keeping project-specific actions through add_action.
 - [ ] T0030 Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 - [ ] T0031 Assess meteo's fills, states, labels, links, focus, and grounds against the bright look's AA adjustments.
 - [ ] T0032 [needs: T0030, T0031] Vendor the support.webapp design system with the bright look and move the three screens into its shell.
