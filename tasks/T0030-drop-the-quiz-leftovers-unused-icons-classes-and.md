@@ -13,9 +13,11 @@ preview: none
 protocol: standard
 usage:
   worker: {turns: 2, duration_s: 2525.8, input: 136, output: 29038, cache_read: 3957484, cache_write: 117098}
+  review: {turns: 2, duration_s: 11.8}
 review_status: pending
 review_round: 1
 review_requested_at: "2026-11-13T19:01:55Z"
+work_duration: 1312.5
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 
