@@ -1,0 +1,30 @@
+---
+id: T0031
+owner: ~
+needs: []
+branch: —
+worktree: —
+status: ready
+started_at: —
+ended_at: —
+review: agent
+preview: none
+protocol: standard
+---
+# T0031: Assess meteo's fills, states, labels, links, focus, and grounds against the bright look's AA adjustments.
+
+## Goals
+Compare meteo's light yellow and dark blue and red fills, interaction states, labels, links, focus, and grounds with the `bright` look.
+Use the AA adjustments of [ADR-0002](../../../support.webapp/docs/adrs/ADR-0002-looks.md) and the [bright look spec](../../../support.webapp/docs/specs/looks/bright.md).
+List every palette override meteo needs to keep its appearance, and every deliberate AA exception, such as white labels on yellow.
+Investigation only: the findings feed the vendoring task, which applies them.
+
+## Task Execution Steps
+- [ ] **[Read]**      Read the named ADRs and the app at a recorded commit.
+- [ ] **[Verify]**    Measure each fill, state, label, link, focus, and ground pair against the bright look.
+- [ ] **[Doc]**       Record the findings and the follow-up decisions in validation-proof.md.
+- [ ] **[Review]**    Obtain review approval of the findings before completion.
+
+## Execution Log
+- [2026-11-13] **[Doc]**
+  Created from the support.webapp adoption roadmap at the user's request.
