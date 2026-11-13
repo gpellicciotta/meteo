@@ -11,6 +11,11 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 1627.0, input: 232568, output: 26842, cache_read: 7473664, cache_write: 0}
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T23:13:34Z"
 ---
 # T0035: Move the icons to the vendored external icon sprite, keeping each icon's appearance
 
@@ -59,4 +64,7 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
   - Files touched: 11.
   - Lines touched: 335.
   - Reopenings: 0.
+
+- [2026-11-14] **[Review]**
+  Round 1 requested (mode: agent).
 
