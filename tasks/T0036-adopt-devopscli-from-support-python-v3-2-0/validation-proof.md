@@ -1,178 +1,41 @@
 ## Walkthrough & Validation
 
-Interpreter: `.venv/Scripts/python.exe` with support-python 3.2.0, run from the task worktree on branch `task/T0036-adopt-devopscli-from-support-python-v3-2-0`.
+Interpreter: `.venv/Scripts/python.exe` with support-python 3.2.0, run from the task worktree, rebased onto `main` (v1.3.0-pre, commit f47d3d6).
 Each block shows the last 30 lines of output; omitted lines are marked.
 
 ### Process Deviation
 
-The tests were written after the implementation, so there is no failing-first run. I did not reconstruct one.
-The review-round changes added tests only and no corrective implementation, so the new tests passed on first run.
+Round 0 wrote its tests after the implementation, so it has no failing-first run. I did not reconstruct one.
+The round 2 reopen feature below follows the required sequence: failing test first, then implementation.
 
-### Acceptance Status
+### Red phase: reopen test fails before implementation
 
-Both dry runs exit 1 on the released state, because CHANGELOG.md has no active `-pre` heading. This is the old deploy flow precondition. I did not open a heading, because the task forbids version bumps. This task needs an acceptance revision from the user; it is not claimed as met.
-
-### Quality gate: check (fast suites, lint)
-
-Command: `.venv/Scripts/python.exe scripts/devops.py check`
+Command: `.venv/Scripts/python.exe -m unittest tests.test_devops.TestDevopsDryRunIntegration.test_release_tags_then_reopens_next_patch_pre_heading`
 
 ```text
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.md CHANGEL
-Process ID: 10272
-All 4 markdown files passed linting.
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
-Process ID: 75100
-.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.
+Validates a real release tags the frozen version and then opens the next patch -pre version.
 ----------------------------------------------------------------------
-Ran 25 tests in 16.604s
-OK
-Command: "C:\Program Files\nodejs\npm.CMD" test
-Process ID: 52392
-> meteo@1.2.0 test
-> vitest run
- RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
- Test Files  3 passed (3)
-      Tests  105 passed (105)
-   Start at  19:35:41
-   Duration  1.14s (tests 68%, import 15%, transform 12%, worker 5%)
-exit: 0
-```
-
-### Released state: release dry run (fails, expected)
-
-Command: `.venv/Scripts/python.exe scripts/devops.py release --dry-run --skip-checks`
-
-```text
-Checking git working tree status.
-Working tree is clean.
-Checking active CHANGELOG.md version.
-**[ERROR]** No active '-pre' version heading found at the top of CHANGELOG.md - nothing to release.
-Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
-**[ERROR]** Pre-flight deployment checks failed. Resolve issues before deploying.
-**[ERROR]** Finished devops release in 0.6s with status: failed
-exit: 1
-```
-
-### Released state: deploy dry run (fails, expected)
-
-Command: `.venv/Scripts/python.exe scripts/devops.py deploy --dry-run`
-
-```text
-Checking git working tree status.
-Working tree is clean.
-Checking active CHANGELOG.md version.
-**[ERROR]** No active '-pre' version heading found at the top of CHANGELOG.md - nothing to release.
-Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.md CHANGEL
-Process ID: 8668
-All 4 markdown files passed linting.
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
-Process ID: 80008
-.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.
+Traceback (most recent call last):
+  File "tests/test_devops.py", line 266, in test_release_tags_then_reopens_next_patch_pre_heading
+    self.assertEqual(top.group(0).strip(), "## v9.9.10-pre", name)
+AssertionError: '## v9.9.9 [released: 2026-11-13]' != '## v9.9.10-pre'
+- ## v9.9.9 [released: 2026-11-13]
++ ## v9.9.10-pre
+ : CHANGELOG.md
 ----------------------------------------------------------------------
-Ran 25 tests in 16.739s
-OK
-Command: "C:\Program Files\nodejs\npm.CMD" test
-Process ID: 38964
-> meteo@1.2.0 test
-> vitest run
- RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
- Test Files  3 passed (3)
-      Tests  105 passed (105)
-   Start at  19:36:07
-   Duration  1.37s (tests 58%, import 19%, transform 17%, worker 5%)
-**[ERROR]** Pre-flight deployment checks failed. Resolve issues before deploying.
-**[ERROR]** Finished devops deploy in 23.0s with status: failed
-exit: 1
+Ran 1 test in 1.994s
+FAILED (failures=1)
 ```
 
-### Throwaway clone with active -pre heading: deploy dry run (passes)
+### Acceptance status
 
-Command: `.venv/Scripts/python.exe scripts/devops.py deploy --dry-run`
-
-```text
-Checking git working tree status.
-Working tree is clean.
-Checking active CHANGELOG.md version.
-Active in-development version: v9.9.9-pre
-Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.md CHANGEL
-Process ID: 62740
-All 4 markdown files passed linting.
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
-Process ID: 88576
-.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.
-----------------------------------------------------------------------
-Ran 25 tests in 18.305s
-OK
-Command: "C:\Program Files\nodejs\npm.CMD" test
-Process ID: 87108
-> meteo@9.9.9-pre test
-> vitest run
- RUN  v5.0.5 C:/Users/giova/AppData/Local/Temp/tmpplrtzuol/c
- Test Files  3 passed (3)
-      Tests  105 passed (105)
-   Start at  19:34:47
-   Duration  1.69s (tests 46%, transform 31%, import 20%, worker 3%)
-Deployment pre-flight summary for v9.9.9: branch task/T0036-adopt-devopscli-from-support-python-v3-2-0, all checks passed.
-[dry-run] Preconditions validated successfully. Would finalize, commit, and tag v9.9.9. No files were changed.
-exit: 0
-```
-
-### Throwaway clone with active -pre heading: release dry run (passes)
-
-Command: `.venv/Scripts/python.exe scripts/devops.py release --dry-run`
-
-```text
-Checking git working tree status.
-Working tree is clean.
-Checking active CHANGELOG.md version.
-Active in-development version: v9.9.9-pre
-Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.md CHANGEL
-Process ID: 65784
-All 4 markdown files passed linting.
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
-Process ID: 40248
-.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
-.
-----------------------------------------------------------------------
-Ran 25 tests in 14.756s
-OK
-Command: "C:\Program Files\nodejs\npm.CMD" test
-Process ID: 69464
-> meteo@9.9.9-pre test
-> vitest run
- RUN  v5.0.5 C:/Users/giova/AppData/Local/Temp/tmpplrtzuol/c
- Test Files  3 passed (3)
-      Tests  105 passed (105)
-   Start at  19:35:08
-   Duration  1.68s (tests 60%, import 24%, transform 10%, worker 6%)
-Deployment pre-flight summary for v9.9.9: branch task/T0036-adopt-devopscli-from-support-python-v3-2-0, all checks passed.
-[dry-run] Preconditions validated successfully. Would finalize, commit, and tag v9.9.9. No files were changed.
-exit: 0
-```
+The acceptance was revised in the task log: `main` now has `v1.3.0-pre`. After the rebase, `devops versions 1.3.0` aligned `package.json` to `1.3.0-pre`. All commands below exit 0, including both dry runs.
 
 ### .venv/Scripts/python.exe scripts/devops.py versions
 
 ```text
-Version file: 1.2.0
-CHANGELOG.md: 1.2.0
+Version file: 1.3.0-pre
+CHANGELOG.md: 1.3.0-pre
 Versions agree.
 exit: 0
 ```
@@ -180,8 +43,8 @@ exit: 0
 ### .venv/Scripts/python.exe scripts/devops.py lint
 
 ```text
-Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md 
-Process ID: 82692
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.
+Process ID: 89104
 All 4 markdown files passed linting.
 exit: 0
 ```
@@ -193,10 +56,70 @@ Nothing to build; skipping.
 exit: 0
 ```
 
+### .venv/Scripts/python.exe scripts/devops.py check
+
+```text
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.
+Process ID: 5828
+All 4 markdown files passed linting.
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
+Process ID: 74492
+.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.
+----------------------------------------------------------------------
+Ran 26 tests in 8.250s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 2924
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
+ Test Files  3 passed (3)
+      Tests  105 passed (105)
+   Start at  20:46:20
+   Duration  491ms (tests 66%, import 18%, transform 9%, worker 6%)
+exit: 0
+```
+
+### .venv/Scripts/python.exe scripts/devops.py test
+
+```text
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
+Process ID: 82648
+.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.
+----------------------------------------------------------------------
+Ran 26 tests in 7.537s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 84248
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
+ Test Files  3 passed (3)
+      Tests  105 passed (105)
+   Start at  20:46:29
+   Duration  622ms (tests 64%, import 21%, transform 9%, worker 6%)
+exit: 0
+```
+
 ### .venv/Scripts/python.exe scripts/devops.py test --slow
 
 ```text
-[... 338 lines omitted ...]
+[... 333 lines omitted ...]
+ok - no units console, page or network errors
+ok - guide hover scenario receives HTTP 200
+ok - hovering section 1 explains Summary in a tooltip inside the sample (1. Summary When rain starts and its heav)
+ok - hovering section 1 highlights its list item
+ok - hovering section 2 explains Rain amount in a tooltip inside the sample (2. Rain amount Rain or snow expected in )
 ok - hovering section 2 highlights its list item
 ok - hovering section 3 explains Rain bar in a tooltip inside the sample (3. Rain bar Grows with the rain amount. )
 ok - hovering section 3 highlights its list item
@@ -224,8 +147,75 @@ ok - no touch guide console, page or network errors
 exit: 0
 ```
 
-### plan tasks validate --completion T0036 --format json
+### .venv/Scripts/python.exe scripts/devops.py release --dry-run
 
 ```text
-{"valid":true,"total_files":1,"files_passed":1,"files_failed":0,"total_issues":0,"issues":[]}
+[... 1 lines omitted ...]
+Working tree is clean.
+Checking active CHANGELOG.md version.
+Active in-development version: v1.3.0-pre
+Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.
+Process ID: 74108
+All 4 markdown files passed linting.
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
+Process ID: 4564
+.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.
+----------------------------------------------------------------------
+Ran 26 tests in 7.261s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 92024
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
+ Test Files  3 passed (3)
+      Tests  105 passed (105)
+   Start at  20:47:52
+   Duration  551ms (tests 67%, import 19%, transform 8%, worker 6%)
+Deployment pre-flight summary for v1.3.0: branch task/T0036-adopt-devopscli-from-support-python-v3-2-0, all checks passed.
+[dry-run] Preconditions validated successfully. Would finalize, commit, tag v1.3.0, and open v1.3.1-pre. No files were changed.
+exit: 0
 ```
+
+### .venv/Scripts/python.exe scripts/devops.py deploy --dry-run
+
+```text
+[... 1 lines omitted ...]
+Working tree is clean.
+Checking active CHANGELOG.md version.
+Active in-development version: v1.3.0-pre
+Current branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\lint-markdown.EXE check --offline LICENSE.md README.md CHANGELOG.
+Process ID: 67296
+All 4 markdown files passed linting.
+Command: C:\Dev-Projects\meteo\.plan\work\T0036-adopt-devopscli-from-support-python-v3-2-0\.venv\Scripts\python.exe -m unittest discover -s tests
+Process ID: 26932
+.....................warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+.
+----------------------------------------------------------------------
+Ran 26 tests in 7.689s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 56088
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
+ Test Files  3 passed (3)
+      Tests  105 passed (105)
+   Start at  20:48:03
+   Duration  476ms (tests 68%, import 17%, transform 8%, worker 5%)
+Deployment pre-flight summary for v1.3.0: branch task/T0036-adopt-devopscli-from-support-python-v3-2-0, all checks passed.
+[dry-run] Preconditions validated successfully. Would finalize, commit, tag v1.3.0, and open v1.3.1-pre. No files were changed.
+exit: 0
+```
+

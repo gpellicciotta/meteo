@@ -35,9 +35,9 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 - [x] **[Implement]** Implement required changes for T0036.
 - [x] **[Verify]**    Verify implementation with automated test suites.
 - [x] **[Doc]**       Update documentation and CHANGELOG.md.
-- [ ] **[Implement]** Author a failing test that release reopens the next patch -pre heading after tagging.
-- [ ] **[Implement]** Reopen the next patch -pre heading and package.json version after tagging in release.
-- [ ] **[Verify]**    Rebase onto main and rerun all acceptance commands, including both dry runs.
+- [x] **[Implement]** Author a failing test that release reopens the next patch -pre heading after tagging.
+- [x] **[Implement]** Reopen the next patch -pre heading and package.json version after tagging in release.
+- [x] **[Verify]**    Rebase onto main and rerun all acceptance commands, including both dry runs.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
@@ -69,4 +69,13 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 
 - [2026-11-13] **[Decide]**
   Acceptance revised: main now has v1.3.0-pre, so dry runs can pass after rebase; release must reopen the next patch -pre heading after tagging.
+
+- [2026-11-13] **[Implement]**
+  Wrote a failing reopen test first, then made release open the next patch -pre heading and package.json version after tagging.
+
+- [2026-11-13] **[Verify]**
+  Rebased onto main; versions, lint, build, check, test, test --slow, and both dry runs exit 0. Evidence in validation-proof.md.
+
+- [2026-11-13] **[Doc]**
+  Added changelog entries under v1.3.0-pre in both changelogs and synced package.json to 1.3.0-pre.
 
