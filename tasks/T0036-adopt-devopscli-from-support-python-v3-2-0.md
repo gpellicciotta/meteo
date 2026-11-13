@@ -1,6 +1,7 @@
 ---
 id: T0036
 owner: "@claude"
+session: claude-20261113-d28c60
 needs: []
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
 worktree: .plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
@@ -42,11 +43,18 @@ Source: Execution Log and `validation-proof.md` of T0029.
 - `tests/test_devops.py` is rewritten for the new structure and passes.
 
 ## Task Execution Steps
-- [ ] **[Implement]** Implement required changes for T0036.
-- [ ] **[Verify]**    Verify implementation with automated test suites.
-- [ ] **[Doc]**       Update documentation and CHANGELOG.md.
+- [x] **[Implement]** Implement required changes for T0036.
+- [x] **[Verify]**    Verify implementation with automated test suites.
+- [x] **[Doc]**       Update documentation and CHANGELOG.md.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
   Companion task file scaffolded at task creation.
+
+- [2026-11-13] **[Implement]**
+  Adopted DevopsCli via MeteoProject(NodeProject); serve, sw, deploy via add_action; tests rewritten; production alias dropped; tests written after code.
+
+- [2026-11-13] **[Doc]**
+  No CHANGELOG entry: no -pre heading exists and version bumps are forbidden. README updated. Release dry-run fails on missing -pre heading; see validation-proof.md.
+
