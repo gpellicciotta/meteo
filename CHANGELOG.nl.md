@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.3.0-pre
+- DevEx: [devops.py](scripts/devops.py) herbouwd op DevopsCli van support-python v3.2.0, met `test --slow`, `format`, `release` en een projectlokale `.venv`.
 
 ## v1.2.0 [released: 2026-11-02]
 - DevEx: Geünificeerd [devops.py](scripts/devops.py) CLI-script toegevoegd voor tests, linting, review-server, service worker en implementatie.

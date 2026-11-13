@@ -65,10 +65,25 @@ node tests/forecast-browser.mjs  # Playwright browser check of the forecast, wit
 
 Set `SCREENSHOT_DIR` to save desktop and mobile screenshots in light and dark mode during browser checks.
 
+The devops CLI builds on [support-python](https://github.com/gpellicciotta/support.python) v3.2.0.
+Install it once into a project-local virtual environment; [devops.py](scripts/devops.py) then runs through it automatically:
+
+```bash
+python -m venv .venv
+.venv/Scripts/python -m pip install -r scripts/requirements.txt   # .venv/bin/python on macOS and Linux
+```
+
 Run quality checks across test suite and markdown linting:
 
 ```bash
 python scripts/devops.py check
+```
+
+Run the Python and Node suites, or the browser suites:
+
+```bash
+python scripts/devops.py test
+python scripts/devops.py test --slow
 ```
 
 Serve the site locally for manual review:

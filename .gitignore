@@ -18,3 +18,6 @@ logs/
 .plan/
 /PLAN.md
 /plan.code-workspace
+
+# Project-local virtual environment
+.venv/
