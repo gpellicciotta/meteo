@@ -11,6 +11,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 3603.8, input: 4, output: 12}
+work_duration: 1810.5
 ---
 # T0032: Vendor the support.webapp design system with the bright look and move the three screens into its shell.
 
@@ -26,10 +29,10 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [x] **[Decide]**    Write declared files, size estimate, tests, and the completion check into the technical specification.
 - [x] **[Implement]** Write the failing tests named in the technical specification.
 - [x] **[Verify]**    Run the new tests and record their failure output in validation-proof.md.
-- [ ] **[Implement]** Vendor the release, move the screens into the shell, and apply the palette overrides.
-- [ ] **[Verify]**    Run the tests, the vendored check, and the completion check until they pass.
-- [ ] **[Visual]**    Record the lossless switch proof: screenshots at 390 and 1440 px, light and dark.
-- [ ] **[Doc]**       List every visual difference as a fix or deliberate change, and update CHANGELOG.md.
+- [x] **[Implement]** Vendor the release, move the screens into the shell, and apply the palette overrides.
+- [x] **[Verify]**    Run the tests, the vendored check, and the completion check until they pass.
+- [x] **[Visual]**    Record the lossless switch proof: screenshots at 390 and 1440 px, light and dark.
+- [x] **[Doc]**       List every visual difference as a fix or deliberate change, and update CHANGELOG.md.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
@@ -53,3 +56,45 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
   Recorded the failure output of the new unit and browser tests in validation-proof.md.
   - 15 unit tests fail; shell browser checks fail.
 
+- [2026-11-13] **[Implement]**
+  Vendored support.webapp 0.1.0 bright, moved the screens into the shell, moved colors to tokens.css, and applied the T0031 overrides.
+  - Dark blue fill and primary headings held for T0033.
+  - Size note: 18 files, 958 lines; above typical, kept whole.
+
+- [2026-11-13] **[Verify]**
+  devops.py check, check.mjs, and npm run test:browser pass: 28 Python, 161 Vitest, 392 browser checks.
+  - System Python with support-python 3.1.0 recursed; reran in the pinned .venv.
+  - Follow-up: T0037.
+
+- [2026-11-13] **[Visual]**
+  Recorded before and after screenshots at 390 and 1440 px, light and dark, plus computed-style snapshots.
+  - proof/before, proof/after, proof/style-diff.txt.
+
+- [2026-11-13] **[Doc]**
+  Listed every visual difference as a fix or deliberate change; updated README, CHANGELOG.md, and CHANGELOG.nl.md.
+  - Files touched: 18.
+  - Lines touched: 958.
+  - Reopenings: 0.
+
+- [2026-11-13] **[Decided]**
+  Kept --width-narrow for the main column: 880 px against the old 888 px; no smaller width token is proposed.
+  - Dark blue fill and primary headings wait for T0033.
+
+## Screenshots
+The listed differences are in validation-proof.md; `-end` captures in proof/after show scrolled page ends.
+- start, 390 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/start-390-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/start-390-light.png)
+- start, 390 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/start-390-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/start-390-dark.png)
+- start, 1440 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/start-1440-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/start-1440-light.png)
+- start, 1440 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/start-1440-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/start-1440-dark.png)
+- forecast, 390 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/forecast-390-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/forecast-390-light.png)
+- forecast, 390 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/forecast-390-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/forecast-390-dark.png)
+- forecast, 1440 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/forecast-1440-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/forecast-1440-light.png)
+- forecast, 1440 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/forecast-1440-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/forecast-1440-dark.png)
+- about, 390 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/about-390-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/about-390-light.png)
+- about, 390 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/about-390-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/about-390-dark.png)
+- about, 1440 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/about-1440-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/about-1440-light.png)
+- about, 1440 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/about-1440-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/about-1440-dark.png)
+- config, 390 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/config-390-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/config-390-light.png)
+- config, 390 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/config-390-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/config-390-dark.png)
+- config, 1440 px light: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/config-1440-light.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/config-1440-light.png)
+- config, 1440 px dark: ![before](T0032-vendor-the-support-webapp-design-system-with-the/proof/before/config-1440-dark.png) ![after](T0032-vendor-the-support-webapp-design-system-with-the/proof/after/config-1440-dark.png)
