@@ -3,10 +3,13 @@ task: T0036
 round: 2
 verdict: approved
 reviewer: "@claude"
-reviewed_at: 2026-11-13T19:48:39Z
+reviewed_at: 2026-11-13T19:51:50Z
 reviewed_commit: "759d796"
 base_commit: "f47d3d6"
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
+session: claude-20261113-b1f692
+session_agent: claude-code
+session_created_at: 2026-11-13T19:48:39Z
 ---
 # Review Findings: Task T0036 (Round 2)
 

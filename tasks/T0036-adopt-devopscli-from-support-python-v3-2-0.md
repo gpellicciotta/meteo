@@ -5,20 +5,22 @@ session: claude-20261113-d28c60
 needs: []
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
 worktree: .plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
-status: active
+status: completed
 started_at: "2026-11-13T19:43:30Z"
-ended_at: —
+ended_at: "2026-11-13T19:51:51Z"
 review: agent
 preview: none
 protocol: standard
 usage:
   worker: {turns: 8, duration_s: 4100.4, input: 276, output: 65254, cache_read: 18546146, cache_write: 413150}
-  review: {turns: 2, duration_s: 1161.0, input: 135640, output: 10136, cache_read: 5475840, cache_write: 0}
-work_duration: 2453.2
-review_status: pending
+  review: {turns: 4, duration_s: 1531.8, input: 135704, output: 20990, cache_read: 7109180, cache_write: 135538}
+work_duration: 471.7
+review_status: approved
 review_round: 2
 review_requested_at: "2026-11-13T19:48:39Z"
-review_session: codex-20261113-08f59a
+review_session: claude-20261113-b1f692
+reviewed_by: "@claude"
+completion-commit: 6305ac05196e21b2ee76c25c885f1505f681d3b9
 ---
 # T0036: Adopt DevopsCli from support-python v3.2.0 in scripts/devops.py via MeteoProject(NodeProject): override test, lint, build, release; keep serve, sw, deploy through add_action; see T0029 findings
 
@@ -37,7 +39,7 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 - [x] **[Implement]** Author a failing test that release reopens the next patch -pre heading after tagging.
 - [x] **[Implement]** Reopen the next patch -pre heading and package.json version after tagging in release.
 - [x] **[Verify]**    Rebase onto main and rerun all acceptance commands, including both dry runs.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
@@ -80,4 +82,11 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 
 - [2026-11-13] **[Review]**
   Round 2 requested (mode: agent).
+
+- [2026-11-13] **[Review]**
+  Round 2 approved by @claude: [Decided]** Approved; all round 1 rework items are resolved, and no blocking defects remain.
+  - Findings: [review-findings-2.md](T0036-adopt-devopscli-from-support-python-v3-2-0/review-findings-2.md).
+
+- [2026-11-13] **[Complete]**
+  Task completed successfully.
 
