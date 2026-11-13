@@ -11,6 +11,11 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 2525.8, input: 136, output: 29038, cache_read: 3957484, cache_write: 117098}
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T19:01:55Z"
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 
@@ -60,6 +65,9 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 
 - [2026-11-13] **[Doc]**
   Changelog updated in English and Dutch; no visual differences to list.
+
+- [2026-11-13] **[Review]**
+  Round 1 requested (mode: agent).
 
 ## Screenshots
 Before and after, all identical; see validation-proof.md.
