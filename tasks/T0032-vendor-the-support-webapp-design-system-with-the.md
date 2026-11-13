@@ -12,13 +12,12 @@ review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 4, duration_s: 7086.6, input: 220, output: 60010, cache_read: 38021208, cache_write: 157400}
+  worker: {turns: 6, duration_s: 8728.6, input: 276, output: 82324, cache_read: 49326552, cache_write: 201290}
   review: {turns: 2, duration_s: 303.8, input: 212688, output: 6298, cache_read: 1737216, cache_write: 0}
 work_duration: 3734.1
-review_status: rejected
-review_round: 1
-review_requested_at: "2026-11-13T21:09:35Z"
-reviewed_by: "@codex"
+review_status: pending
+review_round: 2
+review_requested_at: "2026-11-13T21:26:23Z"
 review_session: codex-20261113-89db46
 ---
 # T0032: Vendor the support.webapp design system with the bright look and move the three screens into its shell.
@@ -97,6 +96,9 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
   Reproduced the round 1 focus failure as a resize-event race, also at the base commit; scenario 4 now waits for the page's resize event.
   - Repro: 4/30 failed before, 0/60 after.
   - npm run test:browser: exit 0, three runs, 392 checks.
+
+- [2026-11-13] **[Review]**
+  Round 2 requested (mode: agent).
 
 ## Screenshots
 The listed differences are in validation-proof.md; `-end` captures in proof/after show scrolled page ends.
