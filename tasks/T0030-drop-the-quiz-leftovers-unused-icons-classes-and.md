@@ -1,11 +1,11 @@
 ---
 id: T0030
-owner: ~
+owner: "@claude"
 needs: []
-branch: —
-worktree: —
-status: ready
-started_at: —
+branch: task/T0030-drop-the-quiz-leftovers-unused-icons-classes-and
+worktree: .plan/work/T0030-drop-the-quiz-leftovers-unused-icons-classes-and
+status: active
+started_at: "2026-11-13T18:40:16Z"
 ended_at: —
 review: agent
 preview: none
