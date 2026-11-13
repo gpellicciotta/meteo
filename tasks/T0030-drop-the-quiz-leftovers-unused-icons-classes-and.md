@@ -12,13 +12,12 @@ review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 2, duration_s: 2525.8, input: 136, output: 29038, cache_read: 3957484, cache_write: 117098}
+  worker: {turns: 4, duration_s: 3522.0, input: 240, output: 54096, cache_read: 8544726, cache_write: 169736}
   review: {turns: 4, duration_s: 2122.0, input: 496136, output: 68988, cache_read: 13230728}
-review_status: rejected
-review_round: 1
-review_requested_at: "2026-11-13T19:01:55Z"
+review_status: pending
+review_round: 2
+review_requested_at: "2026-11-13T19:28:38Z"
 work_duration: 2392.7
-reviewed_by: "@gemini"
 review_session: antigravity-20261113-29f32c
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
@@ -82,6 +81,9 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 
 - [2026-11-13] **[Doc]**
   Outcomes: Files touched: 5. Lines touched: 292. Reopenings: 1.
+
+- [2026-11-13] **[Review]**
+  Round 2 requested (mode: agent).
 
 ## Screenshots
 Before and after are identical; see validation-proof.md.
