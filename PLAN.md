@@ -9,7 +9,7 @@ An overview of all tasks and their planning.
 - [x] T0032 Vendor the support.webapp design system with the bright look and move the three screens into its shell.
 - [x] T0033 Rename data-theme-color to data-accent and document every palette override and AA exception.
 - [!] T0034 [reason: needs review: full check recursively launches release tests; resolve prerequisite or explicitly waive full-check requirement] [owner: @codex] Replace the app's shared components with the vendored ones and import the public bright look entry point.
-- [~] T0035 [owner: @codex] Move the icons to the vendored external icon sprite, keeping each icon's appearance.
+- [x] T0035 Move the icons to the vendored external icon sprite, keeping each icon's appearance.
 
 ## Backlog
 - [ ] T0039 Decide whether dark blue adopts the bright look's light fill with dark labels, removing its AA exception.

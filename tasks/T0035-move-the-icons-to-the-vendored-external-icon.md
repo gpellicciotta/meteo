@@ -5,17 +5,22 @@ session: codex-20261113-f58fbf
 needs: []
 branch: task/T0035-move-the-icons-to-the-vendored-external-icon
 worktree: .plan/work/T0035-move-the-icons-to-the-vendored-external-icon
-status: active
+status: completed
 started_at: "2026-11-13T22:59:52Z"
-ended_at: —
+ended_at: "2026-11-13T23:16:54Z"
 review: agent
 preview: none
 protocol: standard
 usage:
   worker: {turns: 2, duration_s: 1627.0, input: 232568, output: 26842, cache_read: 7473664, cache_write: 0}
-review_status: pending
+  review: {turns: 2, duration_s: 391.2, input: 147578, output: 6488, cache_read: 2761984, cache_write: 0}
+review_status: approved
 review_round: 1
 review_requested_at: "2026-11-13T23:13:34Z"
+reviewed_by: "@codex"
+review_session: codex-20261114-f0c432
+work_duration: 1022.4
+completion-commit: c40e7e824b111b148c6853b1574569594333e957
 ---
 # T0035: Move the icons to the vendored external icon sprite, keeping each icon's appearance
 
@@ -32,7 +37,7 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [x] **[Implement]** Migrate the icons with the recorded command and remove the inline definitions.
 - [x] **[Verify]**    Run the full tests and compare icon screenshots before and after.
 - [x] **[Doc]**       Update documentation and CHANGELOG.md.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
@@ -67,4 +72,11 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 
 - [2026-11-14] **[Review]**
   Round 1 requested (mode: agent).
+
+- [2026-11-14] **[Review]**
+  Round 1 approved by @codex: Approved.
+  - Findings: [review-findings-1.md](T0035-move-the-icons-to-the-vendored-external-icon/review-findings-1.md).
+
+- [2026-11-14] **[Complete]**
+  Task completed successfully.
 

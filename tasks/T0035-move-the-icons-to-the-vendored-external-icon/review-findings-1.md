@@ -3,10 +3,13 @@ task: T0035
 round: 1
 verdict: approved
 reviewer: "@codex"
-reviewed_at: 2026-11-13T23:13:35Z
+reviewed_at: 2026-11-13T23:16:52Z
 reviewed_commit: "e76808a"
 base_commit: "7857b0d"
 branch: task/T0035-move-the-icons-to-the-vendored-external-icon
+session: codex-20261114-f0c432
+session_agent: codex
+session_created_at: 2026-11-13T23:13:35Z
 ---
 # Review Findings: Task T0035 (Round 1)
 
