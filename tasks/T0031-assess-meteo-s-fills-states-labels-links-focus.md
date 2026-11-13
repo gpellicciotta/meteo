@@ -1,11 +1,11 @@
 ---
 id: T0031
-owner: ~
+owner: "@claude"
 needs: []
-branch: —
-worktree: —
-status: ready
-started_at: —
+branch: task/T0031-assess-meteo-s-fills-states-labels-links-focus
+worktree: .plan/work/T0031-assess-meteo-s-fills-states-labels-links-focus
+status: active
+started_at: "2026-11-13T20:00:18Z"
 ended_at: —
 review: agent
 preview: none
@@ -23,7 +23,7 @@ Investigation only: the findings feed the vendoring task, which applies them.
 - [ ] **[Read]**      Read the named ADRs and the app at a recorded commit.
 - [ ] **[Verify]**    Measure each fill, state, label, link, focus, and ground pair against the bright look.
 - [ ] **[Doc]**       Record the findings and the follow-up decisions in validation-proof.md.
-- [ ] **[Review]**    Obtain review approval of the findings before completion.
+- [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
