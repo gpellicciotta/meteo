@@ -152,3 +152,58 @@ Visual differences, each a fix or a deliberate change:
 | A skip link appears on the first Tab and leads to the main area.                                      | Fix        |
 
 Unchanged: dark blue, red, and dark yellow fills; text, muted text, grounds, cards, and rain colors.
+
+### Review round 1 rework: focus failure at 320x568
+Finding: `npm run test:browser` failed once in forecast scenario 4 with `the focused icon button is named exactly once (, 1 match)`.
+
+Reproduction: a scratch script repeats scenario 4's resize sequence, then `focus("#location-input")` and Shift+Tab.
+It logs `resize`, `focusin`, and `focusout` events in the page. At 39a6858, `node repro-focus.mjs <worktree> 30`, exit code 0:
+
+```text
+run 28: FAIL active=BODY
+  792.8 focusin location-input
+  812.8 resize 1280x800 active=location-input
+  844.8 resize 390x667 active=location-input
+  --- focus input
+  874.8 focusout location-input
+  875.8 focusin btn-current-location
+  877.8 resize 320x568 active=btn-current-location
+  877.8 focusout btn-current-location
+4/30 runs failed (no settle)
+```
+
+The same script against the export of base commit b766712 (`SERVE_ROOT` set), exit code 0:
+
+```text
+run 27: FAIL active=BODY
+[... 6 trace lines omitted, same order as above ...]
+  970.6 focusout btn-current-location
+2/30 runs failed (no settle)
+```
+
+Cause: `page.setViewportSize` returns before the page dispatches `resize`.
+The 320x568 event can arrive after Shift+Tab focuses the button.
+`dismissOpenTooltips` in `js/app.js` then blurs it, as designed for open tooltips, so focus falls to `BODY`.
+**[Decided]** Disposition: a pre-existing test synchronization race, present at the base commit and not caused by the shell.
+The app behavior stays; the assertion, keyboard order, and exact accessible name stay unchanged.
+
+Fix: `resizeViewport` in `tests/forecast-browser.mjs` waits for the page's `resize` event at the new size before scenario 4 continues.
+The same wait in the script, `node repro-focus.mjs <worktree> 60 --settle`, exit code 0:
+
+```text
+0/60 runs failed (--settle)
+```
+
+`npm run test:browser` after the fix, run three times in a row:
+
+```text
+run 1 exit=0 ok=392 failed=0
+  ok - the focused icon button is named exactly once (btn-current-location, 1 match)
+run 2 exit=0 ok=392 failed=0
+  ok - the focused icon button is named exactly once (btn-current-location, 1 match)
+run 3 exit=0 ok=392 failed=0
+  ok - the focused icon button is named exactly once (btn-current-location, 1 match)
+```
+
+Process gap on private imports: `css/style.css` imports five private layers until T0034 switches to `looks/bright/index.css`.
+That interim state is the split recorded in T0034's goals; the vendored check passes on it.
