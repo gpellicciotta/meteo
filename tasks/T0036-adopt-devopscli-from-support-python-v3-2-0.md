@@ -5,7 +5,7 @@ session: claude-20261113-d28c60
 needs: []
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
 worktree: .plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
-status: active
+status: suspended
 started_at: "2026-11-13T17:59:06Z"
 ended_at: —
 review: agent
@@ -13,10 +13,13 @@ preview: none
 protocol: standard
 usage:
   worker: {turns: 4, duration_s: 1895.6, input: 64, output: 10342, cache_read: 3227646, cache_write: 29328}
-work_duration: 939.6
-review_status: pending
+  review: {turns: 2, duration_s: 1161.0, input: 135640, output: 10136, cache_read: 5475840, cache_write: 0}
+work_duration: 1589.5
+review_status: rejected
 review_round: 1
 review_requested_at: "2026-11-13T18:15:48Z"
+reviewed_by: "@codex"
+review_session: codex-20261113-08f59a
 ---
 # T0036: Adopt DevopsCli from support-python v3.2.0 in scripts/devops.py via MeteoProject(NodeProject): override test, lint, build, release; keep serve, sw, deploy through add_action; see T0029 findings
 
@@ -50,4 +53,14 @@ Adopt DevopsCli from support-python v3.2.0 in `scripts/devops.py` via `MeteoProj
 
 - [2026-11-13] **[Review]**
   Round 1 requested (mode: agent).
+
+- [2026-11-13] **[Review]**
+  Round 1 rejected by @codex: [Decided]** Rejected because acceptance and verification requirements remain unmet.
+  - Findings: [review-findings-1.md](T0036-adopt-devopscli-from-support-python-v3-2-0/review-findings-1.md).
+
+- [2026-11-13] **[Doc]**
+  Rework round 1: added dry-run integration tests, technical-spec.md, and a walkthrough proof. Both dry runs pass in a clone with a -pre heading, but fail on released main.
+
+- [2026-11-13] **[Review]**
+  Needs acceptance revision: dry runs on main fail without a -pre heading, and a version bump is forbidden. Open question: add a -pre heading, or relax the acceptance?.
 

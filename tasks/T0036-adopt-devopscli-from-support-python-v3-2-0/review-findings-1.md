@@ -3,10 +3,13 @@ task: T0036
 round: 1
 verdict: rejected
 reviewer: "@codex"
-reviewed_at: 2026-11-13T18:15:49Z
+reviewed_at: 2026-11-13T18:25:33Z
 reviewed_commit: "d053731"
 base_commit: "8937c32"
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
+session: codex-20261113-08f59a
+session_agent: codex
+session_created_at: 2026-11-13T18:15:49Z
 ---
 # Review Findings: Task T0036 (Round 1)
 
