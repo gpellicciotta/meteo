@@ -5,21 +5,22 @@ session: claude-20261113-a74229
 needs: []
 branch: task/T0030-drop-the-quiz-leftovers-unused-icons-classes-and
 worktree: .plan/work/T0030-drop-the-quiz-leftovers-unused-icons-classes-and
-status: active
+status: completed
 started_at: "2026-11-13T18:40:16Z"
-ended_at: —
+ended_at: "2026-11-13T19:59:58Z"
 review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 6, duration_s: 3566.0, input: 260, output: 55860, cache_read: 9718170, cache_write: 210308}
+  worker: {turns: 8, duration_s: 3660.4, input: 284, output: 58394, cache_read: 10982900, cache_write: 225806}
   review: {turns: 8, duration_s: 4355.0, input: 1132448, output: 109944, cache_read: 27701336, cache_write: 0}
 review_status: approved
 review_round: 2
 review_requested_at: "2026-11-13T19:28:38Z"
-work_duration: 374.2
+work_duration: 466.2
 review_session: codex-20261113-ae1a86
 reviewed_by: "@codex"
+completion-commit: b76671232c4f4bc18b52cdfef4d82b57091c2439
 ---
 # T0030: Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 
@@ -93,6 +94,9 @@ Start once support.webapp finishes its generator phase; see the [roadmap](../../
 - [2026-11-13] **[Review]**
   Round 2 approved by @codex: [Decided]** Approved.
   - Findings: [review-findings-2.md](T0030-drop-the-quiz-leftovers-unused-icons-classes-and/review-findings-2.md).
+
+- [2026-11-13] **[Complete]**
+  Task completed successfully.
 
 ## Screenshots
 Before and after are identical; see validation-proof.md.
