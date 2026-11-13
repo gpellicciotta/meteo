@@ -1,6 +1,7 @@
 ---
 id: T0032
 owner: "@claude"
+session: claude-20261113-c52ebd
 needs: []
 branch: task/T0032-vendor-the-support-webapp-design-system-with-the
 worktree: .plan/work/T0032-vendor-the-support-webapp-design-system-with-the
@@ -21,10 +22,10 @@ Gain reduced-motion handling and visible focus rings through the shared componen
 Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires.
 
 ## Task Execution Steps
-- [ ] **[Read]**      Read the named ADRs and the app at a recorded commit.
-- [ ] **[Decide]**    Write declared files, size estimate, tests, and the completion check into the technical specification.
-- [ ] **[Implement]** Write the failing tests named in the technical specification.
-- [ ] **[Verify]**    Run the new tests and record their failure output in validation-proof.md.
+- [x] **[Read]**      Read the named ADRs and the app at a recorded commit.
+- [x] **[Decide]**    Write declared files, size estimate, tests, and the completion check into the technical specification.
+- [x] **[Implement]** Write the failing tests named in the technical specification.
+- [x] **[Verify]**    Run the new tests and record their failure output in validation-proof.md.
 - [ ] **[Implement]** Vendor the release, move the screens into the shell, and apply the palette overrides.
 - [ ] **[Verify]**    Run the tests, the vendored check, and the completion check until they pass.
 - [ ] **[Visual]**    Record the lossless switch proof: screenshots at 390 and 1440 px, light and dark.
@@ -34,3 +35,21 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 ## Execution Log
 - [2026-11-13] **[Doc]**
   Created from the support.webapp adoption roadmap at the user's request.
+
+- [2026-11-13] **[Read]**
+  Read ADR-0002, 0004, 0005, 0007, components.md, and support.webapp v0.1.0 (30e1f96); read meteo at b766712.
+  - Baseline: 145 vitest tests, 352 browser checks pass.
+  - T0031 recommended overrides are the palette input.
+
+- [2026-11-13] **[Decide]**
+  Wrote declared files, decisions, size estimate of 17 files and 850 lines, tests, and the completion check into technical-spec.md.
+  - Size note: above typical line, kept whole; see technical-spec.md.
+
+- [2026-11-13] **[Implement]**
+  Wrote failing unit tests, shell browser checks, and the reusable switch-proof harness.
+  - tests/screens.test.js, tests/design.test.js, tests/switch-proof.mjs added.
+
+- [2026-11-13] **[Verify]**
+  Recorded the failure output of the new unit and browser tests in validation-proof.md.
+  - 15 unit tests fail; shell browser checks fail.
+
