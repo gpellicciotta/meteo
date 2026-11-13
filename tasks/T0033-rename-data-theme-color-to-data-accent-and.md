@@ -1,11 +1,11 @@
 ---
 id: T0033
-owner: ~
-needs: [T0032]
-branch: —
-worktree: —
-status: ready
-started_at: —
+owner: "@claude"
+needs: []
+branch: task/T0033-rename-data-theme-color-to-data-accent-and
+worktree: .plan/work/T0033-rename-data-theme-color-to-data-accent-and
+status: active
+started_at: "2026-11-13T21:29:17Z"
 ended_at: —
 review: agent
 preview: none

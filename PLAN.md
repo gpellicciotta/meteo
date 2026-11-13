@@ -7,7 +7,7 @@ An overview of all tasks and their planning.
 - [x] T0030 Drop the quiz leftovers: unused icons, classes, and tokens, before adopting the design system.
 - [x] T0031 Assess meteo's fills, states, labels, links, focus, and grounds against the bright look's AA adjustments.
 - [x] T0032 Vendor the support.webapp design system with the bright look and move the three screens into its shell.
-- [ ] T0033 Rename data-theme-color to data-accent and document every palette override and AA exception.
+- [~] T0033 [owner: @claude] Rename data-theme-color to data-accent and document every palette override and AA exception.
 - [ ] T0034 Replace the app's shared components with the vendored ones and import the public bright look entry point.
 - [ ] T0035 Move the icons to the vendored external icon sprite, keeping each icon's appearance.
 
