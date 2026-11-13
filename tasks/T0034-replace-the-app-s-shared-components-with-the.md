@@ -11,6 +11,9 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 3606.0, input: 4, output: 4}
+work_duration: 1828.2
 ---
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
