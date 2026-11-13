@@ -5,8 +5,8 @@ session: claude-20261113-d28c60
 needs: []
 branch: task/T0036-adopt-devopscli-from-support-python-v3-2-0
 worktree: .plan/work/T0036-adopt-devopscli-from-support-python-v3-2-0
-status: suspended
-started_at: "2026-11-13T17:59:06Z"
+status: active
+started_at: "2026-11-13T19:43:30Z"
 ended_at: —
 review: agent
 preview: none
