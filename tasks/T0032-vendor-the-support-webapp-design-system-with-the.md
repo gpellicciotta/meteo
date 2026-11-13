@@ -12,8 +12,11 @@ review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 2, duration_s: 3603.8, input: 4, output: 12}
+  worker: {turns: 4, duration_s: 7086.6, input: 220, output: 60010, cache_read: 38021208, cache_write: 157400}
 work_duration: 1810.5
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T21:09:35Z"
 ---
 # T0032: Vendor the support.webapp design system with the bright look and move the three screens into its shell.
 
@@ -79,6 +82,9 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [2026-11-13] **[Decided]**
   Kept --width-narrow for the main column: 880 px against the old 888 px; no smaller width token is proposed.
   - Dark blue fill and primary headings wait for T0033.
+
+- [2026-11-13] **[Review]**
+  Round 1 requested (mode: agent).
 
 ## Screenshots
 The listed differences are in validation-proof.md; `-end` captures in proof/after show scrolled page ends.
