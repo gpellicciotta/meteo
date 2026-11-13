@@ -13,12 +13,13 @@ preview: none
 protocol: standard
 usage:
   worker: {turns: 4, duration_s: 484.2, input: 140, output: 27886, cache_read: 4398652, cache_write: 137940}
-  review: {turns: 2, duration_s: 209.4, input: 76620, output: 3944, cache_read: 504064, cache_write: 0}
-review_status: pending
+  review: {turns: 4, duration_s: 382.0, input: 179784, output: 8300, cache_read: 1066240, cache_write: 0}
+review_status: rejected
 review_round: 2
 review_requested_at: "2026-11-13T17:54:06Z"
-review_session: codex-20261113-ae2f4d
-work_duration: 324.8
+review_session: codex-20261113-a8c95f
+work_duration: 537.6
+reviewed_by: "@codex"
 ---
 # T0029: Evaluate adopting DevopsCli from the released support-python v2.0.0, keeping project-specific actions through add_action
 
@@ -59,4 +60,11 @@ Record the decision in the Execution Log, and adopt it in a follow-up task when 
 
 - [2026-11-13] **[Review]**
   Round 2 requested (mode: agent).
+
+- [2026-11-13] **[Review]**
+  Round 2 rejected by @codex: [Decided]** Rejected for the remaining execution-evidence gap.
+  - Findings: [review-findings-2.md](T0029-evaluate-adopting-devopscli-from-the-released-support-python/review-findings-2.md).
+
+- [2026-11-13] **[Doc]**
+  Rework round 2: replaced condensed results with verbatim captured output, exact commands, exit codes, and placeholder definitions; linter rerun passes.
 
