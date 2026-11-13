@@ -17,15 +17,9 @@
   --color-primary-focus: rgba(26, 86, 219, 0.18);
 
   /* Semantic Feedback & State Colors */
-  --color-correct: #1a7f37;
-  --color-correct-bg: #ecfdf3;
-  --color-correct-border: #15803d;
-  --color-correct-text: #15803d;
   --color-wrong: #c81e1e;
   --color-wrong-bg: #fef2f2;
-  --color-wrong-border: #b91c1c;
   --color-wrong-text: #b91c1c;
-  --color-warning: #ca8a04;
   --color-warning-bg: #fef3c7;
   --color-warning-border: #fcd34d;
   --color-warning-text: #92400e;
@@ -44,7 +38,6 @@
   --color-muted: #6b7280;
   --color-border: #cbd5e1;
   --color-border-subtle: #e2e8f0;
-  --color-overlay: rgba(15, 23, 42, 0.6);
   --color-btn-tint-hover: rgba(0, 0, 0, 0.05);
 
   /* Tooltip & Popover Surface Tokens */
@@ -75,7 +68,6 @@
   --radius-sm: 4px;
   --radius-md: 6px;
   --radius: 10px;
-  --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
   --radius-round: 50%;
@@ -84,7 +76,6 @@
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.05);
   --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.06);
-  --shadow-modal: 0 12px 32px rgba(0, 0, 0, 0.2);
 }
 
 /* Theme Color Variant: Yellow, with white text by choice; blue and red offer more contrast */
@@ -131,18 +122,11 @@
   --color-muted: #94a3b8;
   --color-border: #475569;
   --color-border-subtle: #334155;
-  --color-overlay: rgba(0, 0, 0, 0.75);
   --color-btn-tint-hover: rgba(255, 255, 255, 0.1);
 
-  --color-correct: #22c55e;
-  --color-correct-bg: rgba(22, 101, 52, 0.28);
-  --color-correct-border: #22c55e;
-  --color-correct-text: #4ade80;
   --color-wrong: #ef4444;
   --color-wrong-bg: rgba(153, 27, 27, 0.28);
-  --color-wrong-border: #ef4444;
   --color-wrong-text: #f87171;
-  --color-warning: #f59e0b;
   --color-warning-bg: #451a03;
   --color-warning-border: #78350f;
   --color-warning-text: #fde68a;
@@ -367,18 +351,6 @@ input[type="text"]:focus {
   flex-shrink: 0;
 }
 
-.badge-amber {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning-text);
-  border: 1px solid var(--color-warning-border);
-}
-
-.badge-blue {
-  background-color: var(--color-primary-tint);
-  color: var(--color-primary-text);
-  border: 1px solid var(--color-primary-border);
-}
-
 /* ==========================================================================
    4. Buttons & Interactive Controls
    ========================================================================== */
@@ -404,18 +376,6 @@ button {
 .btn-primary:focus-visible {
   background: var(--color-primary-dark);
   box-shadow: 0 3px 8px var(--color-primary-shadow-hover);
-  outline: none;
-}
-
-.btn-secondary {
-  background: var(--color-card);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
-}
-
-.btn-secondary:hover,
-.btn-secondary:focus-visible {
-  background: var(--color-primary-tint);
   outline: none;
 }
 
@@ -513,24 +473,6 @@ body.suppress-tooltips [data-tooltip]::before {
   transform: translateY(0);
 }
 
-/* Tooltip placement: Top-bar & Header buttons -> display below */
-.start-header-actions [data-tooltip]::after {
-  top: calc(100% + 8px);
-  bottom: auto;
-  transform: translateX(-50%) translateY(-4px);
-}
-
-.start-header-actions [data-tooltip]::before {
-  top: calc(100% + 2px);
-  bottom: auto;
-  border-top-color: transparent;
-  border-bottom-color: var(--color-tooltip-bg);
-}
-
-.start-header-actions [data-tooltip]:focus-visible::after {
-  transform: translateX(-50%) translateY(0);
-}
-
 .start-meta-item:first-child[data-tooltip]::after {
   left: 0;
   transform: translateY(4px);
@@ -578,13 +520,6 @@ body.suppress-tooltips [data-tooltip]::before {
     transform: translateY(0);
   }
 
-  .start-header-actions [data-tooltip]:hover::after {
-    display: block;
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(-50%) translateY(0);
-  }
-
   
 
   .start-meta-item:first-child:hover::after,
@@ -598,7 +533,6 @@ body.suppress-tooltips [data-tooltip]::before {
 
 /* Close & Back Button with accessible focus rings and top-right placement */
 .btn-about-close,
-.btn-about-back,
 .btn-config-close,
 .view-close-btn,
 .modal-close {
@@ -623,7 +557,6 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .btn-about-close:hover,
-.btn-about-back:hover,
 .btn-config-close:hover,
 .view-close-btn:hover,
 .modal-close:hover {
@@ -632,7 +565,6 @@ body.suppress-tooltips [data-tooltip]::before {
 }
 
 .btn-about-close:focus-visible,
-.btn-about-back:focus-visible,
 .btn-config-close:focus-visible,
 .view-close-btn:focus-visible,
 .modal-close:focus-visible {
@@ -789,10 +721,6 @@ body.suppress-tooltips [data-tooltip]::before {
   user-select: none;
   padding: 0;
   margin: 0;
-}
-
-.start-meta-hint {
-  cursor: help;
 }
 
 .start-about-btn,
@@ -1158,13 +1086,6 @@ body.suppress-tooltips [data-tooltip]::before {
   border-bottom: 1px solid var(--color-border-subtle);
   margin-bottom: 0;
   min-height: 48px;
-}
-
-.about-header-spacer {
-  display: block;
-  width: 38px;
-  min-width: 38px;
-  flex: 0 0 38px;
 }
 
 .about-title {
@@ -1633,13 +1554,6 @@ body.suppress-tooltips [data-tooltip]::before {
   min-height: 48px;
 }
 
-.config-header-spacer {
-  display: block;
-  width: 38px;
-  min-width: 38px;
-  flex: 0 0 38px;
-}
-
 .config-title {
   font-size: var(--font-size-lg);
   font-weight: 700;
@@ -1748,18 +1662,6 @@ body.suppress-tooltips [data-tooltip]::before {
   margin-left: 0;
 }
 
-.config-field-warning {
-  margin-top: 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius-md);
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning-text);
-  border: 1px solid var(--color-warning-border);
-  font-size: var(--font-size-xs);
-  line-height: 1.4;
-  font-weight: 500;
-}
-
 .config-actions {
   position: sticky;
   bottom: 0;
@@ -1778,13 +1680,6 @@ body.suppress-tooltips [data-tooltip]::before {
   width: auto;
   padding: 10px 28px;
   font-size: var(--font-size-sm);
-}
-
-.view-footer-spacer {
-  display: block;
-  width: 38px;
-  min-width: 38px;
-  flex: 0 0 38px;
 }
 
 /* ==========================================================================
@@ -1863,10 +1758,6 @@ body.suppress-tooltips [data-tooltip]::before {
   .start-meta-bar {
     flex-direction: column;
     gap: 10px;
-  }
-
-  .start-meta-info {
-    order: -1;
   }
 
   .start-copyright {
@@ -1970,10 +1861,6 @@ body.suppress-tooltips [data-tooltip]::before {
   *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
-  }
-
-  .no-print {
-    display: none !important;
   }
 
   #screen-start,
