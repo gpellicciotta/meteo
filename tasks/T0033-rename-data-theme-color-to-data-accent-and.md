@@ -11,6 +11,11 @@ ended_at: —
 review: agent
 preview: none
 protocol: standard
+usage:
+  worker: {turns: 2, duration_s: 2996.0, input: 280, output: 121788, cache_read: 19981574, cache_write: 345516}
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-13T21:54:53Z"
 ---
 # T0033: Rename data-theme-color to data-accent and document every palette override and AA exception.
 
@@ -71,6 +76,8 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
   Kept dark blue's #2563eb fill and accent headings, listed as AA exceptions; follow-ups T0038 lint docs, T0039 dark blue.
   - [Feedback Needed] dark blue: keep meteo's fill or adopt bright's?.
 
+- [2026-11-13] **[Review]**
+  Round 1 requested (mode: agent).
 
 ## Screenshots
 Before and after captures are byte-identical; validation-proof.md records the comparison.
