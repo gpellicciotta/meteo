@@ -1,11 +1,11 @@
 ---
 id: T0035
-owner: ~
-needs: [T0032]
-branch: —
-worktree: —
-status: ready
-started_at: —
+owner: "@codex"
+needs: []
+branch: task/T0035-move-the-icons-to-the-vendored-external-icon
+worktree: .plan/work/T0035-move-the-icons-to-the-vendored-external-icon
+status: active
+started_at: "2026-11-13T22:59:52Z"
 ended_at: —
 review: agent
 preview: none
