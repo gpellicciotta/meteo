@@ -15,4 +15,4 @@ An overview of all tasks and their planning.
 - [x] T0035 Move the icons to the vendored external icon sprite, keeping each icon's appearance.
 
 ## Backlog
-*(Currently no tasks)*
+- [ ] T0040 Make devops.py lint use the venv's lint-markdown instead of a global copy from another support-python version.
