@@ -15,8 +15,8 @@ review_status: pending
 review_round: 1
 review_requested_at: "2026-11-14T09:27:17Z"
 usage:
-  worker: {turns: 1, duration_s: 0.0}
-work_duration: 7.8
+  worker: {turns: 8, duration_s: 0.0}
+work_duration: 2180.7
 ---
 # T0037: Make devops.py use the project venv when the importable support-python differs from the pinned version
 
@@ -64,4 +64,8 @@ Completion check: `python scripts/devops.py test` passes through the venv.
 
 - [2026-11-14] **[Review]**
   Round 1 requested (mode: agent).
+
+- [2026-11-14] **[Review]**
+  Launched agent review round 1 via plan agents review T0037 --sandbox; reviewer @codex.
+  - plan PID 33176, codex PID 34540.
 
