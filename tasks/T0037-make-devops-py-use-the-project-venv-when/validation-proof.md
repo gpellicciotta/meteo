@@ -100,3 +100,69 @@ Versions agree.
 ```text
 All 4 markdown files passed linting.
 ```
+
+## Round 1 Rework: Bounded Venv Fallback
+
+The `.venv` had been removed since round 1; it was recreated with `python -m venv .venv` and `.venv/Scripts/python -m pip install -r scripts/requirements.txt` (support-python 3.2.0).
+
+### Red phase: mocked worktree and primary venvs
+
+Before the fix, `.venv/Scripts/python -m unittest tests.test_devops.TestSupportPythonVenvFallback`, exit code 1.
+Every failure shows the old code re-executing into the other venv.
+`TestSupportPythonWorktreeFallback` was not run red: its two error cases recurse without bound under the old code.
+
+```text
+FAIL: test_mismatched_worktree_venv_falls_back_to_pinned_primary_venv
+AssertionError: 'C:\\[23 chars]Local\\Temp\\tmpsyqn383j\\worktree\\.venv\\Scripts\\python.exe' != 'C:\\[23 chars]Local\\Temp\\tmpsyqn383j\\main\\.venv\\Scripts\\python.exe'
+FAIL: test_pinned_version_clears_reexec_marker
+AssertionError: '1' is not None
+FAIL: test_reexecuted_run_never_reexecutes_again
+AssertionError: 0 != 1 :
+[call(['C:\\Users\\giova\\AppData\\Local\\Temp\\tmpuuebq5sc\\worktree\\.venv\\Scripts\\python.exe', 'python.exe -m unittest', 'tests.test_devops.TestSupportPythonVenvFallback'], check=False)]
+FAIL: test_two_mismatched_venvs_exit_with_setup_commands
+AssertionError: 0 != 1 :
+[call(['C:\\Users\\giova\\AppData\\Local\\Temp\\tmpmyd4o3dp\\main\\.venv\\Scripts\\python.exe', 'python.exe -m unittest', 'tests.test_devops.TestSupportPythonVenvFallback'], check=False)]
+FAIL: test_two_venvs_without_support_python_exit_with_setup_commands
+AssertionError: 0 != 1 :
+[call(['C:\\Users\\giova\\AppData\\Local\\Temp\\tmpn8yn4ylk\\worktree\\.venv\\Scripts\\python.exe', 'python.exe -m unittest', 'tests.test_devops.TestSupportPythonVenvFallback'], check=False)]
+Ran 5 tests in 0.398s
+FAILED (failures=5)
+```
+
+### Green phase: all support-python venv tests
+
+After the fix, `.venv/Scripts/python -m unittest tests.test_devops.TestSupportPythonPin tests.test_devops.TestSupportPythonVenvSelection tests.test_devops.TestSupportPythonVenvFallback tests.test_devops.TestSupportPythonWorktreeFallback`, exit code 0.
+It includes the real-process worktree runs with two wrong venvs and two venvs without support-python.
+
+```text
+................
+----------------------------------------------------------------------
+Ran 16 tests in 4.981s
+
+OK
+```
+
+### Completion check: devops test from the global interpreter
+
+`python scripts/devops.py test` with global support-python 3.1.0, exit code 0; it re-ran under `.venv`.
+The Node run reflects unrelated uncommitted work in the checkout, which deletes several JavaScript test files.
+
+```text
+Command: C:\Dev-Projects\meteo\.venv\Scripts\python.exe -m unittest discover -s tests
+Ran 45 tests in 46.439s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+ Test Files  3 passed (3)
+      Tests  105 passed (105)
+```
+
+### Versions, lint, and whitespace
+
+`python scripts/devops.py versions`, `python scripts/devops.py lint`, and `git diff --check -- scripts/devops.py tests/test_devops.py`, each exit code 0:
+
+```text
+Version file: 1.3.0-pre
+CHANGELOG.md: 1.3.0-pre
+Versions agree.
+All 4 markdown files passed linting.
+```
