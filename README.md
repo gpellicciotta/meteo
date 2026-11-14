@@ -74,7 +74,8 @@ python -m venv .venv
 ```
 
 [devops.py](scripts/devops.py) checks the importable support-python against the version pinned in [requirements.txt](scripts/requirements.txt).
-On a mismatch it re-runs under `.venv`, or under the primary checkout's `.venv` from a task worktree.
+On a mismatch it re-runs under the first venv holding the pinned version.
+It tries `.venv`, then the primary checkout's `.venv` from a task worktree.
 Without such a venv it exits with the setup commands above rather than run on the wrong version.
 
 Run quality checks across markdown linting, the vendored design check, and the test suites:

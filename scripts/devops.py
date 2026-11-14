@@ -21,6 +21,7 @@ import argparse
 from datetime import date
 import functools
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+import os
 from pathlib import Path
 import re
 import subprocess
@@ -30,6 +31,14 @@ from typing import Optional, Sequence
 REPO_ROOT = Path(__file__).resolve().parent.parent
 REQUIREMENTS_PATH = REPO_ROOT / "scripts" / "requirements.txt"
 VENV_PYTHON_RELATIVE = Path(".venv") / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+REEXEC_ENV = "METEO_DEVOPS_VENV_REEXEC"
+VERSION_PROBE = (
+    "from importlib import metadata\n"
+    "try:\n"
+    "    print(metadata.version('support-python'))\n"
+    "except metadata.PackageNotFoundError:\n"
+    "    pass\n"
+)
 SUPPORT_PYTHON_PIN = re.compile(r"^\s*support[-_]python\b[^\n#]*?(?:==\s*|@v?)(\d+(?:\.\d+)*)\s*(?:#.*)?$", re.IGNORECASE | re.MULTILINE)
 
 
@@ -73,16 +82,40 @@ def venv_python_candidates(repo_root: Path = REPO_ROOT) -> list[Path]:
     return [root / VENV_PYTHON_RELATIVE for root in roots]
 
 
+def venv_support_python_version(venv_python: Path) -> Optional[str]:
+    """Returns the support-python version a venv interpreter sees, or None when it has none or fails."""
+    try:
+        result = subprocess.run(
+            [str(venv_python), "-c", VERSION_PROBE], capture_output=True, text=True, check=False, timeout=60
+        )
+    except (OSError, subprocess.SubprocessError):
+        return None
+    version = result.stdout.strip()
+    return version if result.returncode == 0 and version else None
+
+
+def _matches_pin(version: Optional[str], pinned: Optional[str]) -> bool:
+    return version is not None and (pinned is None or version == pinned)
+
+
 def _reexec_in_venv() -> None:
-    """Re-runs this script under the project venv unless the pinned support-python version is importable."""
+    """Re-runs this script under a candidate venv holding the pinned support-python, or exits 1 with setup help.
+
+    A re-executed run never re-executes again, so mismatched venvs cannot hand the run back and forth.
+    """
     pinned = pinned_support_python_version()
     installed = installed_support_python_version()
-    if installed is not None and (pinned is None or installed == pinned):
+    if _matches_pin(installed, pinned):
+        os.environ.pop(REEXEC_ENV, None)
         return
-    running_prefix = Path(sys.prefix).resolve()
-    for venv_python in venv_python_candidates():
-        if venv_python.is_file() and venv_python.parent.parent.resolve() != running_prefix:
-            raise SystemExit(subprocess.run([str(venv_python), *sys.argv], check=False).returncode)
+    if not os.environ.get(REEXEC_ENV):
+        running_prefix = Path(sys.prefix).resolve()
+        for venv_python in venv_python_candidates():
+            if not venv_python.is_file() or venv_python.parent.parent.resolve() == running_prefix:
+                continue
+            if _matches_pin(venv_support_python_version(venv_python), pinned):
+                env = {**os.environ, REEXEC_ENV: "1"}
+                raise SystemExit(subprocess.run([str(venv_python), *sys.argv], check=False, env=env).returncode)
     found = f"support-python {installed} is installed" if installed else "support-python is not installed"
     wanted = f"scripts/requirements.txt pins {pinned}" if pinned else "scripts/requirements.txt requires it"
     print(

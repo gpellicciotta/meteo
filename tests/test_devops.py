@@ -2,13 +2,17 @@
 
 from __future__ import annotations
 
+import contextlib
 import importlib.util
+import io
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
+from typing import Optional
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -314,6 +318,8 @@ class TestDevopsDryRunIntegration(unittest.TestCase):
 
 PINNED_VERSION = "3.2.0"
 VENV_RELATIVE = Path(".venv") / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+REEXEC_ENV = "METEO_DEVOPS_VENV_REEXEC"
+SETUP_COMMAND = "pip install -r scripts/requirements.txt"
 
 
 def _git(*args: str) -> None:
@@ -332,6 +338,40 @@ def _write_fake_support_python(site: Path, version: str, marker: str, exit_code:
     dist_info.mkdir()
     (dist_info / "METADATA").write_text(
         f"Metadata-Version: 2.1\nName: support-python\nVersion: {version}\n", encoding="utf-8"
+    )
+
+
+def _make_venv(root: Path, version: Optional[str], marker: str, exit_code: int) -> None:
+    """Creates root/.venv, holding a stand-in support-python of version, or none when version is None."""
+    subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(root / ".venv")], check=True, timeout=120)
+    if version is None:
+        return
+    purelib = subprocess.run(
+        [str(root / VENV_RELATIVE), "-c", "import sysconfig; print(sysconfig.get_paths()['purelib'])"],
+        capture_output=True,
+        text=True,
+        check=True,
+    ).stdout.strip()
+    _write_fake_support_python(Path(purelib), version, marker, exit_code)
+
+
+def _run_script_with_site(script: Path, site: Path, *args: str) -> subprocess.CompletedProcess:
+    """Runs script as __main__ with site first on sys.path, like a user-site install."""
+    bootstrap = (
+        "import runpy, sys\n"
+        f"sys.path.insert(0, {str(site)!r})\n"
+        f"sys.argv = [{str(script)!r}, *{list(args)!r}]\n"
+        f"runpy.run_path({str(script)!r}, run_name='__main__')\n"
+    )
+    env = {key: value for key, value in os.environ.items() if key != REEXEC_ENV}
+    return subprocess.run(
+        [sys.executable, "-c", bootstrap],
+        cwd=str(script.parent.parent),
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=120,
+        env=env,
     )
 
 
@@ -391,22 +431,8 @@ class TestSupportPythonVenvSelection(unittest.TestCase):
         self.outer_site = Path(self.tmp.name) / "outer-site"
 
     def _run_copy(self, *args: str) -> subprocess.CompletedProcess:
-        """Runs the copied script as __main__ with the stand-in site first on sys.path, like a user-site install."""
-        script = self.project / "scripts" / "devops.py"
-        bootstrap = (
-            "import runpy, sys\n"
-            f"sys.path.insert(0, {str(self.outer_site)!r})\n"
-            f"sys.argv = [{str(script)!r}, *{list(args)!r}]\n"
-            f"runpy.run_path({str(script)!r}, run_name='__main__')\n"
-        )
-        return subprocess.run(
-            [sys.executable, "-c", bootstrap],
-            cwd=str(self.project),
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=120,
-        )
+        """Runs the copied script as __main__ with the stand-in site first on sys.path."""
+        return _run_script_with_site(self.project / "scripts" / "devops.py", self.outer_site, *args)
 
     def test_mismatched_version_without_venv_exits_with_setup_commands(self) -> None:
         """Validates a wrong support-python version and no venv stop devops.py with the setup commands."""
@@ -442,6 +468,141 @@ class TestSupportPythonVenvSelection(unittest.TestCase):
         result = self._run_copy("version")
         self.assertEqual(result.returncode, 5, result.stdout + result.stderr)
         self.assertIn("PINNED-IN-PLACE-RAN", result.stdout)
+
+
+class TestSupportPythonVenvFallback(unittest.TestCase):
+    """Validates the choice between worktree and primary venvs, mocking interpreter probes and re-execution."""
+
+    def setUp(self) -> None:
+        self.mod = _load_devops_module()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+        self.worktree_python = self.root / "worktree" / VENV_RELATIVE
+        self.primary_python = self.root / "main" / VENV_RELATIVE
+        for python in [self.worktree_python, self.primary_python]:
+            python.parent.mkdir(parents=True)
+            python.write_bytes(b"")
+
+    def _reexec(
+        self,
+        venv_versions: dict[Path, Optional[str]],
+        running_prefix: Path,
+        installed: Optional[str] = "3.1.0",
+        marker: Optional[str] = None,
+    ) -> tuple[Optional[int], MagicMock, str]:
+        """Runs _reexec_in_venv with mocked probes; returns its exit code, the run mock, and stderr."""
+        run = MagicMock(return_value=subprocess.CompletedProcess([], 0))
+        stderr = io.StringIO()
+        environ = {key: value for key, value in os.environ.items() if key != REEXEC_ENV}
+        if marker is not None:
+            environ[REEXEC_ENV] = marker
+        code: Optional[int] = None
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(patch.dict(os.environ, environ, clear=True))
+            stack.enter_context(patch.object(self.mod, "pinned_support_python_version", return_value=PINNED_VERSION))
+            stack.enter_context(patch.object(self.mod, "installed_support_python_version", return_value=installed))
+            stack.enter_context(
+                patch.object(self.mod, "venv_python_candidates", return_value=[self.worktree_python, self.primary_python])
+            )
+            stack.enter_context(
+                patch.object(self.mod, "venv_support_python_version", side_effect=venv_versions.get, create=True)
+            )
+            stack.enter_context(patch.object(self.mod.subprocess, "run", run))
+            stack.enter_context(patch.object(self.mod.sys, "prefix", str(running_prefix)))
+            stack.enter_context(contextlib.redirect_stderr(stderr))
+            try:
+                self.mod._reexec_in_venv()
+            except SystemExit as exit_:
+                code = exit_.code
+            self.marker_after = os.environ.get(REEXEC_ENV)
+        return code, run, stderr.getvalue()
+
+    def test_two_mismatched_venvs_exit_with_setup_commands(self) -> None:
+        """Validates incompatible worktree and primary venvs end in the setup error, not a re-execution."""
+        versions = {self.worktree_python: "3.1.0", self.primary_python: "3.0.0"}
+        code, run, stderr = self._reexec(versions, self.worktree_python.parent.parent)
+        self.assertEqual(code, 1, run.call_args_list)
+        run.assert_not_called()
+        self.assertIn(SETUP_COMMAND, stderr)
+
+    def test_two_venvs_without_support_python_exit_with_setup_commands(self) -> None:
+        """Validates venvs lacking support-python end in the setup error, not a re-execution."""
+        versions = {self.worktree_python: None, self.primary_python: None}
+        code, run, stderr = self._reexec(versions, self.primary_python.parent.parent, installed=None)
+        self.assertEqual(code, 1, run.call_args_list)
+        run.assert_not_called()
+        self.assertIn(SETUP_COMMAND, stderr)
+
+    def test_mismatched_worktree_venv_falls_back_to_pinned_primary_venv(self) -> None:
+        """Validates an incompatible worktree venv is skipped for a primary venv holding the pin."""
+        versions = {self.worktree_python: "3.1.0", self.primary_python: PINNED_VERSION}
+        code, run, _ = self._reexec(versions, self.root / "global")
+        self.assertEqual(code, 0)
+        run.assert_called_once()
+        self.assertEqual(run.call_args.args[0][0], str(self.primary_python))
+        self.assertEqual(run.call_args.kwargs["env"][REEXEC_ENV], "1")
+
+    def test_reexecuted_run_never_reexecutes_again(self) -> None:
+        """Validates a run started by a re-execution exits with the setup error on a mismatch."""
+        versions = {self.worktree_python: PINNED_VERSION, self.primary_python: PINNED_VERSION}
+        code, run, stderr = self._reexec(versions, self.root / "global", marker="1")
+        self.assertEqual(code, 1, run.call_args_list)
+        run.assert_not_called()
+        self.assertIn(SETUP_COMMAND, stderr)
+
+    def test_pinned_version_clears_reexec_marker(self) -> None:
+        """Validates a run on the pinned version clears the marker, so nested devops runs may re-execute."""
+        code, run, _ = self._reexec({}, self.root / "global", installed=PINNED_VERSION, marker="1")
+        self.assertIsNone(code)
+        run.assert_not_called()
+        self.assertIsNone(self.marker_after)
+
+
+class TestSupportPythonWorktreeFallback(unittest.TestCase):
+    """Runs devops.py from a linked worktree whose own and primary venvs both lack the pinned version."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        root = Path(self.tmp.name)
+        self.main = root / "main"
+        (self.main / "scripts").mkdir(parents=True)
+        for source in [DEVOPS_SCRIPT, REQUIREMENTS]:
+            (self.main / "scripts" / source.name).write_bytes(source.read_bytes())
+        _git("-C", str(self.main), "init", "-q")
+        _git("-C", str(self.main), "add", "scripts")
+        _git("-C", str(self.main), "-c", "user.email=t@example.invalid", "-c", "user.name=T", "commit", "-q", "-m", "Init.")
+        self.worktree = root / "worktree"
+        _git("-C", str(self.main), "worktree", "add", "-q", "-b", "task", str(self.worktree))
+        self.outer_site = root / "outer-site"
+        _write_fake_support_python(self.outer_site, "0.0.1", "WRONG-VERSION-RAN", 9)
+
+    def _assert_setup_error(self, result: subprocess.CompletedProcess) -> None:
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn("RAN", result.stdout)
+        self.assertIn(SETUP_COMMAND, result.stderr)
+
+    def test_two_mismatched_venvs_exit_with_setup_commands(self) -> None:
+        """Validates incompatible worktree and primary venvs exit 1 with the setup commands."""
+        _make_venv(self.worktree, "0.0.2", "WORKTREE-VENV-RAN", 3)
+        _make_venv(self.main, "0.0.3", "PRIMARY-VENV-RAN", 4)
+        self._assert_setup_error(_run_script_with_site(self.worktree / "scripts" / "devops.py", self.outer_site, "version"))
+
+    def test_two_venvs_without_support_python_exit_with_setup_commands(self) -> None:
+        """Validates worktree and primary venvs without support-python exit 1 with the setup commands."""
+        _make_venv(self.worktree, None, "", 0)
+        _make_venv(self.main, None, "", 0)
+        self._assert_setup_error(_run_script_with_site(self.worktree / "scripts" / "devops.py", self.outer_site, "version"))
+
+    def test_mismatched_worktree_venv_falls_back_to_pinned_primary_venv(self) -> None:
+        """Validates an incompatible worktree venv hands over to a primary venv holding the pin."""
+        _make_venv(self.worktree, "0.0.2", "WORKTREE-VENV-RAN", 3)
+        _make_venv(self.main, PINNED_VERSION, "PRIMARY-VENV-RAN", 4)
+        result = _run_script_with_site(self.worktree / "scripts" / "devops.py", self.outer_site, "version")
+        self.assertEqual(result.returncode, 4, result.stdout + result.stderr)
+        self.assertIn("PRIMARY-VENV-RAN", result.stdout)
+        self.assertNotIn("WORKTREE-VENV-RAN", result.stdout)
 
 
 
