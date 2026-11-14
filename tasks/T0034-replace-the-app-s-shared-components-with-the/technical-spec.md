@@ -66,6 +66,7 @@ Added or uncounted files:
 - `sw.js` (generated), `package.json` only if the browser script list changes.
 
 Mechanical command: `python scripts/generate-sw.py`.
+Mechanical files: sw.js
 
 Size estimate: 14 files, 420 lines.
 

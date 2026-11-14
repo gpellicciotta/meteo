@@ -19,6 +19,9 @@ size_status: approved
 size_approved: 19 files, 420 lines
 size_approved_by: "@giova"
 size_approved_at: "2026-11-14T09:10:37Z"
+review_status: pending
+review_round: 1
+review_requested_at: "2026-11-14T23:24:22Z"
 ---
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
@@ -34,7 +37,7 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 - [x] **[Implement]** Author tests for each component the app now takes from the vendored copy.
 - [x] **[Verify]**    Run the new tests and confirm they fail before the switch.
 - [x] **[Implement]** Replace the app's copies and switch `style.css` to the public bright entry point.
-- [ ] **[Verify]**    Run the full tests and the lossless switch proof with T0032's harness.
+- [x] **[Verify]**    Run the full tests and the lossless switch proof with T0032's harness.
 - [x] **[Doc]**       Update documentation and CHANGELOG.md.
 - [ ] **[Review]**    Obtain review approval of the finished work before completion.
 
@@ -76,4 +79,19 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 
 - [2026-11-14] **[Decide]**
   Resumed after T0037 (e3afe76): devops.py now runs on pinned support-python 3.2.0, so the full check no longer recurses. Rebase onto main before rerunning it.
+
+- [2026-11-15] **[Verify]**
+  Rebased onto main 6516248; preserved unexplained deletions in a stash. Full check passed: 46 Python and 211 JavaScript tests. Design check passed; switch proof has zero differing properties. Adapted the newly inherited icon test to the removed wifi icon.
+
+- [2026-11-15] **[Verify]**
+  Fixed a duplicate sprite URL introduced while resolving cache conflicts, after recording a failing regression. All 212 unit tests and the update browser scenario pass. Shell and forecast browser suites passed. Added tests/icons.test.js to the files touched.
+
+- [2026-11-15] **[Verify]**
+  Final full check passed after cache correction: 46 Python and 212 JavaScript tests. Task validation passed. Required verification is complete; requesting independent agent review.
+
+- [2026-11-15] **[Review]**
+  Round 1 requested (mode: agent).
+
+- [2026-11-15] **[Review]**
+  Launched independent review round 1 with plan agents review T0034 --sandbox. Parent PID 22460; reviewer PID 44972. Execution session 88444. Rebased task head is 3cff0a8.
 

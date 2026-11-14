@@ -196,3 +196,270 @@ ok - no console, page or network errors
 ```
 
 No tokens were renamed; the obsolete `--color-notice-border` definition and references were removed.
+
+## Rebase verification, 2026-11-15
+Rebased onto main at 6516248. Preserved unexplained deletions in the Git stash.
+
+Command: `python scripts/devops.py check`; exit code 0.
+
+```text
+[... 10 lines omitted ...]
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.................
+----------------------------------------------------------------------
+Ran 46 tests in 20.986s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 46860
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+ Test Files  9 passed (9)
+      Tests  211 passed (211)
+   Start at  00:20:39
+   Duration  2.80s (environment 79%, tests 14%, import 4%, worker 2%, transform 1%)
+    Isolate  9 workers spawned · ~1.38s startup each (spawn + environment, per file)
+             at least ~395ms faster with isolate: false — reuses workers across files instead of one per file
+```
+
+Command: `node ./vendor/design/bin/check.mjs`; exit code 0.
+
+```text
+integrity: PASS
+conformance: PASS
+```
+
+Command: `node tests/switch-proof.mjs --out {{companion-dir}}/proof/rebased`; exit code 0.
+
+```text
+[... 5 lines omitted ...]
+captured start-390-light-yellow
+captured forecast-390-light-yellow
+captured about-390-light-yellow
+captured config-390-light-yellow
+captured offline-390-light-yellow
+captured start-390-light-red
+captured forecast-390-light-red
+captured about-390-light-red
+captured config-390-light-red
+captured offline-390-light-red
+captured start-390-dark-blue
+captured forecast-390-dark-blue
+captured about-390-dark-blue
+captured config-390-dark-blue
+captured offline-390-dark-blue
+captured start-390-dark-yellow
+captured forecast-390-dark-yellow
+captured about-390-dark-yellow
+captured config-390-dark-yellow
+captured offline-390-dark-yellow
+captured start-390-dark-red
+captured forecast-390-dark-red
+captured about-390-dark-red
+captured config-390-dark-red
+captured offline-390-dark-red
+captured start-1440-light-blue
+captured forecast-1440-light-blue
+captured about-1440-light-blue
+captured config-1440-light-blue
+captured offline-1440-light-blue
+captured start-1440-dark-blue
+captured forecast-1440-dark-blue
+captured about-1440-dark-blue
+captured config-1440-dark-blue
+captured offline-1440-dark-blue
+```
+
+Command: `node tests/switch-proof.mjs --compare {{companion-dir}}/proof/after/styles.json {{companion-dir}}/proof/rebased/styles.json`; exit code 0.
+
+```text
+0 differing selector properties
+```
+
+Inspected [rebased offline phone](proof/rebased/offline-390-dark.png).
+
+### Cache conflict regression
+The combined sprite references initially duplicated one URL and blocked installation; the final generator removes that duplicate.
+
+Command: `npm test -- tests/design.test.js`; exit code 1.
+
+```text
+[... 2 lines omitted ...]
+> vitest run tests/design.test.js
+
+
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+
+ ❯ tests/design.test.js (15 tests | 1 failed) 221ms
+   × precaches each asset only once 14ms
+
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+
+ FAIL  tests/design.test.js > precaches each asset only once
+AssertionError: expected 84 to be 83 // Object.is equality
+
+- Expected
++ Received
+
+- 83
++ 84
+
+ ❯ tests/design.test.js:192:25
+    190| it("precaches each asset only once", () => {
+
+    191|   const assets = precached();
+    192|   expect(assets.length).toBe(new Set(assets).size);
+       |                         ^
+    193| });
+    194|
+ Test Files  1 failed (1)
+      Tests  1 failed | 14 passed (15)
+   Start at  00:22:53
+   Duration  1.64s (environment 79%, tests 16%, transform 3%, import 2%, worker 1%)
+
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
+
+```
+
+Command: `npm test`; exit code 0.
+
+```text
+
+> meteo@1.3.0-pre test
+> vitest run
+
+
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+
+
+ Test Files  9 passed (9)
+      Tests  212 passed (212)
+   Start at  00:23:03
+   Duration  2.76s (environment 78%, tests 15%, import 4%, worker 1%, transform 1%)
+
+    Isolate  9 workers spawned · ~1.40s startup each (spawn + environment, per file)
+             at least ~400ms faster with isolate: false — reuses workers across files instead of one per file
+
+```
+
+Command: `npm run test:browser`; exit code 1.
+
+```text
+[... 389 lines omitted ...]
+ok - hovering section 2 highlights its list item
+ok - hovering section 3 explains Rain bar in a tooltip inside the sample (3. Rain bar Grows with the rain amount. )
+ok - hovering section 3 highlights its list item
+ok - hovering section 4 explains Chance of rain in a tooltip inside the sample (4. Chance of rain Probability of more th)
+ok - hovering section 4 highlights its list item
+ok - hovering section 5 explains Hour in a tooltip inside the sample (5. Hour Start of each hour; the first co)
+ok - hovering section 5 highlights its list item
+ok - hovering section 6 explains Sky in a tooltip inside the sample (6. Sky Sky condition of each hour, with )
+ok - hovering section 6 highlights its list item
+ok - hovering section 7 explains Temperature in a tooltip inside the sample (7. Temperature Air temperature at the st)
+ok - hovering section 7 highlights its list item
+ok - hovering a temperature highlights all twelve temperatures (12)
+ok - hovering section 8 explains Wind in a tooltip inside the sample (8. Wind Wind speed 10 m above the ground)
+ok - hovering section 8 highlights its list item
+ok - hovering section 9 explains Place in a tooltip inside the sample (9. Place The searched place, or your cur)
+ok - hovering section 9 highlights its list item
+ok - hovering section 10 explains Update time in a tooltip inside the sample (10. Update time When the forecast was fe)
+ok - hovering section 10 highlights its list item
+ok - hovering badge 6 shows the sky explanation
+ok - the sky tooltip shows the nine weather icons
+ok - leaving the sample hides the tooltip and highlights
+ok - no guide hover console, page or network errors
+ok - a touch phone shows no hover tooltip or highlight in the guide
+ok - no touch guide console, page or network errors
+node:internal/modules/run_main:122
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 15000ms exceeded.
+    at C:\Dev-Projects\meteo\.plan\work\T0034-replace-the-app-s-shared-components-with-the\tests\update-browser.mjs:37:14 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v22.14.0
+```
+
+Command: `node tests/update-browser.mjs`; exit code 0.
+
+```text
+ok - the first install precaches every asset and controls the page
+ok - the first install shows no Update toast
+ok - the changed worker installs and waits instead of taking over
+ok - the Update toast shows the English ready text
+ok - the Update toast offers the Update action
+ok - the Update toast stays above the taller start action bar
+ok - the toast text keeps the text color, not the app's muted paragraphs (rgb(31, 41, 51))
+ok - the Update toast stays past the 8 second expiry of ordinary toasts
+ok - Update activates the waiting worker and reloads under it
+ok - the new worker removes the old cache
+ok - the reloaded page shows no Update toast
+ok - no console, page or network errors
+```
+
+Shell and forecast suites passed before the update timeout; the affected update suite passed after removing the duplicate.
+
+### Final full check
+Command: `python scripts/devops.py check`; exit code 0.
+
+```text
+[... 10 lines omitted ...]
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.................
+----------------------------------------------------------------------
+Ran 46 tests in 25.983s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 45784
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+ Test Files  9 passed (9)
+      Tests  212 passed (212)
+   Start at  00:23:46
+   Duration  3.08s (environment 82%, tests 12%, import 4%, worker 1%, transform 1%)
+    Isolate  9 workers spawned · ~1.62s startup each (spawn + environment, per file)
+             at least ~463ms faster with isolate: false — reuses workers across files instead of one per file
+```
