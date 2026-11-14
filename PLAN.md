@@ -3,7 +3,7 @@ An overview of all tasks and their planning.
 
 ## Next Milestone
 - [x] T0037 Make devops.py use the project venv when the importable support-python differs from the pinned version.
-- [ ] T0038 Add docs/index.md and the visual style guide to the markdown lint list of devops.py.
+- [x] T0038 Add docs/index.md and the visual style guide to the markdown lint list of devops.py.
 - [ ] T0039 Decide whether dark blue adopts the bright look's light fill with dark labels, removing its AA exception.
 - [x] T0036 Adopt DevopsCli from support-python v3.2.0 in scripts/devops.py via MeteoProject(NodeProject): override test, lint, build, release; keep serve, sw, deploy through add_action; see T0029 findings.
 - [x] T0029 Evaluate adopting DevopsCli from the released support-python v2.0.0, keeping project-specific actions through add_action.
