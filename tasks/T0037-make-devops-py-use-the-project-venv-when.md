@@ -5,19 +5,21 @@ session: claude-20261114-ee1e90
 needs: []
 branch: —
 worktree: —
-status: active
+status: completed
 started_at: "2026-11-14T09:12:02Z"
-ended_at: —
+ended_at: "2026-11-14T21:34:16Z"
 review: agent
 preview: none
 protocol: standard
-review_status: pending
+review_status: approved
 review_round: 2
 review_requested_at: "2026-11-14T21:32:19Z"
 usage:
   worker: {turns: 8, duration_s: 0.0}
 work_duration: 2180.7
-review_session: codex-20261114-02098f
+review_session: codex-20261114-aa5b8b
+reviewed_by: "@codex"
+completion-commit: 76f02957be8b963ff6a6ebea5c5cd5569582299f
 ---
 # T0037: Make devops.py use the project venv when the importable support-python differs from the pinned version
 
@@ -39,7 +41,7 @@ Completion check: `python scripts/devops.py test` passes through the venv.
 - [x] **[Verify]**    Run the new mocked tests and record their failure output in validation-proof.md.
 - [x] **[Implement]** Probe each candidate venv's support-python version and bound re-execution to one hop.
 - [x] **[Verify]**    Run the affected tests and devops test through the pinned venv.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-13] **[Doc]**
@@ -94,4 +96,11 @@ Completion check: `python scripts/devops.py test` passes through the venv.
 - [2026-11-14] **[Review]**
   Launched agent review round 2 via plan agents review T0037 --sandbox.
   - plan PID 20600, codex PID 37740.
+
+- [2026-11-14] **[Review]**
+  Round 2 approved by @codex: [Decided]** Approved.
+  - Findings: [review-findings-2.md](T0037-make-devops-py-use-the-project-venv-when/review-findings-2.md).
+
+- [2026-11-14] **[Complete]**
+  Task completed successfully.
 
