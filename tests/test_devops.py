@@ -218,10 +218,11 @@ class TestDevopsDryRunIntegration(unittest.TestCase):
     """Runs real release dry runs in a throwaway clone, with and without an active -pre heading."""
 
     def setUp(self) -> None:
-        self.tmp = tempfile.TemporaryDirectory(ignore_cleanup_errors=True)
+        self.tmp = tempfile.TemporaryDirectory()
         self.addCleanup(self.tmp.cleanup)
         self.clone = Path(self.tmp.name) / "clone"
-        subprocess.run(["git", "clone", "-q", "--local", str(REPO_ROOT), str(self.clone)], check=True)
+        # Copy objects instead of hard-linking them: NTFS caps a file at 1023 links, and links pin the repository packs.
+        subprocess.run(["git", "clone", "-q", "--no-hardlinks", str(REPO_ROOT), str(self.clone)], check=True)
         subprocess.run(["git", "-C", str(self.clone), "config", "user.email", "test@example.invalid"], check=True)
         subprocess.run(["git", "-C", str(self.clone), "config", "user.name", "Test"], check=True)
         # Start from the released state even when the repository itself has an active -pre heading.
@@ -308,6 +309,158 @@ class TestDevopsDryRunIntegration(unittest.TestCase):
             mod, "read_active_pre_release_version", return_value="9.9.9"
         ), patch.object(mod, "current_branch", return_value="main"), patch.object(project, "check", return_value=False):
             self.assertEqual(mod.deploy_flow(project, dry_run=True, push=False, skip_checks=False, logger=logger), 1)
+
+
+
+PINNED_VERSION = "3.2.0"
+VENV_RELATIVE = Path(".venv") / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+
+
+def _git(*args: str) -> None:
+    subprocess.run(["git", *args], check=True, capture_output=True, text=True)
+
+
+def _write_fake_support_python(site: Path, version: str, marker: str, exit_code: int) -> None:
+    """Writes a stand-in support-python distribution whose devops package prints marker and exits."""
+    package = site / "support_python"
+    (package / "devops").mkdir(parents=True)
+    (package / "__init__.py").write_text("", encoding="utf-8")
+    (package / "devops" / "__init__.py").write_text(
+        f"import sys\nprint({marker!r})\nsys.stdout.flush()\nraise SystemExit({exit_code})\n", encoding="utf-8"
+    )
+    dist_info = site / f"support_python-{version}.dist-info"
+    dist_info.mkdir()
+    (dist_info / "METADATA").write_text(
+        f"Metadata-Version: 2.1\nName: support-python\nVersion: {version}\n", encoding="utf-8"
+    )
+
+
+class TestSupportPythonPin(unittest.TestCase):
+    """Validates how devops.py reads the support-python pin and finds the project venv."""
+
+    def setUp(self) -> None:
+        self.mod = _load_devops_module()
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.root = Path(self.tmp.name)
+
+    def test_pin_read_from_project_requirements(self) -> None:
+        """Validates the git URL pin in scripts/requirements.txt yields 3.2.0."""
+        self.assertEqual(self.mod.pinned_support_python_version(REQUIREMENTS), PINNED_VERSION)
+
+    def test_pin_read_from_exact_requirement(self) -> None:
+        """Validates an exact version requirement is read as the pin."""
+        requirements = self.root / "requirements.txt"
+        requirements.write_text("other==1.0\nsupport_python==3.4.1\n", encoding="utf-8")
+        self.assertEqual(self.mod.pinned_support_python_version(requirements), "3.4.1")
+
+    def test_no_pin_without_support_python_line(self) -> None:
+        """Validates a requirements file without support-python has no pin."""
+        requirements = self.root / "requirements.txt"
+        requirements.write_text("other==1.0\n", encoding="utf-8")
+        self.assertIsNone(self.mod.pinned_support_python_version(requirements))
+
+    def test_venv_candidates_from_worktree_include_primary_checkout(self) -> None:
+        """Validates a linked worktree falls back to the primary checkout's venv."""
+        main = self.root / "main"
+        main.mkdir()
+        _git("-C", str(main), "init", "-q")
+        _git("-C", str(main), "-c", "user.email=t@example.invalid", "-c", "user.name=T", "commit", "-q", "--allow-empty", "-m", "Init.")
+        worktree = self.root / "worktree"
+        _git("-C", str(main), "worktree", "add", "-q", "-b", "task", str(worktree))
+        candidates = [path.resolve() for path in self.mod.venv_python_candidates(worktree)]
+        self.assertEqual(candidates, [(worktree / VENV_RELATIVE).resolve(), (main / VENV_RELATIVE).resolve()])
+
+    def test_venv_candidates_from_primary_checkout_list_only_its_venv(self) -> None:
+        """Validates a primary checkout only offers its own venv."""
+        _git("-C", str(self.root), "init", "-q")
+        candidates = [path.resolve() for path in self.mod.venv_python_candidates(self.root)]
+        self.assertEqual(candidates, [(self.root / VENV_RELATIVE).resolve()])
+
+
+class TestSupportPythonVenvSelection(unittest.TestCase):
+    """Runs a copy of devops.py against stand-in support-python versions, with and without a project venv."""
+
+    def setUp(self) -> None:
+        self.tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(self.tmp.cleanup)
+        self.project = Path(self.tmp.name) / "project"
+        (self.project / "scripts").mkdir(parents=True)
+        for source in [DEVOPS_SCRIPT, REQUIREMENTS]:
+            (self.project / "scripts" / source.name).write_bytes(source.read_bytes())
+        self.outer_site = Path(self.tmp.name) / "outer-site"
+
+    def _run_copy(self, *args: str) -> subprocess.CompletedProcess:
+        """Runs the copied script as __main__ with the stand-in site first on sys.path, like a user-site install."""
+        script = self.project / "scripts" / "devops.py"
+        bootstrap = (
+            "import runpy, sys\n"
+            f"sys.path.insert(0, {str(self.outer_site)!r})\n"
+            f"sys.argv = [{str(script)!r}, *{list(args)!r}]\n"
+            f"runpy.run_path({str(script)!r}, run_name='__main__')\n"
+        )
+        return subprocess.run(
+            [sys.executable, "-c", bootstrap],
+            cwd=str(self.project),
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=120,
+        )
+
+    def test_mismatched_version_without_venv_exits_with_setup_commands(self) -> None:
+        """Validates a wrong support-python version and no venv stop devops.py with the setup commands."""
+        _write_fake_support_python(self.outer_site, "0.0.1", "WRONG-VERSION-RAN", 9)
+        result = self._run_copy("version")
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertNotIn("WRONG-VERSION-RAN", result.stdout)
+        self.assertIn("0.0.1", result.stderr)
+        self.assertIn(PINNED_VERSION, result.stderr)
+        self.assertIn("pip install -r scripts/requirements.txt", result.stderr)
+
+    def test_mismatched_version_reruns_under_project_venv(self) -> None:
+        """Validates a wrong support-python version re-runs devops.py under the project venv."""
+        _write_fake_support_python(self.outer_site, "0.0.1", "WRONG-VERSION-RAN", 9)
+        venv = self.project / ".venv"
+        subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(venv)], check=True, timeout=120)
+        venv_python = self.project / VENV_RELATIVE
+        purelib = subprocess.run(
+            [str(venv_python), "-c", "import sysconfig; print(sysconfig.get_paths()['purelib'])"],
+            capture_output=True,
+            text=True,
+            check=True,
+        ).stdout.strip()
+        _write_fake_support_python(Path(purelib), PINNED_VERSION, "PINNED-VENV-RAN", 7)
+        result = self._run_copy("version")
+        self.assertEqual(result.returncode, 7, result.stdout + result.stderr)
+        self.assertIn("PINNED-VENV-RAN", result.stdout)
+        self.assertNotIn("WRONG-VERSION-RAN", result.stdout)
+
+    def test_pinned_version_runs_without_reexec(self) -> None:
+        """Validates the pinned support-python version runs in place."""
+        _write_fake_support_python(self.outer_site, PINNED_VERSION, "PINNED-IN-PLACE-RAN", 5)
+        result = self._run_copy("version")
+        self.assertEqual(result.returncode, 5, result.stdout + result.stderr)
+        self.assertIn("PINNED-IN-PLACE-RAN", result.stdout)
+
+
+
+class TestIntegrationCloneIsolation(unittest.TestCase):
+    """Validates the dry-run integration clones share no files with the repository and leave nothing behind."""
+
+    def test_integration_clone_is_independent_and_removed(self) -> None:
+        """Validates clone pack files have one link each and cleanup deletes the clone."""
+        case = TestDevopsDryRunIntegration("test_release_dry_run_fails_without_pre_heading")
+        case.setUp()
+        clone = case.clone
+        try:
+            pack_files = list((clone / ".git" / "objects" / "pack").glob("*"))
+            self.assertTrue(pack_files, "the clone holds no pack files")
+            for pack_file in pack_files:
+                self.assertEqual(pack_file.stat().st_nlink, 1, f"{pack_file.name} is hard-linked to the repository")
+        finally:
+            case.doCleanups()
+        self.assertFalse(clone.exists(), "cleanup left the integration clone behind")
 
 
 if __name__ == "__main__":

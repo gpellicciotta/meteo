@@ -28,23 +28,70 @@ import sys
 from typing import Optional, Sequence
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-VENV_PYTHON = REPO_ROOT / ".venv" / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+REQUIREMENTS_PATH = REPO_ROOT / "scripts" / "requirements.txt"
+VENV_PYTHON_RELATIVE = Path(".venv") / ("Scripts/python.exe" if sys.platform == "win32" else "bin/python")
+SUPPORT_PYTHON_PIN = re.compile(r"^\s*support[-_]python\b[^\n#]*?(?:==\s*|@v?)(\d+(?:\.\d+)*)\s*(?:#.*)?$", re.IGNORECASE | re.MULTILINE)
+
+
+def pinned_support_python_version(requirements: Path = REQUIREMENTS_PATH) -> Optional[str]:
+    """Returns the support-python version pinned in a requirements file, or None when it pins none."""
+    try:
+        text = requirements.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    match = SUPPORT_PYTHON_PIN.search(text)
+    return match.group(1) if match else None
+
+
+def installed_support_python_version() -> Optional[str]:
+    """Returns the version of the importable support-python distribution without importing it, or None."""
+    from importlib import metadata
+
+    try:
+        return metadata.version("support-python")
+    except metadata.PackageNotFoundError:
+        return None
+
+
+def venv_python_candidates(repo_root: Path = REPO_ROOT) -> list[Path]:
+    """Returns the venv interpreters to try: the checkout's own, then the primary checkout's from a linked worktree."""
+    roots = [repo_root]
+    try:
+        result = subprocess.run(
+            ["git", "-C", str(repo_root), "rev-parse", "--path-format=absolute", "--git-common-dir"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+    except (OSError, subprocess.SubprocessError):
+        result = None
+    if result is not None and result.returncode == 0 and result.stdout.strip():
+        primary_root = Path(result.stdout.strip()).parent
+        if primary_root.resolve() != repo_root.resolve():
+            roots.append(primary_root)
+    return [root / VENV_PYTHON_RELATIVE for root in roots]
 
 
 def _reexec_in_venv() -> None:
-    """Re-runs this script with the project venv interpreter when support-python is not importable."""
-    try:
-        import support_python  # noqa: F401
-    except ImportError:
-        if VENV_PYTHON.is_file() and Path(sys.executable).resolve() != VENV_PYTHON.resolve():
-            raise SystemExit(subprocess.run([str(VENV_PYTHON), *sys.argv], check=False).returncode)
-        print(
-            "support-python is not installed. Create the venv and install it:\n"
-            "  python -m venv .venv\n"
-            "  .venv/Scripts/python -m pip install -r scripts/requirements.txt",
-            file=sys.stderr,
-        )
-        raise SystemExit(1)
+    """Re-runs this script under the project venv unless the pinned support-python version is importable."""
+    pinned = pinned_support_python_version()
+    installed = installed_support_python_version()
+    if installed is not None and (pinned is None or installed == pinned):
+        return
+    running_prefix = Path(sys.prefix).resolve()
+    for venv_python in venv_python_candidates():
+        if venv_python.is_file() and venv_python.parent.parent.resolve() != running_prefix:
+            raise SystemExit(subprocess.run([str(venv_python), *sys.argv], check=False).returncode)
+    found = f"support-python {installed} is installed" if installed else "support-python is not installed"
+    wanted = f"scripts/requirements.txt pins {pinned}" if pinned else "scripts/requirements.txt requires it"
+    print(
+        f"{found}, but {wanted}. Install the pinned version into the project venv:\n"
+        "  python -m venv .venv\n"
+        "  .venv/Scripts/python -m pip install -r scripts/requirements.txt",
+        file=sys.stderr,
+    )
+    raise SystemExit(1)
 
 
 if __name__ == "__main__":
