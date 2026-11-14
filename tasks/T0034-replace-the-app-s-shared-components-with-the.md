@@ -5,16 +5,20 @@ session: codex-20261113-afc2ca
 needs: []
 branch: task/T0034-replace-the-app-s-shared-components-with-the
 worktree: .plan/work/T0034-replace-the-app-s-shared-components-with-the
-status: suspended
-started_at: "2026-11-13T21:59:46Z"
+status: active
+started_at: "2026-11-14T09:27:40Z"
 ended_at: —
 review: agent
 preview: none
 protocol: standard
 usage:
-  worker: {turns: 4, duration_s: 6070.6, input: 4, output: 4, cache_read: 0, cache_write: 0}
-work_duration: 3116.3
+  worker: {turns: 6, duration_s: 6999.2, input: 157410, output: 15864, cache_read: 4527616, cache_write: 0}
+work_duration: 3589.2
 contributors: "@claude"
+size_status: approved
+size_approved: 19 files, 420 lines
+size_approved_by: "@giova"
+size_approved_at: "2026-11-14T09:10:37Z"
 ---
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
@@ -66,4 +70,10 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 
 - [2026-11-13] **[Verify]**
   Confirmed no remaining descendants from the recursive test tree. Normal task validation passed; completion validation remains blocked by unchecked verification. Implementation and documentation are committed; working tree is clean.
+
+- [2026-11-14] **[Size]**
+  Size approved by @giova for 19 files, 420 lines.
+
+- [2026-11-14] **[Decide]**
+  Resumed after T0037 (e3afe76): devops.py now runs on pinned support-python 3.2.0, so the full check no longer recurses. Rebase onto main before rerunning it.
 
