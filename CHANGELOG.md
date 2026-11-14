@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.3.0-pre
+- DevEx: `devops.py lint` and `format` now also cover [docs/index.md](docs/index.md) and the [visual style guide](docs/specs/visual-style-guide.md).
 - DevEx: [devops.py](scripts/devops.py) now runs only on the pinned support-python, switching to the project or primary-checkout `.venv` and failing otherwise.
 - FrontEnd: Moved icons to external sprites while preserving glyphs, presentation, and offline availability.
 - DevEx: Rebuilt [devops.py](scripts/devops.py) on support-python v3.2.0 DevopsCli, adding `test --slow`, `format`, `release`, and a project-local `.venv`.

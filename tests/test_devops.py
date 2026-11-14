@@ -104,7 +104,12 @@ class TestDevopsAdapter(unittest.TestCase):
             self.assertTrue(self.project.lint())
         argv = run_cmd.call_args[0][0]
         self.assertEqual(argv[1:3], ["check", "--offline"])
-        self.assertEqual([Path(a).name for a in argv[3:]], self.mod.CORE_DOCS)
+        self.assertEqual([Path(a).as_posix() for a in argv[3:]], self.mod.CORE_DOCS)
+
+    def test_lint_covers_docs_index_and_visual_style_guide(self) -> None:
+        """Validates the docs index and the visual style guide are in the lint list."""
+        self.assertIn("docs/index.md", self.mod.CORE_DOCS)
+        self.assertIn("docs/specs/visual-style-guide.md", self.mod.CORE_DOCS)
 
     def test_check_stops_at_first_failure(self) -> None:
         """Validates check runs lint then test and skips test after a lint failure."""

@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.3.0-pre
+- DevEx: `devops.py lint` en `format` controleren nu ook [docs/index.md](docs/index.md) en de [visuele stijlgids](docs/specs/visual-style-guide.md).
 - DevEx: [devops.py](scripts/devops.py) draait alleen nog op de vastgezette support-python, via de `.venv` van het project of de hoofd-checkout, en stopt anders.
 - DevEx: [devops.py](scripts/devops.py) herbouwd op DevopsCli van support-python v3.2.0, met `test --slow`, `format`, `release` en een projectlokale `.venv`.
 - FrontEnd: Ongebruikte quiz-restanten verwijderd: 16 iconen, 12 stijlklassen en 9 tokens, zonder visuele wijziging.

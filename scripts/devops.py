@@ -143,6 +143,8 @@ CORE_DOCS = [
     "README.md",
     "CHANGELOG.md",
     "CHANGELOG.nl.md",
+    "docs/index.md",
+    "docs/specs/visual-style-guide.md",
 ]
 
 CHANGELOG_PATH = REPO_ROOT / "CHANGELOG.md"
