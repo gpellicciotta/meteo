@@ -27,7 +27,7 @@ completion-commit: b76671232c4f4bc18b52cdfef4d82b57091c2439
 ## Goals
 Remove the icons, CSS classes, and tokens left from the quiz, which no current screen uses.
 Keep every screen's appearance unchanged; screenshots before and after must match.
-Start once support.webapp finishes its generator phase; see the [roadmap](../../../support.webapp/docs/roadmap.md), Phase 4.
+Start once support.webapp finishes its generator phase; see the [roadmap](../../../../support.webapp/docs/roadmap.md), Phase 4.
 
 ## Task Execution Steps
 - [x] **[Read]**      Read the named ADRs and the app at a recorded commit.

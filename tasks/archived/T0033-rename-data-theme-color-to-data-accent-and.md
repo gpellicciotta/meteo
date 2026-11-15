@@ -27,8 +27,8 @@ completion-commit: 7857b0d20007a2dde9bdc9152b535ae730d4833f
 ## Goals
 Rename the `data-theme-color` attribute to `data-accent`, keeping the accent names as values.
 List every palette override and deliberate AA exception in meteo's style guide, including white labels on yellow.
-Follow [ADR-0002](../../../support.webapp/docs/adrs/ADR-0002-looks.md).
-Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires.
+Follow [ADR-0002](../../../../support.webapp/docs/adrs/ADR-0002-looks.md).
+Prove a lossless switch as [ADR-0007](../../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires.
 
 ## Task Execution Steps
 - [x] **[Read]**      Read the named ADRs and the app at a recorded commit.

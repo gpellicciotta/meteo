@@ -30,11 +30,11 @@ completion-commit: 4d1614bd3826b06c04bfd59a5d24f78fa06af32d
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
 ## Goals
-Replace the app's own copies of the shared components with the vendored ones, per [components.md](../../../support.webapp/docs/specs/components.md).
+Replace the app's own copies of the shared components with the vendored ones, per [components.md](../../../../support.webapp/docs/specs/components.md).
 They cover the live region, the offline indicator, the service worker update prompt, and any toast or dialog the app builds itself.
-Switch `css/style.css` to the public `looks/bright/index.css`, ending the direct import of private files ([ADR-0005](../../../support.webapp/docs/adrs/ADR-0005-distribution-and-versioning.md)).
+Switch `css/style.css` to the public `looks/bright/index.css`, ending the direct import of private files ([ADR-0005](../../../../support.webapp/docs/adrs/ADR-0005-distribution-and-versioning.md)).
 Keep app-local components, such as the forecast chart, in the app.
-Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires, with T0032's proof harness.
+Prove a lossless switch as [ADR-0007](../../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires, with T0032's proof harness.
 
 ## Task Execution Steps
 - [x] **[Read]**      Inventory the app's components against the vendored component list.

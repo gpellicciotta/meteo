@@ -7,8 +7,8 @@ Replace the app's shared components with the vendored ones and import the public
 
 ### Inputs
 - meteo at `7857b0d`, the task base, with support.webapp `0.1.0` vendored in `vendor/design/`.
-- [components.md](../../../../support.webapp/docs/specs/components.md) catalog and skeletons.
-- [ADR-0003](../../../../support.webapp/docs/adrs/ADR-0003-components-and-patterns.md) shared patterns: a new worker shows an Update toast.
+- [components.md](../../../../../support.webapp/docs/specs/components.md) catalog and skeletons.
+- [ADR-0003](../../../../../support.webapp/docs/adrs/ADR-0003-components-and-patterns.md) shared patterns: a new worker shows an Update toast.
 
 ### Component Inventory
 | meteo part                                    | Vendored counterpart                          | Outcome                                       |

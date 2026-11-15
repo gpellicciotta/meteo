@@ -26,7 +26,7 @@ completion-commit: b76671232c4f4bc18b52cdfef4d82b57091c2439
 
 ## Goals
 Compare meteo's light yellow and dark blue and red fills, interaction states, labels, links, focus, and grounds with the `bright` look.
-Use the AA adjustments of [ADR-0002](../../../support.webapp/docs/adrs/ADR-0002-looks.md) and the [bright look spec](../../../support.webapp/docs/specs/looks/bright.md).
+Use the AA adjustments of [ADR-0002](../../../../support.webapp/docs/adrs/ADR-0002-looks.md) and the [bright look spec](../../../../support.webapp/docs/specs/looks/bright.md).
 List every palette override meteo needs to keep its appearance, and every deliberate AA exception, such as white labels on yellow.
 Investigation only: the findings feed the vendoring task, which applies them.
 

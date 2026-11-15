@@ -28,7 +28,7 @@ completion-commit: c40e7e824b111b148c6853b1574569594333e957
 Move the inline icon definitions in `js/icons.js` to the vendored external icon sprite, as T0177 does in family-portal.
 Run the design system's recorded migration command, and keep every icon's size, stroke, and color unchanged.
 Keep weather-specific icons the sprite lacks in an app-local sprite file.
-Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires, with T0032's proof harness.
+Prove a lossless switch as [ADR-0007](../../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires, with T0032's proof harness.
 
 ## Task Execution Steps
 - [x] **[Read]**      Map each icon in `js/icons.js` to the vendored sprite or an app-local symbol.

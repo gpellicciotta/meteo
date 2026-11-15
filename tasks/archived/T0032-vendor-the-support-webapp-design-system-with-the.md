@@ -25,11 +25,11 @@ completion-commit: 33c5cc9e7655dc9371405ed557a51306dbb9c1e4
 # T0032: Vendor the support.webapp design system with the bright look and move the three screens into its shell.
 
 ## Goals
-Vendor the support.webapp release with the `bright` look, as [ADR-0005](../../../support.webapp/docs/adrs/ADR-0005-distribution-and-versioning.md) describes.
-Move the three screens into the shell with `app--scroll-page` and `app--width-narrow`, per [ADR-0004](../../../support.webapp/docs/adrs/ADR-0004-app-shell.md).
+Vendor the support.webapp release with the `bright` look, as [ADR-0005](../../../../support.webapp/docs/adrs/ADR-0005-distribution-and-versioning.md) describes.
+Move the three screens into the shell with `app--scroll-page` and `app--width-narrow`, per [ADR-0004](../../../../support.webapp/docs/adrs/ADR-0004-app-shell.md).
 Measure the main column against `--width-narrow` first, and propose a smaller width if needed.
 Gain reduced-motion handling and visible focus rings through the shared components, and apply the assessed palette overrides.
-Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires.
+Prove a lossless switch as [ADR-0007](../../../../support.webapp/docs/adrs/ADR-0007-documentation-and-verification.md) requires.
 
 ## Task Execution Steps
 - [x] **[Read]**      Read the named ADRs and the app at a recorded commit.
