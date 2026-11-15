@@ -4,15 +4,18 @@ owner: "@codex"
 needs: []
 branch: —
 worktree: —
-status: active
+status: completed
 started_at: "2026-11-15T08:11:47Z"
-ended_at: —
+ended_at: "2026-11-15T08:15:39Z"
 review: agent
 preview: none
 protocol: standard
-review_status: pending
+review_status: approved
 review_round: 1
 review_requested_at: "2026-11-15T08:14:15Z"
+reviewed_by: "@codex"
+review_session: codex-20261115-ae874d
+completion-commit: e362792db57a017b1972736e6bee524a1e2a3e60
 ---
 # T0040: Make devops.py lint use the venv's lint-markdown instead of a global copy from another support-python version
 
@@ -29,7 +32,7 @@ See technical-spec.md for the findings and the test plan.
 - [x] **[Implement]** Run lint-markdown through sys.executable -m in devops.py and drop the launcher lookup.
 - [x] **[Verify]**    Run the devops tests, devops lint, and devops test through the venv.
 - [x] **[Doc]**       Update both changelogs.
-- [ ] **[Review]**    Obtain review approval of the finished work before completion.
+- [x] **[Review]**    Obtain review approval of the finished work before completion.
 
 ## Execution Log
 - [2026-11-14] **[Doc]**
@@ -49,4 +52,11 @@ See technical-spec.md for the findings and the test plan.
 
 - [2026-11-15] **[Review]**
   Launched plan agents review T0040 --sandbox --agent codex. Reviewer PID 24832, execution session 80314; reviewed head e362792.
+
+- [2026-11-15] **[Review]**
+  Round 1 approved by @codex: Approved.
+  - Findings: [review-findings-1.md](T0040-make-devops-py-lint-use-the-venv-s/review-findings-1.md).
+
+- [2026-11-15] **[Complete]**
+  Task completed successfully.
 
