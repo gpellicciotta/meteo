@@ -448,14 +448,8 @@ class MeteoProject(NodeProject):
         return deploy_flow(self, dry_run=dry_run, push=False, skip_checks=skip_checks, logger=self.logger) == 0
 
     def _lint_markdown(self, action: str) -> bool:
-        from support_python.devops.steps import resolve_executable
-
-        executable = resolve_executable("lint-markdown")
-        if executable is None:
-            self.logger.error("lint-markdown not found; install scripts/requirements.txt into the venv.")
-            return False
         docs = [doc for doc in CORE_DOCS if (REPO_ROOT / doc).exists()]
-        return self.run_command([executable, action, "--offline", *docs])
+        return self.run_command([sys.executable, "-m", "support_python.tools.lint_markdown", action, "--offline", *docs])
 
 
 def deploy_flow(project: MeteoProject, *, dry_run: bool, push: bool, skip_checks: bool, logger: CliLogger) -> int:

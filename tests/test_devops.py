@@ -103,8 +103,25 @@ class TestDevopsAdapter(unittest.TestCase):
         with patch.object(self.project, "run_command", return_value=True) as run_cmd:
             self.assertTrue(self.project.lint())
         argv = run_cmd.call_args[0][0]
-        self.assertEqual(argv[1:3], ["check", "--offline"])
-        self.assertEqual([Path(a).as_posix() for a in argv[3:]], self.mod.CORE_DOCS)
+        self.assertEqual(argv[:5], [sys.executable, "-m", "support_python.tools.lint_markdown", "check", "--offline"])
+        self.assertEqual([Path(a).as_posix() for a in argv[5:]], self.mod.CORE_DOCS)
+
+    def test_format_uses_running_interpreter(self) -> None:
+        """Validates format uses the running interpreter's linter module."""
+        with patch.object(self.project, "run_command", return_value=True) as run_cmd:
+            self.assertTrue(self.project.format())
+        run_cmd.assert_called_once_with(
+            [sys.executable, "-m", "support_python.tools.lint_markdown", "fix", "--offline", *self.mod.CORE_DOCS]
+        )
+
+    def test_lint_never_resolves_a_path_launcher(self) -> None:
+        """Validates lint works when no launcher exists on PATH."""
+        with patch("support_python.devops.steps.resolve_executable", return_value=None) as resolve, patch.object(
+            self.project, "run_command", return_value=True
+        ) as run_cmd:
+            self.assertTrue(self.project.lint())
+        resolve.assert_not_called()
+        self.assertEqual(run_cmd.call_args[0][0][:3], [sys.executable, "-m", "support_python.tools.lint_markdown"])
 
     def test_lint_covers_docs_index_and_visual_style_guide(self) -> None:
         """Validates the docs index and the visual style guide are in the lint list."""
