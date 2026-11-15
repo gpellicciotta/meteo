@@ -11,7 +11,6 @@
   --color-wrong-bg: #fef2f2;
   --color-wrong-text: #b91c1c;
   --color-notice-bg: #fef3c7;
-  --color-notice-border: #fcd34d;
   --color-notice-text: #92400e;
 
   /* Rain Chart Colors, following the accent color */
@@ -152,7 +151,6 @@
   --color-wrong-bg: rgba(153, 27, 27, 0.28);
   --color-wrong-text: #f87171;
   --color-notice-bg: #451a03;
-  --color-notice-border: #78350f;
   --color-notice-text: #fde68a;
 
   --color-tooltip-bg: #0f172a;

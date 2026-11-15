@@ -23,6 +23,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 - DevEx: support.webapp 0.1.0 met de bright-look meegeleverd, vastgezet in [design.json](design.json) en gecontroleerd door `devops.py check`.
 - FrontEnd: Het root-attribuut `data-theme-color` hernoemd naar `data-accent`, het variantattribuut van de bright-look, zonder visuele wijziging.
 - DevEx: Een [visuele stijlgids](docs/specs/visual-style-guide.md) toegevoegd met elke kleuroverschrijving en AA-uitzondering, waaronder witte labels op geel.
+- FrontEnd: De gedeelde offlinebanner, toegankelijke updatemelding en publieke bright-stijlingang overgenomen.
 
 ## v1.2.0 [released: 2026-11-02]
 - DevEx: Geünificeerd [devops.py](scripts/devops.py) CLI-script toegevoegd voor tests, linting, review-server, service worker en implementatie.

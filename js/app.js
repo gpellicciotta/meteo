@@ -56,7 +56,7 @@ document.addEventListener("keydown", (e) => {
     openHelp();
     return;
   }
-  if (e.key !== "Escape") {
+  if (e.key !== "Escape" || e.defaultPrevented) {
     return;
   }
   if (currentScreen() === "config") {
@@ -152,7 +152,6 @@ window.addEventListener("resize", dismissOpenTooltips);
 window.addEventListener("orientationchange", dismissOpenTooltips);
 
 // ── Application startup ───────────────────────────────────────────────────────
-registerServiceWorker();
 syncInstallButtonState();
 setLang(detectLang())
   .then(() => {
@@ -168,4 +167,5 @@ setLang(detectLang())
     console.error(err);
     el.startError.textContent = "The interface texts could not be loaded. Please reload the page.";
     el.startError.classList.remove("hidden");
-  });
+  })
+  .finally(registerServiceWorker);

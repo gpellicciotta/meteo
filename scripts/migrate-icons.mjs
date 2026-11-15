@@ -1,7 +1,8 @@
 // Reproducible mechanical migration from the recorded pre-migration glyphs.
 import { readFileSync, writeFileSync } from "node:fs";
 
-const originals = JSON.parse(readFileSync("tests/fixtures/icon-geometry.json", "utf8"));
+const originals = Object.fromEntries(Object.entries(JSON.parse(readFileSync("tests/fixtures/icon-geometry.json", "utf8")))
+  .filter(([name]) => name !== "wifi"));
 const shared = new Set(["close", "search", "help", "settings"]);
 const local = Object.entries(originals).filter(([name]) => !shared.has(name));
 writeFileSync("assets/icons.svg", `<svg xmlns="http://www.w3.org/2000/svg">\n${local.map(([name, geometry]) =>

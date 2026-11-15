@@ -27,6 +27,8 @@ export const el = {
   configUnitWind: document.getElementById("config-unit-wind"),
   btnInstall: document.getElementById("btn-install"),
   offlineIndicator: document.getElementById("offline-indicator"),
+  toastRegion: document.querySelector(".app__overlays .toast-region"),
+  actionBar: document.querySelector(".app__action-bar"),
   btnAbout: document.getElementById("btn-about"),
   btnAboutBack: document.getElementById("btn-about-back"),
   aboutChangelogBody: document.getElementById("about-changelog-body"),

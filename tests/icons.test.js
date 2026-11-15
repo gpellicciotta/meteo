@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { createIcon } from "../js/icons.js";
 import originals from "./fixtures/icon-geometry.json";
 
-it.each(Object.keys(originals))("resolves %s to unchanged external geometry", (name) => {
+it.each(Object.keys(originals).filter((name) => name !== "wifi"))("resolves %s to unchanged external geometry", (name) => {
   const svg = createIcon(name);
   const use = svg.querySelector("use");
   expect(use).not.toBeNull();
@@ -34,4 +34,9 @@ it("precaches both sprite files", () => {
   const worker = readFileSync("sw.js", "utf8");
   expect(worker).toContain('"assets/icons.svg"');
   expect(worker).toContain('"vendor/design/looks/bright/icons.svg"');
+});
+
+it("removes the wifi icon replaced by the shared offline banner", () => {
+  expect(createIcon("wifi")).toBeNull();
+  expect(readFileSync("assets/icons.svg", "utf8")).not.toContain('id="icon-wifi"');
 });

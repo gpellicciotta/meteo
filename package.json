@@ -15,7 +15,7 @@
   },
   "scripts": {
     "test": "vitest run",
-    "test:browser": "node tests/shell-browser.mjs && node tests/forecast-browser.mjs"
+    "test:browser": "node tests/shell-browser.mjs && node tests/forecast-browser.mjs && node tests/update-browser.mjs"
   },
   "devDependencies": {
     "happy-dom": "^21.0.4",

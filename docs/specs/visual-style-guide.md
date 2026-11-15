@@ -10,10 +10,13 @@ Meteo reuses a shared design system and keeps only a few local colors and overri
 - Meteo uses [support.webapp](https://github.com/gpellicciotta/support.webapp) with its `bright` look.
 - [design.json](../../design.json) pins the version; the release is vendored in [vendor/design](../../vendor/design).
 - The look's own page is [bright.md](https://github.com/gpellicciotta/support.webapp/blob/main/docs/specs/looks/bright.md).
-- [style.css](../../css/style.css) imports the vendored layers, then [tokens.css](../../css/tokens.css).
+- [style.css](../../css/style.css) imports the public [index.css](../../vendor/design/looks/bright/index.css), then [tokens.css](../../css/tokens.css).
 - [tokens.css](../../css/tokens.css) holds meteo's own colors and its overrides of contract tokens.
   It is the only app stylesheet with raw colors.
 - Meteo has no gallery of its own yet; the shared gallery shows the look.
+- The offline indicator uses the shared warning banner and offline sprite icon.
+- Service worker updates use the shared persistent toast and polite live region; Update activates the worker and reloads.
+- App-generated icons retain their dimensions through `app-icon`; `icon` belongs to shared sprite icons.
 
 ## Accents
 - Users pick a blue, yellow, or red accent in Settings or with `?theme-color=`.

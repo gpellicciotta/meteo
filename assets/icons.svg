@@ -50,11 +50,6 @@
     <polyline points="7 10 12 15 17 10"></polyline>
     <line x1="12" y1="15" x2="12" y2="3"></line>
     </symbol>
-  <symbol id="icon-wifi" viewBox="0 0 24 24">
-    <path d="M5 12.55a11 11 0 0 1 14.08 0"></path>
-    <path d="M8.53 16.11a6 6 0 0 1 6.94 0"></path>
-    <line x1="12" y1="20" x2="12.01" y2="20"></line>
-    </symbol>
   <symbol id="icon-coffee" viewBox="0 0 24 24">
     <path d="M18 8h1a4 4 0 0 1 0 8h-1"></path>
     <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"></path>

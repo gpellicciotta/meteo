@@ -1,4 +1,7 @@
 import { el } from "./dom.js";
+import { t } from "./i18n.js";
+import { createToast } from "../vendor/design/js/toast.js";
+import { watchWorkerUpdates } from "../vendor/design/js/sw-update.js";
 
 export let deferredInstallPrompt = null;
 
@@ -68,12 +71,41 @@ window.addEventListener("offline", () => {
 const SW_UPDATE_CHECK_INTERVAL_MS = 60 * 1000;
 let serviceWorkerRegistrationStarted = false;
 
+// Read when a toast shows, so the texts follow the language chosen by then.
+const UPDATE_MESSAGES = {
+  get ready() {
+    return t("pwa.update_ready");
+  },
+  get action() {
+    return t("pwa.update_action");
+  },
+  get reload() {
+    return t("pwa.update_reload");
+  },
+};
+
 /**
- * Register the service worker and keep it up to date.
+ * Keep --action-bar-size on the body equal to the action bar's height, so toasts stay above it.
  *
- * Registration happens at most once. Once a replacement worker takes control the
- * page reloads so open tabs pick up the new assets, and updates are polled
- * periodically as well as on online, focus, pageshow and visibility events.
+ * The shell offsets toasts by its standard bar size, but the start screen's bar is taller.
+ *
+ * @returns {void}
+ */
+function trackActionBarSize() {
+  if (!el.actionBar || typeof ResizeObserver !== "function") {
+    return;
+  }
+  new ResizeObserver(() => {
+    document.body.style.setProperty("--action-bar-size", `${el.actionBar.offsetHeight}px`);
+  }).observe(el.actionBar);
+}
+
+/**
+ * Register the service worker, offer each new version in an Update toast, and keep checking for one.
+ *
+ * Registration happens at most once. The vendored update watcher shows a persistent toast once a new
+ * worker waits; Update activates it and reloads this tab once it takes control (support.webapp ADR-0003).
+ * Updates are polled periodically as well as on online, focus, pageshow and visibility events.
  *
  * @returns {Promise<void>|undefined} Resolves once registration finished, or undefined
  *          when service workers are unsupported or registration already started.
@@ -84,38 +116,31 @@ export function registerServiceWorker() {
   }
   serviceWorkerRegistrationStarted = true;
 
-  // Reload once the new worker takes control, so open tabs (installed PWA
-  // included) pick up the updated assets without a manual close/reopen.
-  let refreshingAfterUpdate = false;
-  let hadController = Boolean(navigator.serviceWorker.controller);
-  navigator.serviceWorker.addEventListener("controllerchange", () => {
-    // The first installation needs no reload; subsequent replacements do.
-    if (!hadController) {
-      hadController = Boolean(navigator.serviceWorker.controller);
-      return;
-    }
-    if (refreshingAfterUpdate) {
-      return;
-    }
-    refreshingAfterUpdate = true;
-    window.location.reload();
-  });
-
+  trackActionBarSize();
   // Startup may run after window.load, so register without waiting for it.
-  return navigator.serviceWorker
-      .register("./sw.js", { updateViaCache: "none" })
+  const sharedToaster = createToast({ region: el.toastRegion });
+  // Tag app-owned update messages so their existing nodes follow language changes.
+  const toaster = {
+    show(message, settings) {
+      const dismiss = sharedToaster.show(message, settings);
+      const toast = el.toastRegion.lastElementChild;
+      toast.querySelector(".toast__text").dataset.i18n = "pwa.update_ready";
+      toast.querySelector("button").dataset.i18n = settings.actionLabel === t("pwa.update_reload")
+        ? "pwa.update_reload" : "pwa.update_action";
+      return dismiss;
+    },
+  };
+  document.addEventListener("languagechange", () => {
+    for (const node of el.toastRegion.querySelectorAll("[data-i18n]")) {
+      node.textContent = t(node.dataset.i18n);
+    }
+  });
+  return watchWorkerUpdates({ script: "./sw.js", toaster, messages: UPDATE_MESSAGES })
+      .then(() => navigator.serviceWorker.getRegistration())
       .then((reg) => {
-        reg.addEventListener("updatefound", () => {
-          const worker = reg.installing;
-          if (worker) {
-            worker.addEventListener("statechange", () => {
-              if (worker.state === "installed" && navigator.serviceWorker.controller) {
-                console.info("New version of Meteo available, activating automatically.");
-              }
-            });
-          }
-        });
-
+        if (!reg) {
+          return;
+        }
         let checking = false;
         /**
          * Ask the browser for a newer service worker, skipping needless checks.

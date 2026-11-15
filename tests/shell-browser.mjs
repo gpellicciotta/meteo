@@ -3,7 +3,7 @@
 import { captureViews, check, launchBrowser, startStaticServer } from "./browser-harness.mjs";
 
 const server = await startStaticServer();
-const { browser, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
+const { browser, context, page, problems } = await launchBrowser({ viewport: { width: 1280, height: 800 } });
 let failed = false;
 
 try {
@@ -75,6 +75,19 @@ try {
   check((await page.getAttribute("html", "data-theme")) === "light", "F1 in Settings reverts the unsaved theme preview");
   await page.keyboard.press("Escape");
   check(await page.isVisible("#screen-start"), "Escape returns to the start view after F1");
+
+  await context.setOffline(true);
+  await page.waitForSelector("#offline-indicator.banner:not([hidden])");
+  const banner = await page.evaluate(() => ({
+    text: getComputedStyle(document.querySelector("#offline-indicator .banner__text")).color,
+    body: getComputedStyle(document.body).color,
+    icon: document.querySelector("#offline-indicator > svg.icon").getBoundingClientRect().width,
+  }));
+  check(banner.text === banner.body, `the offline banner text keeps the text color, not the app's muted paragraphs (${banner.text})`);
+  check(banner.icon > 0, "the offline banner draws its sprite icon");
+  await context.setOffline(false);
+  await page.waitForSelector("#offline-indicator[hidden]", { state: "attached" });
+  check(true, "the offline banner hides once the browser is back online");
 
   check(problems.length === 0, `no console, page or network errors${problems.length ? `:\n${problems.join("\n")}` : ""}`);
 }

@@ -46,6 +46,9 @@ JS_DIR = REPO_ROOT / "js"
 SW_PATH = REPO_ROOT / "sw.js"
 CSS_ENTRY = "css/style.css"
 CSS_IMPORT = re.compile(r"""@import\s+url\(\s*["']?([^"')]+)["']?\s*\)""")
+VENDOR_DIR = "vendor/design"
+MODULE_IMPORT = re.compile(r"""^\s*(?:import|export)\s[^;]*?from\s+["'](\.{1,2}/[^"']+)["']""", re.MULTILINE)
+VENDORED_REFERENCE = re.compile(r"""(?:href|src)="(vendor/design/[^"#?]+)""")
 
 
 def stylesheet_assets(entry: str = CSS_ENTRY) -> list[str]:
@@ -63,6 +66,28 @@ def stylesheet_assets(entry: str = CSS_ENTRY) -> list[str]:
     return assets
 
 
+def vendored_module_assets(modules: list[str]) -> list[str]:
+    """Lists the vendored modules the app modules import, recursively, in import order."""
+    assets: list[str] = []
+
+    def visit(rel: str) -> None:
+        for target in MODULE_IMPORT.findall((REPO_ROOT / rel).read_text(encoding="utf-8")):
+            path = posixpath.normpath(posixpath.join(posixpath.dirname(rel), target))
+            if path.startswith(f"{VENDOR_DIR}/") and path not in assets:
+                assets.append(path)
+                visit(path)
+
+    for module in modules:
+        visit(module)
+    return assets
+
+
+def vendored_page_assets() -> list[str]:
+    """Lists the vendored files index.html references directly, such as the look's icon sprite."""
+    html = (REPO_ROOT / "index.html").read_text(encoding="utf-8")
+    return list(dict.fromkeys(VENDORED_REFERENCE.findall(html)))
+
+
 def build_sw_content(version: str) -> tuple[str, int]:
     """Generates the full sw.js content with dynamic version cache name and asset paths."""
     js_modules = sorted([f"js/{f}" for f in os.listdir(JS_DIR) if f.endswith(".js")]) if JS_DIR.exists() else []
@@ -77,9 +102,10 @@ def build_sw_content(version: str) -> tuple[str, int]:
         "index.html",
         "manifest.webmanifest",
         *stylesheet_assets(),
+        *vendored_page_assets(),
         *js_modules,
         "assets/icons.svg",
-        "vendor/design/looks/bright/icons.svg",
+        *vendored_module_assets(js_modules),
         *data_files,
         "CHANGELOG.md",
         *translated_changelogs,
@@ -113,6 +139,8 @@ const PRECACHE_ASSETS = [
 /**
  * Install: precache all core application assets.
  *
+ * A new version then waits until the page's Update toast asks it to take over.
+ *
  * @param {{ExtendableEvent}} event - Install event whose lifetime covers the precaching.
  * @returns {{void}}
  */
@@ -123,8 +151,19 @@ self.addEventListener("install", (event) => {{
       .then((cache) => cache.addAll(
         PRECACHE_ASSETS.map((asset) => new Request(asset, {{ cache: "reload" }}))
       ))
-      .then(() => self.skipWaiting())
   );
+}});
+
+/**
+ * Message: activate this waiting version when the page's Update toast asks for it.
+ *
+ * @param {{ExtendableMessageEvent}} event - Message from a controlled page.
+ * @returns {{void}}
+ */
+self.addEventListener("message", (event) => {{
+  if (event.data?.type === "skip-waiting") {{
+    self.skipWaiting();
+  }}
 }});
 
 /**

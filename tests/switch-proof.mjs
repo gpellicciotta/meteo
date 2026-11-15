@@ -11,29 +11,37 @@ const ACCENTS = ["blue", "yellow", "red"];
 const PROPERTIES = [
   "color", "background-color", "border-top-color", "border-top-width", "border-radius",
   "font-size", "font-weight", "text-align", "padding-top", "padding-right", "padding-bottom", "padding-left",
-  "width", "height", "box-shadow", "outline-style", "transition-duration",
+  "width", "height", "box-shadow", "outline-style", "transition-duration", "stroke-width",
 ];
 
-// Key elements of each main page, as the proof's computed-style snapshot.
+// Key elements of each main page, as the proof's computed-style snapshot; `offline` drops the connection after loading.
 const PAGES = {
   start: {
     query: "",
-    selectors: ["body", "#start-title", "#start-desc", "#location-input", "#btn-search", "#btn-current-location", "#btn-config", ".start-copyright"],
+    selectors: ["body", "#start-title", "#start-desc", "#location-input", "#btn-search", "#btn-current-location", "#btn-config", ".start-copyright",
+      "#btn-current-location svg", "#btn-config svg", "#btn-about svg"],
   },
   forecast: {
     query: "&location=Brussel",
     ready: "#forecast:not(.hidden)",
-    selectors: ["#forecast-summary", ".forecast-card", ".forecast-bar", ".forecast-temp", "#forecast-place", "#btn-change-place"],
+    selectors: ["#forecast-summary", ".forecast-card", ".forecast-bar", ".forecast-temp", "#forecast-place", "#btn-change-place",
+      "#btn-change-place svg", ".forecast-condition", ".forecast-sky-icon", ".forecast-wind-arrow"],
   },
   about: {
     query: "&view=about",
     ready: "#about-changelog-body .changelog-version-title",
     selectors: [".about-title", "#btn-about-back", ".about-guide-card", ".about-section-heading", ".guide-badge", ".about-icon-badge",
-      ".about-source-link", ".about-support-link", ".about-version-tag", ".about-copyright"],
+      ".about-source-link", ".about-support-link", ".about-version-tag", ".about-copyright",
+      "#btn-about-back svg", ".about-icon-badge svg", ".guide-icon-svg svg", ".about-source-link svg", ".about-support-link .support-icon svg"],
   },
   config: {
     query: "&config=1",
     selectors: ["#config-title", "#btn-config-close", ".config-section", ".config-section-title", ".config-select", ".config-checkbox", "#btn-config-save"],
+  },
+  offline: {
+    query: "",
+    offline: true,
+    selectors: ["#offline-indicator", "#offline-indicator svg", "#start-desc"],
   },
 };
 
@@ -113,6 +121,10 @@ async function capture(root, out) {
               if (spec.ready) {
                 await page.waitForSelector(spec.ready);
               }
+              if (spec.offline) {
+                await context.setOffline(true);
+                await page.waitForSelector("#offline-indicator:not([hidden])");
+              }
               await page.addStyleTag({ content: "*, *::before, *::after { transition: none !important; animation: none !important; }" });
               const key = `${name}-${width}-${theme}-${accent}`;
               if (accent === "blue") {
@@ -125,6 +137,9 @@ async function capture(root, out) {
                 }
               }
               styles[key] = await snapshot(page, spec.selectors);
+              if (spec.offline) {
+                await context.setOffline(false);
+              }
               console.log(`captured ${key}`);
             }
             await page.evaluate(async () => {

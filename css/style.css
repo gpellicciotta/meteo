@@ -1,13 +1,9 @@
 /* ==========================================================================
    Meteo styles on the support.webapp design system, vendored in vendor/design/.
-   Until T0034 switches to the public bright entry point, the app imports the private
-   shared layers it needs: tokens and motion, reset and focus ring, the app shell, and the bright look.
+   The public bright entry point brings the tokens, reset and focus ring, the shared components,
+   the app shell, and the bright look; app-local parts, such as the forecast chart, follow.
    ========================================================================== */
-@import url('../vendor/design/css/base.css');
-@import url('../vendor/design/css/reset.css');
-@import url('../vendor/design/css/shell.css');
-@import url('../vendor/design/looks/bright/primitives.css');
-@import url('../vendor/design/looks/bright/look.css');
+@import url('../vendor/design/looks/bright/index.css');
 @import url('tokens.css');
 /* ==========================================================================
    2. Reset & Base Styles
@@ -46,6 +42,11 @@ body {
   pointer-events: none;
 }
 
+/* Toasts clear the action bar, which grows past the shell's bar size; pwa.js measures it. */
+.app .toast-region {
+  inset-block-end: calc(var(--space-4) + var(--action-bar-size, var(--target-min)));
+}
+
 /* Action bar groups: one per screen, filling the bar. */
 .screen-actions {
   flex: 1 1 100%;
@@ -64,7 +65,8 @@ h2 {
   color: var(--color-primary);
 }
 
-p {
+/* Paragraphs and buttons of the app's own areas; shared components in the banners and overlays keep their own. */
+:where(.app__main, .app__action-bar) p {
   color: var(--color-muted);
   margin: 0 0 16px 0;
 }
@@ -121,32 +123,11 @@ input[type="text"]:focus {
   color: var(--color-wrong);
 }
 
-/* Offline Indicator */
-.offline-indicator {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  background: var(--color-notice-bg);
-  border: 1px solid var(--color-notice-border);
-  color: var(--color-notice-text);
-  font-size: var(--font-size-sm);
-  font-weight: 500;
-  padding: 10px 14px;
-  border-radius: var(--radius);
-  text-align: center;
-}
-
-.offline-icon {
-  font-size: var(--font-size-md);
-  flex-shrink: 0;
-}
-
 /* ==========================================================================
    4. Buttons & Interactive Controls
    ========================================================================== */
 
-button {
+:where(.app__top-bar, .app__main, .app__action-bar) button {
   font-family: inherit;
   font-size: var(--font-size-base);
   border: none;
@@ -519,7 +500,8 @@ body.suppress-tooltips [data-tooltip]::before {
   box-shadow: 0 4px 10px var(--color-primary-shadow-hover);
 }
 
-.icon {
+/* The app's own icons, sized by their SVG attributes; the vendored icon class sizes sprite icons only. */
+.app-icon {
   display: block;
   flex-shrink: 0;
 }

@@ -40,7 +40,8 @@ function rules(css) {
  * @returns {string[][]} Trimmed cells of each row, without the header and separator rows.
  */
 function tableRows(text, heading) {
-  const section = text.split(/^## /m).find((part) => part.startsWith(`${heading}\n`)) ?? "";
+  // Checkouts with core.autocrlf have CRLF line ends.
+  const section = text.replace(/\r\n/g, "\n").split(/^## /m).find((part) => part.startsWith(`${heading}\n`)) ?? "";
   const rows = section.split("\n").filter((line) => line.startsWith("|")).map((line) => line.slice(1, -1).split("|").map((cell) => cell.trim()));
   return rows.filter((cells) => !cells.every((cell) => /^:?-+:?$/.test(cell))).slice(1);
 }

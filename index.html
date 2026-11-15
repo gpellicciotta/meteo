@@ -56,9 +56,9 @@
 </header>
 
 <div class="app__banners">
-  <div id="offline-indicator" class="offline-indicator" role="status" aria-live="polite" hidden>
-    <span class="offline-icon" data-icon="wifi" aria-hidden="true"></span>
-    <span data-i18n="start.offline">Offline: the forecast cannot be refreshed</span>
+  <div id="offline-indicator" class="banner banner--warning" role="status" hidden>
+    <svg class="icon" aria-hidden="true" focusable="false"><use href="vendor/design/looks/bright/icons.svg#icon-sync-offline"/></svg>
+    <p class="banner__text" data-i18n="start.offline">Offline: the forecast cannot be refreshed</p>
   </div>
 </div>
 

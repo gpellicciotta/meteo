@@ -48,7 +48,9 @@ const contractTokens = new Set(JSON.parse(read("vendor/design/contract.json")).t
 const html = read("index.html");
 const scripts = readdirSync(join(ROOT, "js")).filter((f) => f !== "icons.js").map((f) => read(`js/${f}`)).join("\n");
 // Element ids share names with classes, so id lookups do not count as class usage.
-const classScripts = scripts.replace(/getElementById\("[^"]*"\)/g, "");
+// icons.js stays out for its path data, apart from the classes createIcon gives every icon.
+const iconClasses = read("js/icons.js").match(/const classNames = \[([^\]]*)\]/)[1];
+const classScripts = `${scripts.replace(/getElementById\("[^"]*"\)/g, "")}\n${iconClasses}`;
 const iconNames = [...read("js/icons.js").matchAll(/^ {2}"([A-Za-z-]+)": "/gm)].map((m) => m[1]);
 const cssClasses = [...new Set([...css.matchAll(/\.([a-zA-Z_][\w-]*)/g)].map((m) => m[1]))].filter((c) => !/^\d+$/.test(c));
 const markupClasses = new Set([...html.matchAll(/class="([^"]*)"/g)].flatMap((m) => m[1].split(/\s+/)));

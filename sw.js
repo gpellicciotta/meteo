@@ -1,17 +1,57 @@
 // Service Worker for the Meteo PWA
-const CACHE_NAME = "meteo-v1.3.0-pre-89239308970abb45";
+const CACHE_NAME = "meteo-v1.3.0-pre-c721e67b8de448bd";
 
 const PRECACHE_ASSETS = [
   "./",
   "index.html",
   "manifest.webmanifest",
   "css/style.css",
+  "vendor/design/looks/bright/index.css",
+  "vendor/design/css/style.css",
   "vendor/design/css/base.css",
   "vendor/design/css/reset.css",
+  "vendor/design/css/deprecated.css",
+  "vendor/design/css/components/icon.css",
+  "vendor/design/css/components/button.css",
+  "vendor/design/css/components/icon-button.css",
+  "vendor/design/css/components/fab.css",
+  "vendor/design/css/components/link-button.css",
+  "vendor/design/css/components/chip.css",
+  "vendor/design/css/components/badge.css",
+  "vendor/design/css/components/segmented.css",
+  "vendor/design/css/components/field.css",
+  "vendor/design/css/components/checkbox.css",
+  "vendor/design/css/components/switch.css",
+  "vendor/design/css/components/radio.css",
+  "vendor/design/css/components/field-group.css",
+  "vendor/design/css/components/form.css",
+  "vendor/design/css/components/error-summary.css",
+  "vendor/design/css/components/banner.css",
+  "vendor/design/css/components/empty-state.css",
+  "vendor/design/css/components/loading.css",
+  "vendor/design/css/components/progress.css",
+  "vendor/design/css/components/spinner.css",
+  "vendor/design/css/components/row.css",
+  "vendor/design/css/components/list.css",
+  "vendor/design/css/components/selection.css",
+  "vendor/design/css/components/table.css",
+  "vendor/design/css/components/card.css",
+  "vendor/design/css/components/icon-tile.css",
+  "vendor/design/css/components/collapsible.css",
+  "vendor/design/css/components/tabs.css",
+  "vendor/design/css/components/avatar.css",
+  "vendor/design/css/components/dialog.css",
+  "vendor/design/css/components/inline-confirm.css",
+  "vendor/design/css/components/menu.css",
+  "vendor/design/css/components/popover.css",
+  "vendor/design/css/components/tooltip.css",
+  "vendor/design/css/components/account-menu.css",
+  "vendor/design/css/components/toast.css",
   "vendor/design/css/shell.css",
   "vendor/design/looks/bright/primitives.css",
   "vendor/design/looks/bright/look.css",
   "css/tokens.css",
+  "vendor/design/looks/bright/icons.svg",
   "js/app.js",
   "js/changelog.js",
   "js/config-view.js",
@@ -31,7 +71,9 @@ const PRECACHE_ASSETS = [
   "js/units.js",
   "js/weather-api.js",
   "assets/icons.svg",
-  "vendor/design/looks/bright/icons.svg",
+  "vendor/design/js/toast.js",
+  "vendor/design/js/live-region.js",
+  "vendor/design/js/sw-update.js",
   "data/strings.en.json",
   "data/strings.nl.json",
   "CHANGELOG.md",
@@ -48,6 +90,8 @@ const PRECACHE_ASSETS = [
 /**
  * Install: precache all core application assets.
  *
+ * A new version then waits until the page's Update toast asks it to take over.
+ *
  * @param {ExtendableEvent} event - Install event whose lifetime covers the precaching.
  * @returns {void}
  */
@@ -58,8 +102,19 @@ self.addEventListener("install", (event) => {
       .then((cache) => cache.addAll(
         PRECACHE_ASSETS.map((asset) => new Request(asset, { cache: "reload" }))
       ))
-      .then(() => self.skipWaiting())
   );
+});
+
+/**
+ * Message: activate this waiting version when the page's Update toast asks for it.
+ *
+ * @param {ExtendableMessageEvent} event - Message from a controlled page.
+ * @returns {void}
+ */
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "skip-waiting") {
+    self.skipWaiting();
+  }
 });
 
 /**

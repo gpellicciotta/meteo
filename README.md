@@ -33,6 +33,8 @@ Use it at [apps.pellicciotta.com/meteo](https://apps.pellicciotta.com/meteo/).
 - The chart always starts at the current hour, also when the app resumes offline.
 - A saved forecast keeps its original update time.
 - With fewer than 6 hours left, the saved forecast gives way to the network error.
+- An offline banner appears while the browser has no connection.
+- When an update is ready, choose Update in the notification to install it and reload this tab.
 
 The browser fetches the weather and place search data directly from the free [Open-Meteo](https://open-meteo.com/) APIs:
 - [Forecast API](https://open-meteo.com/en/docs) for hourly temperature, precipitation, rain probability, wind speed, gusts and direction, weather codes and daylight.
@@ -61,6 +63,7 @@ npm install
 npm test                       # Vitest unit tests
 node tests/shell-browser.mjs   # Playwright browser check of the app shell
 node tests/forecast-browser.mjs  # Playwright browser check of the forecast, with mocked API answers
+node tests/update-browser.mjs    # Real service worker installation and update flow
 ```
 
 Set `SCREENSHOT_DIR` to save desktop and mobile screenshots in light and dark mode during browser checks.
@@ -107,6 +110,9 @@ python scripts/devops.py sw
 The app uses the [support.webapp](https://github.com/gpellicciotta/support.webapp) design system with its `bright` look.
 A pinned release is vendored in [vendor/design](vendor/design); [design.json](design.json) records its version and look.
 Never edit vendored files: the vendored check fails on any changed, missing, or extra file.
+The stylesheet imports the public [index.css](vendor/design/looks/bright/index.css) entry point before app tokens and styles.
+The offline banner, update toast, and polite live region use the vendored components.
+App-generated icons use `app-icon` to avoid collisions with the shared sprite's `icon` class.
 
 ```bash
 node vendor/design/bin/check.mjs   # copy integrity and app style conformance

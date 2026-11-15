@@ -16,7 +16,6 @@ const ICON_REFS = {
   "help": "vendor/design/looks/bright/icons.svg#icon-help",
   "settings": "vendor/design/looks/bright/icons.svg#icon-settings",
   "install": "assets/icons.svg#icon-install",
-  "wifi": "assets/icons.svg#icon-wifi",
   "coffee": "assets/icons.svg#icon-coffee",
   "creditcard": "assets/icons.svg#icon-creditcard",
   "paypal": "assets/icons.svg#icon-paypal",
@@ -46,7 +45,8 @@ export function createIcon(name, options = {}) {
   }
 
   const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-  const classNames = ["icon", `icon-${name}`];
+  // Not the vendored "icon" class: its CSS size and stroke would override the attributes below.
+  const classNames = ["app-icon", `icon-${name}`];
   if (options.className) classNames.push(options.className);
 
   svg.setAttribute("class", classNames.filter(Boolean).join(" "));
