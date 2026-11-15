@@ -84,3 +84,10 @@ Importing the public entry without renaming the icon class resizes every icon, a
 - Integration: `npm run test:browser` and the switch proof: no icon, layout, or color change outside the listed deliberate ones.
 
 Completion check: `python scripts/devops.py check`, `node ./vendor/design/bin/check.mjs`, and `npm run test:browser`, all exit code 0.
+
+### Review rework
+- Register the worker after startup translations settle, including failure, and translate visible update actions on language changes.
+- Respect consumed Escape events so dismissing a toast keeps Settings and About open.
+- Remove the unused Wi-Fi symbol from the local sprite and migration input selection.
+- Added declared files: js/app.js, assets/icons.svg, scripts/migrate-icons.mjs.
+- Regression coverage: delayed startup strings with an already-waiting worker, live language changes, and Escape on Settings/About.

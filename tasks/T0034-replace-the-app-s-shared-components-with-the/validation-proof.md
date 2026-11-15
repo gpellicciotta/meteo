@@ -463,3 +463,170 @@ Process ID: 45784
     Isolate  9 workers spawned · ~1.62s startup each (spawn + environment, per file)
              at least ~463ms faster with isolate: false — reuses workers across files instead of one per file
 ```
+
+## Round 1 rework verification
+
+Command: `npm test -- tests/pwa.test.js tests/icons.test.js`; exit code 1.
+
+```text
+[... 98 lines omitted ...]
++
+
+ ❯ tests/icons.test.js:41:56
+     39| it("removes the wifi icon replaced by the shared offline banner", () =…
+     40|   expect(createIcon("wifi")).toBeNull();
+     41|   expect(readFileSync("assets/icons.svg", "utf8")).not.toContain('id="…
+       |                                                        ^
+     42| });
+     43|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/3]⎯
+
+ FAIL  tests/pwa.test.js > service worker update toast > updates an open toast on language changes, reload=false
+ FAIL  tests/pwa.test.js > service worker update toast > updates an open toast on language changes, reload=true
+AssertionError: expected 't:pwa.update_ready' to be 'nl:pwa.update_ready' // Object.is equality
+
+Expected: "nl:pwa.update_ready"
+Received: "t:pwa.update_ready"
+
+ ❯ tests/pwa.test.js:88:64
+     86|     document.dispatchEvent(new CustomEvent("languagechange"));
+     87|     expect(document.querySelector(".toast__text").textContent).toBe("n…
+     88|     expect(document.querySelector(".toast button").textContent).toBe(`…
+       |                                                                ^
+     89|     expect(document.querySelectorAll(".toast")).toHaveLength(1);
+     90|   });
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/3]⎯
+
+
+ Test Files  2 failed (2)
+      Tests  3 failed | 31 passed (34)
+   Start at  09:06:07
+   Duration  1.54s (environment 75%, tests 17%, transform 6%, import 2%, worker 1%)
+
+```
+
+Command: `node tests/update-browser.mjs`; exit code 1.
+
+```text
+ok - the first install precaches every asset and controls the page
+ok - the first install shows no Update toast
+ok - the changed worker installs and waits instead of taking over
+ok - the Update toast shows the English ready text
+ok - the Update toast offers the Update action
+node:internal/modules/run_main:122
+    triggerUncaughtException(
+    ^
+
+page.waitForFunction: Timeout 30000ms exceeded.
+    at C:\Dev-Projects\meteo\.plan\work\T0034-replace-the-app-s-shared-components-with-the\tests\update-browser.mjs:54:14 {
+  log: [],
+  name: 'TimeoutError'
+}
+
+Node.js v22.14.0
+```
+
+Command: `npm test`; exit code 0.
+
+```text
+
+> meteo@1.3.0-pre test
+> vitest run
+
+
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+
+
+ Test Files  9 passed (9)
+      Tests  214 passed (214)
+   Start at  09:07:19
+   Duration  2.49s (environment 76%, tests 18%, import 4%, worker 1%, transform 1%)
+
+    Isolate  9 workers spawned · ~1.15s startup each (spawn + environment, per file)
+             at least ~328ms faster with isolate: false — reuses workers across files instead of one per file
+
+```
+
+Command: `python scripts/devops.py check`; exit code 0.
+
+```text
+[... 10 lines omitted ...]
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'package.json', LF will be replaced by CRLF the next time Git touches it
+.warning: in the working copy of 'CHANGELOG.md', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'CHANGELOG.nl.md', LF will be replaced by CRLF the next time Git touches it
+.................
+----------------------------------------------------------------------
+Ran 46 tests in 25.618s
+OK
+Command: "C:\Program Files\nodejs\npm.CMD" test
+Process ID: 39696
+> meteo@1.3.0-pre test
+> vitest run
+ RUN  v5.0.5 C:/Dev-Projects/meteo/.plan/work/T0034-replace-the-app-s-shared-components-with-the
+ Test Files  9 passed (9)
+      Tests  214 passed (214)
+   Start at  09:08:01
+   Duration  2.84s (environment 81%, tests 13%, import 3%, worker 1%, transform 1%)
+    Isolate  9 workers spawned · ~1.39s startup each (spawn + environment, per file)
+             at least ~396ms faster with isolate: false — reuses workers across files instead of one per file
+```
+
+Command: `npm run test:browser`; exit code 0.
+
+```text
+[... 399 lines omitted ...]
+ok - hovering section 7 highlights its list item
+ok - hovering a temperature highlights all twelve temperatures (12)
+ok - hovering section 8 explains Wind in a tooltip inside the sample (8. Wind Wind speed 10 m above the ground)
+ok - hovering section 8 highlights its list item
+ok - hovering section 9 explains Place in a tooltip inside the sample (9. Place The searched place, or your cur)
+ok - hovering section 9 highlights its list item
+ok - hovering section 10 explains Update time in a tooltip inside the sample (10. Update time When the forecast was fe)
+ok - hovering section 10 highlights its list item
+ok - hovering badge 6 shows the sky explanation
+ok - the sky tooltip shows the nine weather icons
+ok - leaving the sample hides the tooltip and highlights
+ok - no guide hover console, page or network errors
+ok - a touch phone shows no hover tooltip or highlight in the guide
+ok - no touch guide console, page or network errors
+ok - the first install precaches every asset and controls the page
+ok - the first install shows no Update toast
+ok - the changed worker installs and waits instead of taking over
+ok - the Update toast shows the English ready text
+ok - the Update toast offers the Update action
+ok - an open Update toast follows the selected language
+ok - a waiting worker offers no toast before startup translations settle
+ok - an already-waiting worker uses the loaded startup language
+ok - Escape dismisses the focused toast on config
+ok - Escape keeps config open when the toast consumes it
+ok - a waiting worker offers no toast before startup translations settle
+ok - an already-waiting worker uses the loaded startup language
+ok - Escape dismisses the focused toast on about
+ok - Escape keeps about open when the toast consumes it
+ok - the Update toast stays above the taller start action bar
+ok - the toast text keeps the text color, not the app's muted paragraphs (rgb(31, 41, 51))
+ok - the Update toast stays past the 8 second expiry of ordinary toasts
+ok - Update activates the waiting worker and reloads under it
+ok - the new worker removes the old cache
+ok - the reloaded page shows no Update toast
+ok - no console, page or network errors
+```

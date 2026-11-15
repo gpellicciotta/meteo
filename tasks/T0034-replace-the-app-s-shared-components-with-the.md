@@ -6,7 +6,7 @@ needs: []
 branch: task/T0034-replace-the-app-s-shared-components-with-the
 worktree: .plan/work/T0034-replace-the-app-s-shared-components-with-the
 status: active
-started_at: "2026-11-14T09:27:40Z"
+started_at: "2026-11-15T08:05:30Z"
 ended_at: —
 review: agent
 preview: none
@@ -16,12 +16,14 @@ usage:
 work_duration: 3589.2
 contributors: "@claude"
 size_status: approved
-size_approved: 19 files, 420 lines
+size_approved: 23 files, 650 lines
 size_approved_by: "@giova"
-size_approved_at: "2026-11-14T09:10:37Z"
+size_approved_at: "2026-11-15T08:05:42Z"
 review_status: pending
-review_round: 1
-review_requested_at: "2026-11-14T23:24:22Z"
+review_round: 2
+review_requested_at: "2026-11-15T08:10:05Z"
+review_session: antigravity-20261115-b56daa
+size_estimate: 23 files, 650 lines
 ---
 # T0034: Replace the app's shared components with the vendored ones and import the public bright look entry point
 
@@ -94,4 +96,27 @@ Prove a lossless switch as [ADR-0007](../../../support.webapp/docs/adrs/ADR-0007
 
 - [2026-11-15] **[Review]**
   Launched independent review round 1 with plan agents review T0034 --sandbox. Parent PID 22460; reviewer PID 44972. Execution session 88444. Rebased task head is 3cff0a8.
+
+- [2026-11-15] **[Review]**
+  Round 1 rejected by @gemini: Rejected due to two behavioral defects in the adopted toast integration and one leftover sprite symbol from rebasing onto T0035.
+  - Findings: [review-findings-1.md](T0034-replace-the-app-s-shared-components-with-the/review-findings-1.md).
+
+- [2026-11-15] **[Size]**
+  Size approval requested for 23 files, 650 lines.
+  - Excluded from size: sw.js (mechanical).
+
+- [2026-11-15] **[Size]**
+  Size approved by @giova for 23 files, 650 lines.
+
+- [2026-11-15] **[Implement]**
+  Addressed round 1 findings with startup ordering, live toast translations, consumed Escape handling, and unused sprite removal. Added unit and browser regressions. Running python scripts/devops.py check (session 33686) and npm run test:browser (session 33284).
+
+- [2026-11-15] **[Verify]**
+  Round 1 rework passes the full check and complete browser suite, including startup language, live translation, and Escape regressions. Recorded red and green evidence. Outcomes: 22 counted files, 388 changed lines, zero reopenings.
+
+- [2026-11-15] **[Review]**
+  Round 2 requested (mode: agent).
+
+- [2026-11-15] **[Review]**
+  Requested round 2 through plan agents review T0034 --sandbox --agent codex. Reviewer PID 2144, execution session 28820; reviewed head 5f058bc. Scope remains within the approved 23 files and 650 lines.
 
