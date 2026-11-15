@@ -167,20 +167,20 @@
   --color-badge-teal-text: #5eead4;
 }
 
-/* Dark Theme + Blue (default); meteo's #2563eb fill with white labels, a deliberate exception */
+/* Dark Theme + Blue (default), using bright's accessible fills and dark labels */
 :root[data-theme="dark"][data-accent="blue"],
 :root[data-theme="dark"]:not([data-accent="yellow"]):not([data-accent="red"]) {
-  --color-primary: #2563eb;
-  --color-primary-dark: #1d4ed8;
+  --color-primary: #60a5fa;
+  --color-primary-dark: #93c5fd;
   --color-primary-tint: #172554;
   --color-primary-border: #1e40af;
   --color-primary-text: #93c5fd;
-  --color-on-primary: #ffffff;
+  --color-on-primary: #0f172a;
   --color-primary-shadow: rgba(37, 99, 235, 0.3);
   --color-primary-shadow-hover: rgba(37, 99, 235, 0.45);
   --color-primary-focus: rgba(37, 99, 235, 0.3);
-  --color-primary-hover: #1d4ed8;
-  --color-primary-active: #1d4ed8;
+  --color-primary-hover: #93c5fd;
+  --color-primary-active: #bfdbfe;
   --color-link: #93c5fd;
   --color-focus: #60a5fa;
 }

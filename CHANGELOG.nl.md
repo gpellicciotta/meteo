@@ -13,6 +13,7 @@ Een beknopt overzicht van alle wijzigingen, per versie van dit project.
 ---
 
 ## v1.3.0-pre
+- FrontEnd: Donkerblauw gebruikt nu toegankelijke lichtblauwe vlakken met donkere labels, zonder contrastuitzonderingen.
 - DevEx: Lint en format gebruiken nu de vastgezette support-python van de actieve interpreter in plaats van een globale launcher.
 - DevEx: `devops.py lint` en `format` controleren nu ook [docs/index.md](docs/index.md) en de [visuele stijlgids](docs/specs/visual-style-guide.md).
 - DevEx: [devops.py](scripts/devops.py) draait alleen nog op de vastgezette support-python, via de `.venv` van het project of de hoofd-checkout, en stopt anders.

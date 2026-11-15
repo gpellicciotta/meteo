@@ -61,10 +61,10 @@ The token test of support.webapp does not cover these overrides; the ratios belo
 | Dark         | `--color-bg`             | `#0f172a` | `#0f172a` | Equal to bright; meteo's own rules read it too.       |
 | Dark         | `--color-text`           | `#f1f5f9` | `#f5f7fa` | Keeps meteo's text color, at 13.35 or more.           |
 | Dark         | `--color-text-muted`     | `#94a3b8` | `#94a3b8` | Equal to bright.                                      |
-| Dark blue    | `--color-primary`        | `#2563eb` | `#60a5fa` | Keeps meteo's fill; as an icon, an AA exception.      |
-| Dark blue    | `--color-primary-hover`  | `#1d4ed8` | `#93c5fd` | Keeps meteo's hover, with white labels at 6.70.       |
-| Dark blue    | `--color-primary-active` | `#1d4ed8` | `#bfdbfe` | Repeats hover, as meteo's pressed controls do.        |
-| Dark blue    | `--color-on-primary`     | `#ffffff` | `#0f172a` | Keeps white labels, at 5.17 on the fill.              |
+| Dark blue    | `--color-primary`        | `#60a5fa` | `#60a5fa` | Equal to bright; removes the dark-blue AA exception.  |
+| Dark blue    | `--color-primary-hover`  | `#93c5fd` | `#93c5fd` | Equal to bright; removes the dark-blue AA exception.  |
+| Dark blue    | `--color-primary-active` | `#bfdbfe` | `#bfdbfe` | Equal to bright; removes the dark-blue AA exception.  |
+| Dark blue    | `--color-on-primary`     | `#0f172a` | `#0f172a` | Equal to bright; removes the dark-blue AA exception.  |
 | Dark blue    | `--color-link`           | `#93c5fd` | `#93c5fd` | Equal to bright; meteo's `#2563eb` fails AA as text.  |
 | Dark blue    | `--color-focus`          | `#60a5fa` | `#60a5fa` | Equal to bright.                                      |
 | Dark yellow  | `--color-primary`        | `#d97706` | `#d97706` | Equal to bright.                                      |
@@ -92,10 +92,8 @@ ADR-0002 rounds instead, giving 3.43 and 3.19 for the yellow labels.
 | :----------- | :------------------- | :---------------- | :---- | :------ | :-------------------------------------------------------------- |
 | Light yellow | `--color-on-primary` | `--color-primary` | 3.42  | 4.5     | Deliberate: white labels on yellow, as ADR-0002 allows.         |
 | Dark yellow  | `--color-on-primary` | `--color-primary` | 3.18  | 4.5     | Deliberate: white labels on yellow, as in light.                |
-| Dark blue    | `--color-primary`    | `--color-surface` | 2.83  | 3       | Fill as an icon; awaits the user's call on bright's fill.       |
 | Light yellow | `--color-primary`    | `--color-bg`      | 3.19  | 4.5     | Accent headings; the component switch moves them to an AA role. |
 | Light red    | `--color-primary`    | `--color-bg`      | 4.49  | 4.5     | Accent headings; the component switch moves them to an AA role. |
-| Dark blue    | `--color-primary`    | `--color-surface` | 2.83  | 4.5     | Accent headings; the component switch moves them to an AA role. |
 | Dark red     | `--color-primary`    | `--color-surface` | 3.02  | 4.5     | Accent headings; the component switch moves them to an AA role. |
 
 The yellow hover and pressed fills keep white labels at AA: 4.92 in light and 5.02 in dark.
@@ -111,7 +109,7 @@ These ratios were measured with the WCAG 2.2 formula on 2026-11-13:
 ## Decisions
 - Meteo keeps its accents and colors where they pass AA, else the look's value or meteo's AA text color.
 - White labels on yellow stay by choice, as ADR-0002 allows meteo through an app override.
-- Dark blue keeps meteo's `#2563eb` fill with white labels, so the switch to `data-accent` changes nothing visible.
-  The look's alternative is a `#60a5fa` fill with `#0f172a` labels; adopting it is the user's call.
+- **[Decided]** Dark blue adopts bright's `#60a5fa` fill and `#0f172a` labels after verified AA contrast.
+  Hover uses `#93c5fd`; pressed shared controls use `#bfdbfe`.
 - Headings keep `--color-primary` until the component switch moves them to an AA text role.
 - The `?theme-color=` parameter and the stored `themeColor` preference keep their names, so links and settings survive.

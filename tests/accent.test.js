@@ -190,6 +190,24 @@ describe("accent attribute", () => {
 });
 
 describe("style guide", () => {
+  it.each(["--color-primary", "--color-primary-hover", "--color-primary-active", "--color-on-primary"])(
+    "dark blue adopts bright's %s", (token) => {
+      expect(effective("Dark blue", token)).toBe(bright("Dark blue", token));
+    }
+  );
+
+  it("dark-blue labels pass AA in every primary state", () => {
+    for (const token of ["--color-primary", "--color-primary-hover", "--color-primary-active"]) {
+      expect(contrast(effective("Dark blue", "--color-on-primary"), effective("Dark blue", token))).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  it("dark-blue primary text and icons pass on every shared ground", () => {
+    for (const ground of ["--color-bg", "--color-surface", "--color-surface-sunken"]) {
+      expect(contrast(effective("Dark blue", "--color-primary"), effective("Dark blue", ground))).toBeGreaterThanOrEqual(4.5);
+    }
+    expect(tableRows(read(GUIDE), "AA exceptions").filter(([label]) => label === "Dark blue")).toEqual([]);
+  });
   it("is linked from docs/index.md", () => {
     expect(read("docs/index.md")).toContain("(specs/visual-style-guide.md)");
   });

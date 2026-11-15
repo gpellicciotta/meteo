@@ -14,6 +14,7 @@ A summarized overview of all changes, per version of this project.
 ---
 
 ## v1.3.0-pre
+- FrontEnd: Adopted accessible light-blue fills and dark labels for dark blue, removing its contrast exceptions.
 - DevEx: Lint and format now use the running interpreter's pinned support-python instead of a global launcher.
 - DevEx: `devops.py lint` and `format` now also cover [docs/index.md](docs/index.md) and the [visual style guide](docs/specs/visual-style-guide.md).
 - DevEx: [devops.py](scripts/devops.py) now runs only on the pinned support-python, switching to the project or primary-checkout `.venv` and failing otherwise.
